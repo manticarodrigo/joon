@@ -14,6 +14,7 @@ import { InvitePage } from '../pages/invite/invite';
 import { FriendsPage } from '../pages/friends/friends';
 import { ChatsPage } from '../pages/chats/chats';
 
+import { AuthService } from '../providers/auth-service';
 
 @Component({
   templateUrl: 'app.html'
@@ -21,15 +22,16 @@ import { ChatsPage } from '../pages/chats/chats';
 export class Joon {
   @ViewChild(Nav) nav: Nav;
 
-  rootPage: any = LoginPage;
+  rootPage: any = DiscoverPage;
 
   pages: Array<{title: string, component: any}>;
 
-  constructor(public platform: Platform) {
+  constructor(public platform: Platform, public auth: AuthService) {
     this.initializeApp();
 
     // used for an example of ngFor and navigation
     this.pages = [
+      { title: 'Discover', component: DiscoverPage },
       { title: 'My Profile', component: ProfilePage },
       { title: 'Top Users', component: TopUsersPage },
       { title: 'Discovery Preferences', component: PreferencesPage },
@@ -56,4 +58,15 @@ export class Joon {
     // we wouldn't want the back button to show in this scenario
     this.nav.setRoot(page.component);
   }
+  
+  ngAfterViewInit() {
+    // Check auth state
+    if (this.auth.authState != null) {
+        console.log(this.auth.displayName());
+    } else {
+        // Push login page
+        // this.nav.push(LoginPage);
+    }
+  }
+  
 }

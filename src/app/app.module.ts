@@ -41,10 +41,11 @@ export const firebaseConfig = {
     ChatsPage
   ],
   imports: [
-    IonicModule.forRoot(Joon,{
-        menuType: 'push',
+    IonicModule.forRoot(Joon, {
+        mode: 'md',
+        menuType: 'reveal',
     }),
-    AngularFireModule.initializeApp(firebaseConfig)
+    AngularFireModule.initializeApp(firebaseConfig),
   ],
   bootstrap: [IonicApp],
   entryComponents: [

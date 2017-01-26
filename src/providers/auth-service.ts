@@ -3,7 +3,7 @@ import { AuthProviders, AngularFireAuth, FirebaseAuthState, AuthMethods } from '
 
 @Injectable()
 export class AuthService {
-  private authState: FirebaseAuthState;
+  public authState: FirebaseAuthState;
 
   constructor(public auth$: AngularFireAuth) {
     this.authState = auth$.getAuth();

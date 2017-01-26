@@ -1,12 +1,18 @@
-<ion-header>
+<ion-header no-shadow>
   <ion-navbar>
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>Discover</ion-title>
+    <ion-title>
+        <img alt="Logo" height="30" src="../../assets/joon.png">
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button icon-only (click)="openChats()">
+        <ion-icon name="ios-chatbubbles-outline"></ion-icon>
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
-
 <ion-content>
   <ion-list>
     <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">

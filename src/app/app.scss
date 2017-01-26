@@ -19,7 +19,36 @@
     width: 200px;
 }
 
-.center {
-    margin: 0 auto;
-    display: block;
+.toolbar-content {
+    text-align: center;
+    margin-right: 50px;
 }
+
+.toolbar-content img {
+    display:inline-block;
+    margin:0 45px;
+}
+
+.header::after {
+    background-image: none;
+}
+
+.md .menu-content-reveal {
+    box-shadow: none;
+}
+
+.item {
+    border-bottom: 1px solid #dedede;
+}
+
+.list-md .item-block .item-inner {
+    border-bottom: none;
+}
+
+/*.item-left {
+    padding-left: 16px;
+}
+
+.input-wrapper {
+    padding-left: 16px;
+}*/
