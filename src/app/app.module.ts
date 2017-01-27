@@ -13,6 +13,7 @@ import { FeedbackPage } from '../pages/feedback/feedback';
 import { InvitePage } from '../pages/invite/invite';
 import { FriendsPage } from '../pages/friends/friends';
 import { ChatsPage } from '../pages/chats/chats';
+import { SwingModule } from 'angular2-swing';
 
 import { AngularFireModule } from 'angularfire2';
 import { AuthService } from '../providers/auth-service';
@@ -46,6 +47,7 @@ export const firebaseConfig = {
         menuType: 'reveal',
     }),
     AngularFireModule.initializeApp(firebaseConfig),
+    SwingModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
