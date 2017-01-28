@@ -23599,11 +23599,16 @@ sub {
 }
 
 .swiper-pagination-bullet-active {
-  background: #58595B;
+  background: #A2A3A7;
 }
 
 .toolbar-background {
   background-color: #f4f3f2;
+}
+
+.toolbar-title {
+  font-family: 'Arial';
+  color: #58595B;
 }
 
 .toolbar-content {
@@ -23616,8 +23621,17 @@ sub {
   margin: 0 45px;
 }
 
+.bar-button {
+  font-family: 'Arial';
+  text-transform: capitalize;
+}
+
 .header::after {
   background-image: none;
+}
+
+.md .menu-content-reveal {
+  box-shadow: none;
 }
 
 .item {
@@ -23626,6 +23640,10 @@ sub {
 
 .list-md .item-block .item-inner {
   border-bottom: none;
+}
+
+.label {
+  margin: 10px 0px;
 }
 
 .centered-list ion-item {
@@ -23639,31 +23657,57 @@ sub {
   text-transform: none;
 }
 
+page-discover .no-scroll .scroll-content {
+  overflow: hidden;
+}
+
+page-discover .discover {
+  /*#cardsContainer {
+              background: #fff;
+              border: 2px solid #000;
+              display: inline-block;
+              vertical-align: top;
+              padding: 10px;
+              width: 130px;
+              height: 130px;
+              margin-right: .5em;
+              margin-bottom: .3em;
+        }*/
+  /*.round {
+          @extend #cardsContainer;
+          border-radius: 50%;
+          overflow: hidden;
+          .crop {border-radius: 50%;}
+        }*/
+}
+
 page-discover .discover #card-stack {
   width: 100%;
-  height: 100%;
+  height: 70%;
   background: #fff;
-  margin: 0;
-  position: relative;
+  position: absolute;
+  top: 2%;
+}
+
+page-discover .discover #card-stack .card-md {
+  border-radius: 5px;
+  box-shadow: 0px 0px 2px 2px RGBA(153, 153, 153, 0.1);
+}
+
+page-discover .discover #card-stack .item {
+  border: 0;
+  padding: 0;
+}
+
+page-discover .discover #card-stack .item .item-inner {
+  padding: 0;
 }
 
 page-discover .discover #card-stack ion-card {
   position: absolute;
   text-align: center;
-  top: 3%;
-  height: 90%;
-}
-
-page-discover .discover #cardsContainer, page-discover .discover .round {
-  background: #fff;
-  border: 2px solid #000;
-  display: inline-block;
-  vertical-align: top;
-  padding: 10px;
-  width: 130px;
-  height: 130px;
-  margin-right: .5em;
-  margin-bottom: .3em;
+  top: 0%;
+  height: 100%;
 }
 
 page-discover .discover #cardsDock {
@@ -23679,18 +23723,13 @@ page-discover .discover #cardsDock img {
   max-width: 25px;
   min-width: 0%;
   min-height: 0%;
-  margin: 0;
-  overflow: auto;
+  margin-bottom: -4px;
   display: inline;
 }
 
-page-discover .discover .round {
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-page-discover .discover .round .crop {
-  border-radius: 50%;
+page-discover .discover #cardsDock h2 {
+  text-transform: capitalize;
+  margin: 0;
 }
 
 page-discover .discover .crop {
@@ -23712,19 +23751,23 @@ page-discover .discover .crop img {
 }
 
 page-discover .discover-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   padding: 20px 20px 0 22px;
   text-align: justify;
-  height: 150px !important;
-  background: #f4f3f2 !important;
+  width: 100%;
+  height: 22.5%;
+  background: #f4f3f2;
 }
 
 page-discover .discover-footer img {
-  width: 20%;
+  height: 60%;
 }
 
 page-discover .discover-footer #lower {
   position: relative;
-  top: 40px;
+  top: 30%;
 }
 
 page-discover .discover-footer::after {
@@ -23739,4 +23782,51 @@ page-login .slides {
 
 page-login .slides img {
   width: 80%;
+}
+
+page-profile .item {
+  padding: 0;
+}
+
+page-profile .list-md .item-block .item-inner {
+  padding: 0;
+}
+
+page-profile .toolbar-background {
+  background-color: #fff;
+}
+
+page-profile .slides {
+  height: 290px;
+}
+
+page-profile .slides img {
+  height: 250px;
+  position: absolute;
+  top: 5px;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 1px;
+  border: 1px solid #999999;
+}
+
+page-profile h1 {
+  margin-top: 0px;
+  text-align: center;
+  text-transform: capitalize;
+  font-family: 'Arial';
+}
+
+page-profile h2 {
+  text-transform: capitalize;
+}
+
+page-profile h5 {
+  color: #4FBB80;
+}
+
+page-profile .middle-section .item-inner {
+  background: #FDFDFD;
 }

@@ -30,11 +30,16 @@
 }
 
 .swiper-pagination-bullet-active {
-    background:#58595B;
+    background:#A2A3A7;
 }
 
 .toolbar-background {
     background-color: color($colors, light);
+}
+
+.toolbar-title {
+    font-family: 'Arial';
+    color: color($colors, med);
 }
 
 .toolbar-content {
@@ -47,12 +52,17 @@
     margin:0 45px;
 }
 
+.bar-button {
+    font-family: 'Arial';
+    text-transform: capitalize;
+}
+
 .header::after {
     background-image: none;
 }
 
 .md .menu-content-reveal {
-    // box-shadow: none;
+    box-shadow: none;
 }
 
 .item {
@@ -61,6 +71,10 @@
 
 .list-md .item-block .item-inner {
     border-bottom: none;
+}
+
+.label {
+    margin: 10px 0px;
 }
 
 .centered-list ion-item {

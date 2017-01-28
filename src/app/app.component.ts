@@ -24,7 +24,7 @@ export class Joon {
     
     isMenuOpen: false;
 
-    rootPage: any = DiscoverPage;
+    rootPage: any = ProfilePage;
 
     pages: Array<{title: string, component: any}>;
     

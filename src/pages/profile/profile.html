@@ -1,32 +1,60 @@
 <ion-header>
-  <ion-navbar>
+  <ion-navbar class="white">
     <button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
+      <ion-icon color="primary" name="menu"></ion-icon>
     </button>
-    <ion-title>Profile</ion-title>
+    <ion-title>My Profile</ion-title>
+    <ion-buttons end>
+        <button color="primary" ion-button (click)="editProfile()">
+            Edit
+        </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
   <ion-list no-lines class="centered-list">
-    <ion-item>
-        <ion-slides pager>
+    <ion-slides class="slides" pager>
           <ion-slide>
-            <img src="../../assets/joon.png"/>
+            <img *ngIf="user.picture"[src]="user.picture.large"/>
           </ion-slide>
             <ion-slide>
                 <h1>YO!</h1>
             </ion-slide>
-        </ion-slides>
-    </ion-item>
-    <ion-item>Name, Age</ion-item>
-    <ion-item>Instagram</ion-item>
-    <ion-item>Height</ion-item>
-    <ion-item>Location</ion-item>
-    <ion-item>School</ion-item>
-    <ion-item>Job</ion-item>
-    <ion-item>Religion</ion-item>
-    <ion-item>Ethnicity</ion-item>
-    <ion-item>Bio</ion-item>
+    </ion-slides>
+    <h1 *ngIf="user.name"> {{ user.name.last }}, {{ user.age }} </h1>
+    <div class="middle-section">
+        <ion-item>
+            <h5 *ngIf="user.name">@{{ user.name.last }}{{ user.name.first }}</h5>
+            <h6>instagram</h6>
+        </ion-item>
+        <ion-item>
+            <h2>5'10</h2>
+            <h6>Height</h6>
+        </ion-item>
+        <ion-item>
+            <h2 *ngIf="user.location">{{ user.location.city }}, {{ user.location.state }}</h2>
+            <h6>Location</h6>
+        </ion-item>
+        <ion-item>
+            <h2 *ngIf="user.location">{{ user.location.city }} University</h2>
+            <h6>University</h6>
+        </ion-item>
+        <ion-item>
+            <h2>Lead Developer, Joon</h2>
+            <h6>Career</h6>
+        </ion-item>
+        <ion-item>
+            <h2>Agnostic</h2>
+            <h6>Spirituality</h6>
+        </ion-item>
+        <ion-item>
+            <h2>Persian</h2>
+            <h6>Ethnicity</h6>
+        </ion-item>
+        <ion-item>
+            <h3>Love pets, love hikes, love life!</h3>
+        </ion-item>
+        </div>
   </ion-list>
 </ion-content>

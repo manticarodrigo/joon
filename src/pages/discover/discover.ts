@@ -102,9 +102,21 @@ export class DiscoverPage {
 	  .subscribe(result => {
 	    for (let val of result) {
             if (val["dob"]) {
-                var age = val["dob"].split(" ")[0];
-                val["age"] = age;
-            }
+                        var age = val["dob"].split(" ")[0];
+                        var year = age.split('-')[0];
+                        var month = age.split('-')[1];
+                        var day = age.split('-')[2];
+                        
+                        var today = new Date();
+                        age = today.getFullYear() - year;
+                        if ( today.getMonth() < (month - 1)) {
+                            age--;
+                        }
+                        if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
+                            age--;
+                        }
+                        val["age"] = age;
+                    }
 	      this.cards.push(val);
 	    }
 	  })
