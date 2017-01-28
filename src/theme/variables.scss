@@ -2,6 +2,22 @@
 // http://ionicframework.com/docs/v2/theming/
 $font-path: "../assets/fonts";
 
+/* regular */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(../assets/fonts/OpenSans-Regular.ttf) format('truetype');
+}
+
+/* light */
+@font-face {
+  font-family: 'Open Sans-Light';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(../assets/fonts/OpenSans-Light.ttf) format('truetype');
+}
+
 @import "ionic.globals";
 
 
@@ -12,8 +28,11 @@ $font-path: "../assets/fonts";
 // To view all the possible Ionic variables, see:
 // http://ionicframework.com/docs/v2/theming/overriding-ionic-variables/
 
-
-
+$font-family-base: "Helvetica Neue", Helvetica, Arial, sans-serif;
+$text-color: #58595B;
+$menu-width: 200px;
+$menu-ios-box-shadow: 0 0 20px rgba(0,0,0,0.2);
+$menu-md-box-shadow: 0 0 20px rgba(0,0,0,0.2);
 
 // Named Color Variables
 // --------------------------------------------------
@@ -24,11 +43,12 @@ $font-path: "../assets/fonts";
 // The "primary" color is the only required color in the map.
 
 $colors: (
-  primary:    #4FBB80,
-  secondary:  #999999,
-  danger:     #DE5445,
-  light:      #f4f4f4,
-  dark:       #242424
+    primary:    #4FBB80,
+    secondary:  #999999,
+    danger:     #DE5445,
+    light:      #f4f3f2,
+    med:        #58595B,
+    dark:       #242424
 );
 
 

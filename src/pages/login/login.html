@@ -9,10 +9,16 @@
 -->
 </ion-header>
 
-<ion-content text-center padding>
-  <p>Find matches and chat with the people you like.</p>
-
-  <img src="https://upload.wikimedia.org/wikipedia/en/3/3a/Tinder_screenshot.png" alt="Smiley face" width="200px">
+<ion-content text-center>
+    <p>Find matches and chat <br> with the people you like.</p>
+    <ion-slides class="slides" pager>
+        <ion-slide>
+            <img src="../../assets/intro1.png"/>
+        </ion-slide>
+        <ion-slide>
+            <h1>Welcome!</h1>
+        </ion-slide>
+    </ion-slides>
 
   <button ion-button (click)="signInWithFacebook()">Login with Facebook</button>
     

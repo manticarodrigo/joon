@@ -1,5 +1,5 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, ToastController } from 'ionic-angular';
 import { ChatsPage } from '../chats/chats';
 import { Http } from '@angular/http';
 import 'rxjs/Rx';
@@ -20,14 +20,14 @@ import {
     templateUrl: 'discover.html'
 })
 export class DiscoverPage {
-    @ViewChild('swing1') swingStack: SwingStackComponent;
-    @ViewChildren('cards1') swingCards: QueryList<SwingCardComponent>;
+    @ViewChild('swingContainer') swingStack: SwingStackComponent;
+    @ViewChildren('cardsContainer') swingCards: QueryList<SwingCardComponent>;
     
     cards: Array<any>;
     stackConfig: StackConfig;
     recentCard: string = '';
   
-    constructor(public navCtrl: NavController, private http: Http, public navParams: NavParams, af: AngularFire) {  
+    constructor(public navCtrl: NavController, private http: Http, public navParams: NavParams, public toastCtrl: ToastController, af: AngularFire) {
         this.stackConfig = {
           throwOutConfidence: (offset, element) => {
             return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -39,13 +39,6 @@ export class DiscoverPage {
             return 800;
           }
         };
-
-        // Let's populate this page with some filler content for funzies
-        this.cards = [
-            { name: 'clubs', symbol: '♣', rank: 1 },
-            { name: 'diamonds', symbol: '♦', rank: 2 },
-            { name: 'spades', symbol: '♠', rank: 3 }
-        ];
     }
   
     openChats() {
@@ -81,14 +74,26 @@ export class DiscoverPage {
 
 	// Connected through HTML
 	voteUp(like: boolean) {
-	  let removedCard = this.cards.pop();
-	  this.addNewCards(1);
-	  if (like) {
-	    this.recentCard = 'You liked: ' + removedCard.email;
-	  } else {
-	    this.recentCard = 'You disliked: ' + removedCard.email;
-	  }
+        let removedCard = this.cards.pop();
+        this.addNewCards(1);
+        if (like) {
+	       this.recentCard = 'You liked: ' + removedCard.email;
+        } else {
+	       this.recentCard = 'You disliked: ' + removedCard.email;
+        }
+        this.presentToast();
 	}
+    
+    
+    
+    presentToast() {
+        let toast = this.toastCtrl.create({
+            message: this.recentCard,
+            duration: 500,
+            position: 'top'
+        });
+        toast.present();
+    }
 
 	// Add new cards to our array
 	addNewCards(count: number) {
@@ -96,6 +101,10 @@ export class DiscoverPage {
 	  .map(data => data.json().results)
 	  .subscribe(result => {
 	    for (let val of result) {
+            if (val["dob"]) {
+                var age = val["dob"].split(" ")[0];
+                val["age"] = age;
+            }
 	      this.cards.push(val);
 	    }
 	  })
