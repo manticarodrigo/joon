@@ -1,3 +1,47 @@
 page-preferences {
-    
+    .borderless {
+        border: none;
+    }
+    .item {
+        padding: 0;
+        .item-inner {
+            padding: 0 !important;
+        }
+    }
+    .segment {
+        height: 70px;
+        font-family: 'Open Sans-Light', Helvetica, sans-serif;
+        border: 0.5px solid #999999;
+        
+        .segment-button {
+            line-height: 70px;
+            height: 100%;
+            border: none;
+            text-transform: capitalize;
+        }
+        .segment-activated {
+            font-family: 'Open Sans', Helvetica, sans-serif;
+            background: color($colors, primary);
+            color: #fff !important;
+        }
+    }
+    .range {
+        padding: 0px 20px;
+        height: 70px;
+        border: 0.5px solid #999999;
+    }
+    .item-checkbox {
+        border: none;
+        padding: 20px 20px;
+        .checkbox {
+            margin-right: 10px !important;
+            .checkbox-icon {
+                border-radius: 0px;
+                border: 1px solid #999999;
+            }
+        }
+        .item-inner {
+            border: none !important;
+        }
+    }
 }

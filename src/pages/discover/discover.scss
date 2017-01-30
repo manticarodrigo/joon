@@ -1,6 +1,9 @@
 $discover_footer_height: 400px;
 
 page-discover {
+    .toolbar-background {
+        background-color: color($colors, light);
+    }
     .no-scroll .scroll-content{
         overflow: hidden;
     }
@@ -58,6 +61,10 @@ page-discover {
             h2 {
                 text-transform: capitalize;
                 margin: 0;
+            }
+            .mutual {
+                font-weight: 700;
+                
             }
         }
         /*.round {

@@ -1,23 +1,31 @@
-<ion-header>
+<ion-header class="white">
   <ion-navbar>
-    <button ion-button menuToggle>
+    <button ion-button color="primary" menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>Preferences</ion-title>
   </ion-navbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
-    <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">
-      <ion-icon [name]="item.icon" item-left></ion-icon>
-      {{item.title}}
-      <div class="item-note" item-right>
-        {{item.note}}
-      </div>
-    </button>
-  </ion-list>
-  <div *ngIf="selectedItem" padding>
-    You navigated here from <b>{{selectedItem.title}}</b>
-  </div>
+<ion-content padding>
+    <ion-label>I am interested in:</ion-label>
+    <ion-segment [(ngModel)]="relationship" color="primary">
+        <ion-segment-button value="men" selected (ionSelect)="selectedMen()">
+            Men
+        </ion-segment-button>
+        <ion-segment-button value="women" (ionSelect)="selectedWomen()">
+            Women
+        </ion-segment-button>
+    </ion-segment>
+    <ion-label>Search Distance</ion-label>
+    <ion-item class="borderless">
+        <ion-range min="5" max="100" [(ngModel)]="distance" color="primary">
+            <ion-label range-left>5mi</ion-label>
+            <ion-label range-right>100mi</ion-label>
+        </ion-range>
+    </ion-item>
+    <ion-item class="borderless">
+        <ion-label>Show Age</ion-label>
+        <ion-checkbox [(ngModel)]="showAge"></ion-checkbox>
+    </ion-item>
 </ion-content>

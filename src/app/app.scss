@@ -15,6 +15,42 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 
+/* regular */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(../assets/fonts/OpenSans-Regular.ttf) format('truetype');
+}
+
+/* light */
+@font-face {
+  font-family: 'Open Sans-Light';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Open Sans'), local('OpenSans'), url(../assets/fonts/OpenSans-Light.ttf) format('truetype');
+}
+
+h1 {
+    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+}
+
+h2 {
+    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+}
+
+h5 {
+    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+}
+
+h6 {
+    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+}
+
+p {
+    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+}
+
 .sidemenu {
     .item-inner {
         color: color($colors, primary);
@@ -40,11 +76,11 @@
 }
 
 .toolbar-background {
-    background-color: color($colors, light);
+    background-color: #fff;
 }
 
 .toolbar-title {
-    font-family: 'Arial';
+    font-family: 'Open Sans-Light', Helvetica, sans-serif;
     color: color($colors, med);
 }
 
@@ -59,7 +95,7 @@
 }
 
 .bar-button {
-    font-family: 'Arial';
+    font-family: 'Open Sans-Light', Helvetica, sans-serif;
     text-transform: capitalize;
 }
 
@@ -72,6 +108,7 @@
 }
 
 .item {
+    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
     border-bottom: 1px solid #dedede;
 }
 
@@ -80,6 +117,7 @@
 }
 
 .label {
+    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
     margin: 10px 0px;
 }
 

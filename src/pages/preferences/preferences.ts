@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-
 import { NavController } from 'ionic-angular';
 
 @Component({
@@ -7,9 +6,19 @@ import { NavController } from 'ionic-angular';
   templateUrl: 'preferences.html'
 })
 export class PreferencesPage {
-
-  constructor(public navCtrl: NavController) {
+    relationship = '';
     
-  }
+    constructor(public navCtrl: NavController) {
+        this.relationship = "women";
+    }
+    
+    selectedMen() {
+        console.log("likes men");
+    }
+    
+    selectedWomen() {
+        console.log("likes women");
+    }
+    
 
 }
