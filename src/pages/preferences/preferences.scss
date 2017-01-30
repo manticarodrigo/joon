@@ -16,12 +16,15 @@ page-preferences {
         font-family: 'Open Sans-Light', Helvetica, sans-serif;
         border: 0.5px solid color($colors, secondary);
         .segment-button {
+            font-size: 14px;
+            font-weight: 600;
             line-height: 70px;
             height: 100%;
             border: none;
             text-transform: capitalize;
         }
         .segment-activated {
+            font-weight: 800;
             font-family: 'Open Sans', Helvetica, sans-serif;
             background: color($colors, primary);
             color: #fff !important;
@@ -51,7 +54,7 @@ page-preferences {
     */
     .item-checkbox {
         border: none;
-        padding: 20px 20px;
+        padding: 20px 0px;
         .checkbox {
             margin-right: 10px !important;
             .checkbox-icon {
