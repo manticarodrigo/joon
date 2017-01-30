@@ -134,16 +134,14 @@ p {
 
 /* Fade out right side when menu is open */
 
-.menu-content-open .toolbar {
-  opacity: 0.5;
-}
-
 .menu-content-open .toolbar-background {
   background-color: black;
+  opacity: 0.3;
+  z-index: 100;
 }
 
 .menu-content-open .fixed-content {
   background-color: black;
-  opacity: 0.5;
+  opacity: 0.3;
   z-index: 100;
 }
