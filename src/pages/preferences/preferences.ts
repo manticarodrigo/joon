@@ -7,6 +7,8 @@ import { NavController } from 'ionic-angular';
 })
 export class PreferencesPage {
     relationship = '';
+    distance = 'global';
+    showAge = true;
     
     constructor(public navCtrl: NavController) {
         this.relationship = "women";

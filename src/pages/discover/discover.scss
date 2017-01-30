@@ -1,6 +1,10 @@
 $discover_footer_height: 400px;
 
 page-discover {
+    .toolbar-content img {
+        display:inline-block;
+        margin-right: 30px;
+    }
     .toolbar-background {
         background-color: color($colors, light);
     }
