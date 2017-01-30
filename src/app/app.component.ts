@@ -22,9 +22,9 @@ import { AuthService } from '../providers/auth-service';
 export class Joon {
     @ViewChild(Nav) nav: Nav;
     
-    isMenuOpen: false;
+    isMenuOpen: boolean = false;
 
-    rootPage: any = FeedbackPage;
+    rootPage: any = DiscoverPage;
 
     pages: Array<{title: string, component: any}>;
     
@@ -58,6 +58,7 @@ export class Joon {
     
     
     menuToggled() {
+        this.isMenuOpen = !(this.isMenuOpen);
         console.log(this.isMenuOpen);
     }
     
