@@ -131,3 +131,19 @@ p {
     font-family: 'Open Sans';
     text-transform: none;
 }
+
+/* Fade out right side when menu is open */
+
+.menu-content-open .toolbar {
+  opacity: 0.5;
+}
+
+.menu-content-open .toolbar-background {
+  background-color: black;
+}
+
+.menu-content-open .fixed-content {
+  background-color: black;
+  opacity: 0.5;
+  z-index: 100;
+}
