@@ -1,23 +1,54 @@
 <ion-header>
-  <ion-navbar>
-    <button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
-    </button>
-    <ion-title>Settings</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <button ion-button menuToggle>
+        <ion-icon color="primary" name="menu"></ion-icon>
+        </button>
+        <ion-title>App Settings</ion-title>
+        <ion-buttons end>
+          <button ion-button icon-only>
+            <img height="25" src="../../assets/empty.png"/>
+          </button>
+        </ion-buttons>
+    </ion-navbar>
 </ion-header>
 
-<ion-content>
-  <ion-list>
-    <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">
-      <ion-icon [name]="item.icon" item-left></ion-icon>
-      {{item.title}}
-      <div class="item-note" item-right>
-        {{item.note}}
-      </div>
-    </button>
-  </ion-list>
-  <div *ngIf="selectedItem" padding>
-    You navigated here from <b>{{selectedItem.title}}</b>
-  </div>
+<ion-content padding>
+    <h6>Notifications</h6>
+    <ion-item>
+        <ion-label>New Match</ion-label>
+        <ion-toggle checked="true"></ion-toggle>
+    </ion-item>
+        <ion-item>
+        <ion-label>Messages</ion-label>
+        <ion-toggle checked="false"></ion-toggle>
+    </ion-item>
+    <ion-item>
+        <ion-label>Double Likes</ion-label>
+        <ion-toggle checked="true"></ion-toggle>
+    </ion-item>
+    
+    <h6>Legal</h6>
+    <ion-item>
+        <ion-label>Licenses</ion-label>
+        <ion-toggle checked="false"></ion-toggle>
+    </ion-item>
+        <ion-item>
+        <ion-label>Privacy Policy</ion-label>
+        <ion-toggle checked="false"></ion-toggle>
+    </ion-item>
+    <ion-item>
+        <ion-label>Notifications</ion-label>
+        <ion-toggle checked="false"></ion-toggle>
+    </ion-item>
+    
+    <h6>Account Settings</h6>
+    <ion-item>
+        <ion-label>Hide Account</ion-label>
+        <ion-toggle checked="false"></ion-toggle>
+    </ion-item>
+        <ion-item>
+        <ion-label>Delete Account</ion-label>
+        <ion-toggle checked="false"></ion-toggle>
+    </ion-item>
+    
 </ion-content>

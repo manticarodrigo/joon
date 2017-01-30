@@ -32,23 +32,23 @@
 }
 
 h1 {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+    font-family: $font-family-base !important;
 }
 
 h2 {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+    font-family: $font-family-base !important;
 }
 
 h5 {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+    font-family: $font-family-base !important;
 }
 
 h6 {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+    font-family: $font-family-base !important;
 }
 
 p {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+    font-family: $font-family-base !important;
 }
 
 .sidemenu {
@@ -80,22 +80,22 @@ p {
 }
 
 .toolbar-title {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif;
+    font-family: $font-family-base;
     color: color($colors, med);
 }
 
 .toolbar-content {
     text-align: center;
-    margin-right: 25px;
+    // margin-right: 25px;
 }
 
 .toolbar-content img {
     display:inline-block;
-    margin:0 45px;
+   //  margin:0 45px;
 }
 
 .bar-button {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif;
+    font-family: $font-family-base;
     text-transform: capitalize;
 }
 
@@ -108,7 +108,7 @@ p {
 }
 
 .item {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+    font-family: $font-family-base !important;
     border-bottom: 1px solid #dedede;
 }
 
@@ -117,7 +117,7 @@ p {
 }
 
 .label {
-    font-family: 'Open Sans-Light', Helvetica, sans-serif !important;
+    font-family: $font-family-base !important;
     margin: 10px 0px;
 }
 

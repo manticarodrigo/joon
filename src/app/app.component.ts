@@ -24,7 +24,7 @@ export class Joon {
     
     isMenuOpen: false;
 
-    rootPage: any = PreferencesPage;
+    rootPage: any = FeedbackPage;
 
     pages: Array<{title: string, component: any}>;
     

@@ -1,3 +1,62 @@
 page-settings {
+    .item {
+        border: none;
+        padding: 0;
+        .item-inner {
+            border: none !important;
+            padding: 0 !important;
+        }
+    }
+    
+    h6 {
+        font-weight: 800;
+        font-size: 16px;
+        
+    }
+    
+    .toggle {
+        padding: 6px 3px !important;
+        width: 70px;
+        height: 40px;
+        border: 1px solid color($colors, primary);
+        .toggle-icon {
+            width: 100% !important;
+            border-radius: 0px;
+            background: none;
+            .toggle-inner {
+                width: 32px;
+                height: 32px;
+                box-shadow: none;
+                border-radius: 0px;
+                border: 1px solid color($colors, primary);
+            }
+        }
+    }
+    
+    .toggle-checked {
+        border: none;
+        background: none;
+        .toggle-inner {
+            transform: translate3d(30px, 0, 0) !important;
+        }
+    }
+    
+    .segment {
+        width: 70px;
+        height: 40px;
+        font-family: $font-family-base;
+        border: 1px solid color($colors, primary);
+        .segment-button {
+            line-height: 40px;
+            height: 100%;
+            border: none;
+            text-transform: capitalize;
+        }
+        .segment-activated {
+            font-family: $font-family-base;
+            background: color($colors, primary);
+            color: #fff !important;
+        }
+    }
     
 }

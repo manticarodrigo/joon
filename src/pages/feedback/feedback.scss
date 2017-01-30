@@ -1,3 +1,19 @@
 page-feedback {
-    
+    .input {
+        height: 50%;
+    }
+    .text-input {
+        border: 0.5px solid #999999;
+        height: 100%;
+        width: 100%;
+        padding: 20px;
+        margin: 0px;
+        resize: none;
+    }
+    .button {
+        display: block;
+        margin: 10px auto;
+        width: 180px;
+        height: 50px;
+    }
 }
