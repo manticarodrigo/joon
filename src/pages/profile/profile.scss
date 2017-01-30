@@ -50,4 +50,17 @@ page-profile {
         }
     }
     
+    .mutual {
+        padding: 20px 40px;;
+        text-align: center;
+        img {
+            max-height: 75%;
+            max-width: 75%;
+            border-radius: 50%;
+            display: block;
+            margin: auto;
+            margin-bottom: 15px;
+        }
+    }
+    
 }

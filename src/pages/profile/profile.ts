@@ -9,6 +9,7 @@ import 'rxjs/Rx';
 })
 export class ProfilePage {
     user = '';
+    mutual: Array<any>;
 
     constructor(public navCtrl: NavController, private http: Http) {
     
@@ -16,6 +17,8 @@ export class ProfilePage {
     
     ngAfterViewInit() {
         this.generateRandomUser();
+        this.mutual = [];
+        
 	}
 
     generateRandomUser() {
@@ -40,6 +43,9 @@ export class ProfilePage {
                         val["age"] = age;
                     }
                     this.user = val;
+                    for (var i=0; i<3; i++) {
+                        this.mutual.push(this.user);
+                    }
                 }
         })
     }
