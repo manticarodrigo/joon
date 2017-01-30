@@ -24,7 +24,7 @@ export class Joon {
     
     isMenuOpen: false;
 
-    rootPage: any = ProfilePage;
+    rootPage: any = TopUsersPage;
 
     pages: Array<{title: string, component: any}>;
     
@@ -54,6 +54,8 @@ export class Joon {
           Splashscreen.hide();
         });
     }
+    
+    
     
     menuToggled() {
         console.log(this.isMenuOpen);

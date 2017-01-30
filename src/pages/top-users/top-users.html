@@ -1,23 +1,27 @@
 <ion-header>
   <ion-navbar>
     <button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
+      <ion-icon color="primary" name="menu"></ion-icon>
     </button>
-    <ion-title>Top Users</ion-title>
+    <ion-title class="smaller">Most Popular Users In Your Area</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">
-      <ion-icon [name]="item.icon" item-left></ion-icon>
-      {{item.title}}
-      <div class="item-note" item-right>
-        {{item.note}}
-      </div>
-    </button>
-  </ion-list>
-  <div *ngIf="selectedItem" padding>
-    You navigated here from <b>{{selectedItem.title}}</b>
-  </div>
+    <ion-item class="city-select">
+        <button ion-button icon-right>
+            <h5>New York, NY</h5>
+            <ion-icon color="primary" name="ios-arrow-down"></ion-icon>
+        </button>
+    </ion-item>
+    <ion-grid>
+        <ion-row wrap>
+            <ion-col width-33 *ngFor="let i of numbers">
+                <img *ngIf="user.picture" [src]="user.picture.large">
+                <h6 *ngIf="user.name">
+                    {{ user.name.first }}, {{ user.age }}
+                </h6>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
 </ion-content>
