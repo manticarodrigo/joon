@@ -1,0 +1,84 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon color="primary" name="menu"></ion-icon>
+    </button>
+    <ion-title>Edit Profile</ion-title>
+    <ion-buttons end>
+        <button ion-button icon-only>
+            <img height="25" src="../../assets/empty.png"/>
+          </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-list no-lines>
+        <ion-grid class="images">
+            <ion-row>
+                <ion-col width-75 class="large">
+                    <img *ngIf="user.picture" [src]="user.picture.large">
+                    <img class="edit" src="../../assets/edit.png">
+                </ion-col>
+                <ion-col width-25 class="right">
+                    <img *ngIf="user.picture" [src]="user.picture.large">
+                    <img src="../../assets/add.png">
+                    <img src="../../assets/add.png">
+                </ion-col>
+            </ion-row>
+            <ion-row class="bottom">
+                <ion-col width-25>
+                    <img src="../../assets/add.png">
+                </ion-col>
+                <ion-col width-25 class="small">
+                    <img src="../../assets/add.png">
+                </ion-col>
+                <ion-col width-25 class="small">
+                    <img src="../../assets/add.png">
+                </ion-col>
+                <ion-col width-25 class="small">
+                    <img src="../../assets/add.png">
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ion-item>
+            <ion-input type="text" placeholder="First Name"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Birthday"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Instagram Handle"></ion-input>
+        </ion-item>
+    </ion-list>
+    <ion-grid padding>
+        <ion-label>Gender:</ion-label>
+        <ion-row class="borderless">
+            <ion-col width-50>
+                <ion-checkbox></ion-checkbox>
+                <ion-label>Male</ion-label>
+            </ion-col>
+            <ion-col width-50>
+                <ion-checkbox></ion-checkbox>
+                <ion-label>Female</ion-label>
+            </ion-col>
+        </ion-row>
+        <ion-label>Height:</ion-label>
+        <ion-row class="borderless">
+            <ion-col width-50>
+                <ion-select>
+                    <ion-option value="local" selected="true">Local</ion-option>
+                    <ion-option value="national">National</ion-option>
+                    <ion-option value="global">Global</ion-option>
+                </ion-select>
+            </ion-col>
+            <ion-col width-50>
+                <ion-select>
+                    <ion-option value="local" selected="true">Local</ion-option>
+                    <ion-option value="national">National</ion-option>
+                    <ion-option value="global">Global</ion-option>
+                </ion-select>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</ion-content>

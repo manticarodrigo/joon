@@ -3,13 +3,11 @@ import { NavController } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/Rx';
 
-import { EditProfilePage } from '../edit-profile/edit-profile';
-
 @Component({
-  selector: 'page-profile',
-  templateUrl: 'profile.html'
+  selector: 'page-edit-profile',
+  templateUrl: 'edit-profile.html'
 })
-export class ProfilePage {
+export class EditProfilePage {
     user = '';
     mutual: Array<any>;
 
@@ -22,10 +20,6 @@ export class ProfilePage {
         this.mutual = [];
         
 	}
-    
-editProfile() {
-    this.navCtrl.push(EditProfilePage);
-}
 
     generateRandomUser() {
         this.http.get('https://randomuser.me/api/?results=' + 1)
