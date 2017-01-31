@@ -33,7 +33,25 @@
 
 /* Set font family */
 
-h1 h2 h3 h4 h5 h6 p {
+h1 {
+    font-family: $font-family-base !important;
+}
+h2 {
+    font-family: $font-family-base !important;
+}
+h3 {
+    font-family: $font-family-base !important;
+}
+h4 {
+    font-family: $font-family-base !important;
+}
+h5 {
+    font-family: $font-family-base !important;
+}
+h6 {
+    font-family: $font-family-base !important;
+}
+p {
     font-family: $font-family-base !important;
 }
 

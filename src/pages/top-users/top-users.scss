@@ -22,11 +22,11 @@ page-top-users {
     }
     
     h6 {
-        font-family: $font-family-base;
         text-transform: capitalize;
     }
     
     img {
+        padding: 5px;
         min-height: 100%;
         min-width: 100%;
         border-radius: 50%;
