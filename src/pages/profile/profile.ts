@@ -14,18 +14,13 @@ export class ProfilePage {
     mutual: Array<any>;
 
     constructor(public navCtrl: NavController, private http: Http) {
-    
-    }
-    
-    ngAfterViewInit() {
         this.generateRandomUser();
         this.mutual = [];
-        
-	}
+    }
     
-editProfile() {
-    this.navCtrl.push(EditProfilePage);
-}
+    editProfile() {
+        this.navCtrl.push(EditProfilePage);
+    }
 
     generateRandomUser() {
         this.http.get('https://randomuser.me/api/?results=' + 1)
