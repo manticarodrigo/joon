@@ -47,6 +47,8 @@ export const firebaseConfig = {
     IonicModule.forRoot(Joon, {
         mode: 'md',
         menuType: 'reveal',
+        backButtonText: 'Back',
+        backButtonIcon: 'ios-arrow-back',
     }),
     AngularFireModule.initializeApp(firebaseConfig),
     SwingModule

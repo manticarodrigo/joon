@@ -29,10 +29,10 @@ page-profile {
     }
     
     h1 {
+        font-family: $font-family-base;
         margin-top: 0px;
         text-align: center;
         text-transform: capitalize;
-        font-family: 'Arial';
     }
     
     h2 {
@@ -53,6 +53,7 @@ page-profile {
     .mutual {
         padding: 20px 40px;;
         text-align: center;
+        text-transform: capitalize;
         img {
             max-height: 75%;
             max-width: 75%;

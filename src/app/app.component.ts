@@ -25,7 +25,7 @@ export class Joon {
     
     isMenuOpen: boolean = false;
 
-    rootPage: any = EditProfilePage;
+    rootPage: any = TopUsersPage;
 
     pages: Array<{title: string, component: any}>;
     

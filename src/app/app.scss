@@ -74,6 +74,14 @@ h1 h2 h3 h4 h5 h6 p {
 
 /* Navbar styles */
 
+.back-button-icon {
+    color: color($colors, primary);
+}
+
+.back-button-text {
+    color: color($colors, primary);
+}
+
 .toolbar-background {
     background-color: #fff;
 }
@@ -128,4 +136,9 @@ h1 h2 h3 h4 h5 h6 p {
     box-shadow: none;
     font-family: 'Open Sans';
     text-transform: none;
+}
+
+.text-input {
+    font-family: $font-family-base;
+    resize: none;
 }
