@@ -14,6 +14,7 @@ import { FeedbackPage } from '../pages/feedback/feedback';
 import { InvitePage } from '../pages/invite/invite';
 import { FriendsPage } from '../pages/friends/friends';
 import { ChatsPage } from '../pages/chats/chats';
+import { ChatPage } from '../pages/chat/chat';
 
 import { AuthService } from '../providers/auth-service';
 

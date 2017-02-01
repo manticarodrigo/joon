@@ -16,7 +16,7 @@
     <ion-label>I am interested in:</ion-label>
     <ion-item class="borderless">
         <ion-segment [(ngModel)]="relationship" color="primary">
-            <ion-segment-button value="men" selected (ionSelect)="selectedMen()">
+            <ion-segment-button value="men" (ionSelect)="selectedMen()">
                 Men
             </ion-segment-button>
             <ion-segment-button value="women" (ionSelect)="selectedWomen()">

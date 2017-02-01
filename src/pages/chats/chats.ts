@@ -3,6 +3,8 @@ import { NavController, NavParams } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/Rx';
 
+import { ChatPage } from '../chat/chat';
+
 @Component({
   selector: 'page-chats',
   templateUrl: 'chats.html'
@@ -14,8 +16,6 @@ export class ChatsPage {
     users: Array<any>;
 
     constructor(private nav: NavController, navParams: NavParams, private http: Http) {
-        // If we navigated to this page, we will have an item available as a nav param
-        this.selectedUser = navParams.get('user');
     
         this.generateRandomUser();
         this.users = [];
@@ -52,7 +52,7 @@ export class ChatsPage {
 
     userTapped(event, user) {
         // That's right, we're pushing to ourselves!
-        this.nav.push(ChatsPage, {
+        this.nav.push(ChatPage, {
             user: user
         });
     }

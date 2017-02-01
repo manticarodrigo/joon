@@ -14,6 +14,7 @@ import { FeedbackPage } from '../pages/feedback/feedback';
 import { InvitePage } from '../pages/invite/invite';
 import { FriendsPage } from '../pages/friends/friends';
 import { ChatsPage } from '../pages/chats/chats';
+import { ChatPage } from '../pages/chat/chat';
 import { SwingModule } from 'angular2-swing';
 
 import { AngularFireModule } from 'angularfire2';
@@ -41,7 +42,8 @@ export const firebaseConfig = {
     FeedbackPage,
     InvitePage,
     FriendsPage,
-    ChatsPage
+    ChatsPage,
+    ChatPage
   ],
   imports: [
     IonicModule.forRoot(Joon, {
@@ -67,7 +69,8 @@ export const firebaseConfig = {
     FeedbackPage,
     InvitePage,
     FriendsPage,
-    ChatsPage
+    ChatsPage,
+    ChatPage
   ],
   providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, AuthService]
 })
