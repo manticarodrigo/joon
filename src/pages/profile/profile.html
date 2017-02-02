@@ -16,7 +16,7 @@
   <ion-list no-lines class="centered-list">
     <ion-slides class="slides" pager>
           <ion-slide>
-            <img *ngIf="user.picture"[src]="user.picture.large"/>
+            <img *ngIf="(userObj | async)" [src]="(userObj | async)?.photoURL" />
           </ion-slide>
             <ion-slide>
                 <h1>YO!</h1>

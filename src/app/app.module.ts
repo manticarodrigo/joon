@@ -17,6 +17,7 @@ import { SwingModule } from 'angular2-swing';
 
 import { AngularFireModule } from 'angularfire2';
 import { AuthService } from '../providers/auth-service';
+import { UserService } from '../providers/user-service';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
@@ -64,6 +65,10 @@ export const firebaseConfig = {
     FriendsPage,
     ChatsPage
   ],
-  providers: [{provide: ErrorHandler, useClass: IonicErrorHandler}, AuthService]
+  providers: [
+    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    AuthService,
+    UserService
+   ]
 })
 export class AppModule {}

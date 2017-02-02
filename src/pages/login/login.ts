@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
 
 import { AuthService } from '../../providers/auth-service';
+import { UserService } from '../../providers/user-service';
+
+import { NavController } from 'ionic-angular';
 
 @Component({
   selector: 'page-login',
@@ -9,8 +11,9 @@ import { AuthService } from '../../providers/auth-service';
 })
 export class LoginPage {
   
-  constructor(public navCtrl: NavController, private auth: AuthService) {
-  
+  constructor(public navCtrl: NavController,
+              private auth: AuthService,
+              private userService: UserService) {
   }
   
   signInWithFacebook(): void {
@@ -19,8 +22,14 @@ export class LoginPage {
   }
 
   private onSignInSuccess(): void {
-    this.navCtrl.pop();
+    let uid = this.auth.authState.facebook.uid;
+    this.userService.addUserByUID(uid, this.auth.authState.facebook);
+    this.userService.setCurrentUserUID(uid);
+
+    // this.navCtrl.pop();
     console.log("Facebook display name ",this.auth.displayName());
+
+    // TODO: reroute to landing page!
   }
 
 }
