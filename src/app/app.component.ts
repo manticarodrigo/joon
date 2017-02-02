@@ -5,6 +5,7 @@ import { StatusBar, Splashscreen } from 'ionic-native';
 import { LoginPage } from '../pages/login/login';
 import { DiscoverPage } from '../pages/discover/discover';
 import { ProfilePage } from '../pages/profile/profile';
+import { EditProfilePage } from '../pages/edit-profile/edit-profile';
 import { TopUsersPage } from '../pages/top-users/top-users';
 import { PreferencesPage } from '../pages/preferences/preferences';
 import { SettingsPage } from '../pages/settings/settings';
@@ -13,6 +14,7 @@ import { FeedbackPage } from '../pages/feedback/feedback';
 import { InvitePage } from '../pages/invite/invite';
 import { FriendsPage } from '../pages/friends/friends';
 import { ChatsPage } from '../pages/chats/chats';
+import { ChatPage } from '../pages/chat/chat';
 
 import { AuthService } from '../providers/auth-service';
 
@@ -22,9 +24,9 @@ import { AuthService } from '../providers/auth-service';
 export class Joon {
     @ViewChild(Nav) nav: Nav;
     
-    isMenuOpen: false;
+    isMenuOpen: boolean = false;
 
-    rootPage: any = FeedbackPage;
+    rootPage: any = DiscoverPage;
 
     pages: Array<{title: string, component: any}>;
     
@@ -58,6 +60,7 @@ export class Joon {
     
     
     menuToggled() {
+        this.isMenuOpen = !(this.isMenuOpen);
         console.log(this.isMenuOpen);
     }
     

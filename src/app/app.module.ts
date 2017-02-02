@@ -5,6 +5,7 @@ import { Joon } from './app.component';
 import { LoginPage } from '../pages/login/login';
 import { DiscoverPage } from '../pages/discover/discover';
 import { ProfilePage } from '../pages/profile/profile';
+import { EditProfilePage } from '../pages/edit-profile/edit-profile';
 import { TopUsersPage } from '../pages/top-users/top-users';
 import { PreferencesPage } from '../pages/preferences/preferences';
 import { SettingsPage } from '../pages/settings/settings';
@@ -13,6 +14,7 @@ import { FeedbackPage } from '../pages/feedback/feedback';
 import { InvitePage } from '../pages/invite/invite';
 import { FriendsPage } from '../pages/friends/friends';
 import { ChatsPage } from '../pages/chats/chats';
+import { ChatPage } from '../pages/chat/chat';
 import { SwingModule } from 'angular2-swing';
 
 import { AngularFireModule } from 'angularfire2';
@@ -33,6 +35,7 @@ export const firebaseConfig = {
     LoginPage,
     DiscoverPage,
     ProfilePage,
+    EditProfilePage,
     TopUsersPage,
     PreferencesPage,
     SettingsPage,
@@ -40,12 +43,15 @@ export const firebaseConfig = {
     FeedbackPage,
     InvitePage,
     FriendsPage,
-    ChatsPage
+    ChatsPage,
+    ChatPage
   ],
   imports: [
     IonicModule.forRoot(Joon, {
         mode: 'md',
         menuType: 'reveal',
+        backButtonText: 'Back',
+        backButtonIcon: 'ios-arrow-back',
     }),
     AngularFireModule.initializeApp(firebaseConfig),
     SwingModule
@@ -56,6 +62,7 @@ export const firebaseConfig = {
     LoginPage,
     DiscoverPage,
     ProfilePage,
+    EditProfilePage,
     TopUsersPage,
     PreferencesPage,
     SettingsPage,
@@ -63,7 +70,8 @@ export const firebaseConfig = {
     FeedbackPage,
     InvitePage,
     FriendsPage,
-    ChatsPage
+    ChatsPage,
+    ChatPage
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},

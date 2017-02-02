@@ -1,26 +1,21 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController } from 'ionic-angular';
 import { Http } from '@angular/http';
 import 'rxjs/Rx';
 
-import { ChatPage } from '../chat/chat';
-
 @Component({
-  selector: 'page-chats',
-  templateUrl: 'chats.html'
+  selector: 'page-edit-profile',
+  templateUrl: 'edit-profile.html'
 })
-export class ChatsPage {
-    
-    selectedUser: any;
-    user: '';
-    users: Array<any>;
+export class EditProfilePage {
+    user = '';
+    mutual: Array<any>;
 
-    constructor(private nav: NavController, navParams: NavParams, private http: Http) {
-    
+    constructor(public navCtrl: NavController, private http: Http) {
         this.generateRandomUser();
-        this.users = [];
+        this.mutual = [];
     }
-    
+
     generateRandomUser() {
         this.http.get('https://randomuser.me/api/?results=' + 1)
             .map(data => data.json().results)
@@ -44,17 +39,10 @@ export class ChatsPage {
                     }
                     this.user = val;
                     for (var i=0; i<3; i++) {
-                        this.users.push(this.user);
+                        this.mutual.push(this.user);
                     }
                 }
         })
-    }
-
-    userTapped(event, user) {
-        // That's right, we're pushing to ourselves!
-        this.nav.push(ChatPage, {
-            user: user
-        });
     }
 
 }

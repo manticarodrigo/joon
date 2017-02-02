@@ -1,23 +1,30 @@
 <ion-header>
-  <ion-navbar>
-    <button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
-    </button>
-    <ion-title>Chats</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <button color="primary" ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>Chats</ion-title>
+        <ion-buttons end>
+            <button ion-button>
+                <img height="25" src="assets/chats.png"/>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">
-      <ion-icon [name]="item.icon" item-left></ion-icon>
-      {{item.title}}
-      <div class="item-note" item-right>
-        {{item.note}}
-      </div>
-    </button>
-  </ion-list>
-  <div *ngIf="selectedItem" padding>
-    You navigated here from <b>{{selectedItem.title}}</b>
-  </div>
+    <ion-list>
+        <button ion-item *ngFor="let user of users" (click)="userTapped($event, user)">
+            <div class="avatar" *ngIf="user.picture" item-left>
+                <img [src]="user.picture.large">
+            </div>
+            <div *ngIf="user.name">
+                <h2>{{user.name.first}}</h2>
+                <p>Nice to meet you!</p>
+            </div>
+            <div class="time" item-right>
+                <p>12:00</p>
+            </div>
+        </button>
+    </ion-list>
 </ion-content>

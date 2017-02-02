@@ -1,0 +1,91 @@
+page-chat {
+    .toolbar {
+        text-transform: capitalize;
+    }
+    .title {
+        img {
+            vertical-align: middle;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 0.5px solid color($colors, secondary);
+        }
+    }
+    .borderless {
+        border: none;
+        .item-inner {
+            border: none !important;
+        }
+    }
+    .item {
+        padding: 0;
+        .item-inner {
+            padding: 0 !important;
+        }
+    }
+    .segment {
+        height: 30px;
+        font-family: 'Open Sans-Light', Helvetica, sans-serif;
+        background: color($colors, light);
+        padding: 0px 60px;
+        .segment-button {
+            font-size: 16px;
+            line-height: 30px;
+            height: 100%;
+            border: none;
+            text-transform: capitalize;
+        }
+        .segment-activated {
+            font-weight: bold;
+        }
+    }
+    .chat-area {
+        #bg-text {
+            margin: 0;
+            color: color($colors, secondary);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+    .chat-footer {
+        width:100%;
+        text-align:center;
+        background: #fff;
+        border-top: 0.5px solid color($colors, secondary);
+        height: 70px;
+        .attach {
+            float: left;
+            height: 100%;
+            background: color($colors, primary);
+            padding: 12px;
+            img {
+                height: 100%;
+                color: #fff;
+            }
+        }
+        .message {
+            float: left;
+            width: calc(100% - 150px);
+            .text-input {
+                font-size: 16px;
+                border-left: 0.5px solid color($colors, secondary);
+                height: 70px;
+                width: 100%;
+                padding: 15px 15px;
+                margin: 0px;
+            } 
+        }
+        .send {
+            float: right;
+            height: 100%;
+            padding: 20px;
+            img {
+                height: 100%;
+                color: color($colors, primary);
+            }
+        }
+    }
+}

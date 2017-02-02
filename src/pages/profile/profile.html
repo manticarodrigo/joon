@@ -1,5 +1,5 @@
 <ion-header>
-  <ion-navbar class="white">
+  <ion-navbar>
     <button ion-button menuToggle>
       <ion-icon color="primary" name="menu"></ion-icon>
     </button>
@@ -21,29 +21,30 @@
             <ion-slide>
                 <h1>YO!</h1>
             </ion-slide>
-    </ion-slides>
-    <h1 *ngIf="user.name"> {{ user.name.last }}, {{ user.age }} </h1>
-    <div class="middle-section">
-        <ion-item>
-            <h5 *ngIf="user.name">@{{ user.name.last }}{{ user.name.first }}</h5>
-            <h6>instagram</h6>
-        </ion-item>
-        <ion-item>
-            <h2>5'10</h2>
-            <h6>Height</h6>
-        </ion-item>
-        <ion-item>
-            <h2 *ngIf="user.location">{{ user.location.city }}, {{ user.location.state }}</h2>
-            <h6>Location</h6>
-        </ion-item>
-        <ion-item>
-            <h2 *ngIf="user.location">{{ user.location.city }} University</h2>
-            <h6>University</h6>
-        </ion-item>
-        <ion-item>
-            <h2>Lead Developer, Joon</h2>
-            <h6>Career</h6>
-        </ion-item>
+        </ion-slides>
+        <h1 *ngIf="user.name"> {{ user.name.last }}, {{ user.age }} </h1>
+        <div class="middle-section">
+            <ion-item>
+                <h5 *ngIf="user.name">@{{ user.name.last }}{{ user.name.first }}</h5>
+                <h6>instagram</h6>
+            </ion-item>
+            <ion-item>
+                <h2>5'10</h2>
+                <h6>Height</h6>
+            </ion-item>
+            <ion-item>
+                <h2 *ngIf="user.location">{{ user.location.city }}, {{ user.location.state }}</h2>
+                <h6>Location</h6>
+            </ion-item>
+            <ion-item>
+                <h2 *ngIf="user.location">{{ user.location.city }} University</h2>
+                <h6>University</h6>
+            </ion-item>
+            <ion-item>
+                <h2>Lead Developer, Joon</h2>
+                <h6>Career</h6>
+            </ion-item>
+        </div>
         <ion-item>
             <h2>Agnostic</h2>
             <h6>Spirituality</h6>
@@ -55,6 +56,18 @@
         <ion-item>
             <h3>Love pets, love hikes, love life!</h3>
         </ion-item>
-        </div>
+        <ion-item>
+            <h6>Mutual Friends</h6>
+            <ion-grid class="mutual">
+                <ion-row wrap>
+                    <ion-col width-33 *ngFor="let friend of mutual">
+                        <img *ngIf="friend.picture" [src]="friend.picture.large">
+                        <h6 *ngIf="friend.name">
+                            {{ friend.name.first }}
+                        </h6>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
+        </ion-item>
   </ion-list>
 </ion-content>

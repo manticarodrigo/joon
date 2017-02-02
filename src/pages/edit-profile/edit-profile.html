@@ -1,0 +1,137 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon color="primary" name="menu"></ion-icon>
+    </button>
+    <ion-title>Edit Profile</ion-title>
+    <ion-buttons end>
+        <button ion-button icon-only>
+            <img height="25" src="assets/empty.png"/>
+        </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-list no-lines>
+        <ion-grid class="images" padding>
+            <ion-row>
+                <ion-col width-75 class="large">
+                    <img *ngIf="user.picture" [src]="user.picture.large">
+                    <img class="edit" src="assets/edit.png">
+                </ion-col>
+                <ion-col width-25 class="right">
+                    <img *ngIf="user.picture" [src]="user.picture.large">
+                    <img src="assets/add.png">
+                    <img src="assets/add.png">
+                </ion-col>
+            </ion-row>
+            <ion-row class="bottom">
+                <ion-col width-25>
+                    <img src="assets/add.png">
+                </ion-col>
+                <ion-col width-25 class="small">
+                    <img src="assets/add.png">
+                </ion-col>
+                <ion-col width-25 class="small">
+                    <img src="assets/add.png">
+                </ion-col>
+                <ion-col width-25 class="small">
+                    <img src="assets/add.png">
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ion-item>
+            <ion-input type="text" placeholder="First Name"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Birthday"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Instagram Handle"></ion-input>
+        </ion-item>
+    </ion-list>
+    <ion-list>
+        <ion-grid padding>
+            <ion-label>Gender:</ion-label>
+            <ion-row>
+                <ion-col width-50>
+                    <ion-checkbox></ion-checkbox>
+                    <ion-label>Male</ion-label>
+                </ion-col>
+                <ion-col width-50>
+                    <ion-checkbox></ion-checkbox>
+                    <ion-label>Female</ion-label>
+                </ion-col>
+            </ion-row>
+            <ion-label>Height:</ion-label>
+            <ion-row>
+                <ion-col width-50>
+                    <ion-select placeholder="Feet">
+                        <ion-option value="1">1</ion-option>
+                        <ion-option value="2">2</ion-option>
+                        <ion-option value="3">3</ion-option>
+                        <ion-option value="4">4</ion-option>
+                        <ion-option value="5">5</ion-option>
+                        <ion-option value="6">6</ion-option>
+                        <ion-option value="7">7</ion-option>
+                        <ion-option value="8">8</ion-option>
+                        <ion-option value="9">9</ion-option>
+                    </ion-select>
+                </ion-col>
+                <ion-col width-50>
+                    <ion-select placeholder="Inches">
+                        <ion-option value="1">1</ion-option>
+                        <ion-option value="2">2</ion-option>
+                        <ion-option value="3">3</ion-option>
+                        <ion-option value="4">4</ion-option>
+                        <ion-option value="5">5</ion-option>
+                        <ion-option value="6">6</ion-option>
+                        <ion-option value="7">7</ion-option>
+                        <ion-option value="8">8</ion-option>
+                        <ion-option value="2">2</ion-option>
+                        <ion-option value="3">3</ion-option>
+                        <ion-option value="4">4</ion-option>
+                        <ion-option value="5">5</ion-option>
+                        <ion-option value="6">6</ion-option>
+                        <ion-option value="7">7</ion-option>
+                        <ion-option value="8">8</ion-option>
+                        <ion-option value="9">9</ion-option>
+                        <ion-option value="10">10</ion-option>
+                        <ion-option value="11">11</ion-option>
+                        <ion-option value="12">12</ion-option>
+                    </ion-select>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+    </ion-list>
+    <ion-list no-lines>
+        <ion-item>
+            <ion-input type="text" placeholder="Country"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="City"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="University or School"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Additional University or School"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Job Title"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Company"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Religion"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-input type="text" placeholder="Ethnicity"></ion-input>
+        </ion-item>
+        <ion-textarea class="textarea" placeholder="About Me">
+        </ion-textarea>
+        <button ion-button>Save</button>
+    </ion-list>
+</ion-content>

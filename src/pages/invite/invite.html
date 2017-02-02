@@ -1,23 +1,17 @@
 <ion-header>
-  <ion-navbar>
-    <button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
-    </button>
-    <ion-title>Invite</ion-title>
+    <ion-navbar>
+        <button ion-button color="primary" menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title>Invite</ion-title>
+        <ion-buttons end>
+            <button ion-button icon-only>
+                <img height="25" src="assets/empty.png"/>
+            </button>
+        </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content>
-  <ion-list>
-    <button ion-item *ngFor="let item of items" (click)="itemTapped($event, item)">
-      <ion-icon [name]="item.icon" item-left></ion-icon>
-      {{item.title}}
-      <div class="item-note" item-right>
-        {{item.note}}
-      </div>
-    </button>
-  </ion-list>
-  <div *ngIf="selectedItem" padding>
-    You navigated here from <b>{{selectedItem.title}}</b>
-  </div>
+  <h1 style="text-align:center">Tell your friends about Joon!</h1>
 </ion-content>

@@ -31,48 +31,76 @@
   src: local('Open Sans'), local('OpenSans'), url(../assets/fonts/OpenSans-Light.ttf) format('truetype');
 }
 
+/* Set font family */
+
 h1 {
     font-family: $font-family-base !important;
 }
-
 h2 {
     font-family: $font-family-base !important;
 }
-
+h3 {
+    font-family: $font-family-base !important;
+}
+h4 {
+    font-family: $font-family-base !important;
+}
 h5 {
     font-family: $font-family-base !important;
 }
-
 h6 {
     font-family: $font-family-base !important;
 }
-
 p {
     font-family: $font-family-base !important;
 }
+strong {
+    font-family: $font-family-base !important;
+}
 
+/* Fade out right side when menu is open */
+
+.menu-content-open {
+    .toolbar-background {
+        background-color: black;
+        opacity: 0.3;
+        z-index: 100;
+    }
+    .fixed-content {
+        background-color: black;
+        opacity: 0.3;
+        z-index: 100;
+    }
+}
+
+/* Sidemenu styles */
+
+.show-menu {
+    .header {
+        border-bottom: 1px solid #dedede !important;
+    }
+    .menu-inner {
+        border-right: 1px solid #dedede !important;
+    }
+}
 .sidemenu {
     .item-inner {
         color: color($colors, primary);
     }   
 }
 
-.overlay {
-    body:after {
-        content: "" !important;
-        display: block !important;
-        position: absolute !important; /* could also be absolute */ 
-        top: 0 !important;
-        left: 200px !important;
-        height: 100% !important;
-        width: 100% !important;
-        z-index: 10 !important;
-        background-color: rgba(0,0,0,0.2) !important;
-    }
+.md .menu-content-reveal {
+    box-shadow: none;
 }
 
-.swiper-pagination-bullet-active {
-    background:#A2A3A7;
+/* Navbar styles */
+
+.back-button-icon {
+    color: color($colors, primary);
+}
+
+.back-button-text {
+    color: color($colors, primary);
 }
 
 .toolbar-background {
@@ -89,11 +117,6 @@ p {
     // margin-right: 25px;
 }
 
-.toolbar-content img {
-    display:inline-block;
-   //  margin:0 45px;
-}
-
 .bar-button {
     font-family: $font-family-base;
     text-transform: capitalize;
@@ -103,9 +126,13 @@ p {
     background-image: none;
 }
 
-.md .menu-content-reveal {
-    box-shadow: none;
+/* Slide styles */
+
+.swiper-pagination-bullet-active {
+    background:#A2A3A7;
 }
+
+/* List styles */
 
 .item {
     font-family: $font-family-base !important;
@@ -132,16 +159,7 @@ p {
     text-transform: none;
 }
 
-/* Fade out right side when menu is open */
-
-.menu-content-open .toolbar-background {
-  background-color: black;
-  opacity: 0.3;
-  z-index: 100;
-}
-
-.menu-content-open .fixed-content {
-  background-color: black;
-  opacity: 0.3;
-  z-index: 100;
+.text-input {
+    font-family: $font-family-base;
+    resize: none;
 }

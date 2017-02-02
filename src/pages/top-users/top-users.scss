@@ -5,20 +5,6 @@ page-top-users {
         font-size: 16px;
     }
     
-    .primary {
-        color: color($colors, primary) !important;
-    }
-    
-    .city-select {
-        margin: auto;
-        .button {
-            background: none;
-        }
-        .button:hover {
-            background: none;
-        }
-    }
-    
     .item {
         border: none;
         text-align: center;
@@ -28,21 +14,24 @@ page-top-users {
         border: none !important;
     }
     
-    h5 {
+    .location {
         color: color($colors, primary);
+        .location-label {
+            margin-top: -15px;
+        }
     }
     
     h6 {
-        font-family: 'Arial';
         text-transform: capitalize;
     }
     
     img {
+        padding: 5px;
         min-height: 100%;
         min-width: 100%;
         border-radius: 50%;
-        display:block;
-        margin:auto;
+        display: block;
+        margin: auto;
     }
     
 }

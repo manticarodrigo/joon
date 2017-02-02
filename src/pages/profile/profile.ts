@@ -4,6 +4,8 @@ import { Http } from '@angular/http';
 import 'rxjs/Rx';
 
 import { UserService } from '../../providers/user-service';
+import { EditProfilePage } from '../edit-profile/edit-profile';
+
 import { FirebaseObjectObservable } from 'angularfire2'
 
 @Component({
@@ -12,10 +14,15 @@ import { FirebaseObjectObservable } from 'angularfire2'
 })
 export class ProfilePage {
   user = '';
+  mutual: Array<any>;
   userObj: FirebaseObjectObservable<any>;
 
   constructor(public navCtrl: NavController, private http: Http,
               private userService: UserService) {
+  }
+
+  editProfile() {
+      this.navCtrl.push(EditProfilePage);
   }
   
   ngAfterViewInit() {
