@@ -25,11 +25,11 @@ export class LoginPage {
     let uid = this.auth.authState.facebook.uid;
     this.userService.addUserByUID(uid, this.auth.authState.facebook);
     this.userService.setCurrentUserUID(uid);
-
-    // this.navCtrl.pop();
+      
     console.log("Facebook display name ",this.auth.displayName());
 
     // TODO: reroute to landing page!
+      this.navCtrl.pop();
   }
 
 }
