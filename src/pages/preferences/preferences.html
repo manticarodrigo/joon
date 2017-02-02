@@ -6,7 +6,7 @@
         <ion-title>Discover Preferences</ion-title>
         <ion-buttons end>
           <button ion-button icon-only>
-            <img height="25" src="../../assets/empty.png"/>
+            <img height="25" src="assets/empty.png"/>
           </button>
         </ion-buttons>
     </ion-navbar>
@@ -14,23 +14,29 @@
 
 <ion-content padding>
     <ion-label>I am interested in:</ion-label>
-    <ion-segment [(ngModel)]="relationship" color="primary">
-        <ion-segment-button value="men" selected (ionSelect)="selectedMen()">
-            Men
-        </ion-segment-button>
-        <ion-segment-button value="women" (ionSelect)="selectedWomen()">
-            Women
-        </ion-segment-button>
-    </ion-segment>
+    <ion-item class="borderless">
+        <ion-segment [(ngModel)]="relationship" color="primary">
+            <ion-segment-button value="men" (ionSelect)="selectedMen()">
+                Men
+            </ion-segment-button>
+            <ion-segment-button value="women" (ionSelect)="selectedWomen()">
+                Women
+            </ion-segment-button>
+        </ion-segment>
+    </ion-item>
+    
     <ion-label>Search Distance</ion-label>
     <ion-item class="borderless">
-        <ion-range min="5" max="100" [(ngModel)]="distance" color="primary">
-            <ion-label range-left>5mi</ion-label>
-            <ion-label range-right>100mi</ion-label>
-        </ion-range>
+        <ion-select [(ngModel)]="distance">
+            <ion-option value="local" selected="true">Local</ion-option>
+            <ion-option value="national">National</ion-option>
+            <ion-option value="global">Global</ion-option>
+        </ion-select>
     </ion-item>
+    
     <ion-item class="borderless">
-        <ion-label>Show Age</ion-label>
         <ion-checkbox [(ngModel)]="showAge"></ion-checkbox>
+        <ion-label>Show Age</ion-label>
     </ion-item>
+    
 </ion-content>

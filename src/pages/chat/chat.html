@@ -1,0 +1,47 @@
+
+<ion-header>
+    <ion-navbar>
+        <button color="primary" ion-button menuToggle>
+            <ion-icon name="menu"></ion-icon>
+        </button>
+        <ion-title class="title" *ngIf="user.name">
+            <img [src]="user.picture.large">
+            {{ user.name.first }}
+        </ion-title>
+        <ion-buttons end>
+            <button ion-button>
+                <img height="25" src="assets/options.png"/>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+<ion-content>
+    <ion-item class="borderless">
+        <ion-segment [(ngModel)]="viewState" color="primary">
+            <ion-segment-button value="messages">
+                Messages
+            </ion-segment-button>
+            <ion-segment-button value="about">
+                About
+            </ion-segment-button>
+        </ion-segment>
+    </ion-item>
+    <div class="chat-area">
+        <h5 id="bg-text">Say Hi to start the conversation.</h5>
+        <ion-list>
+            
+        </ion-list>
+    </div>
+</ion-content>
+<ion-footer class="chat-footer">
+    <div class="attach">
+        <img src="assets/attach.png">
+    </div>
+    <div class="message">
+        <ion-textarea type="text" placeholder="Type a Message"></ion-textarea>
+    </div>
+    <div class="send">
+        <img src="assets/send.png">
+    </div>
+</ion-footer>

@@ -1,6 +1,9 @@
 page-preferences {
     .borderless {
         border: none;
+        .item-inner {
+            border: none !important;
+        }
     }
     .item {
         padding: 0;
@@ -11,28 +14,47 @@ page-preferences {
     .segment {
         height: 70px;
         font-family: 'Open Sans-Light', Helvetica, sans-serif;
-        border: 0.5px solid #999999;
-        
+        border: 0.5px solid color($colors, secondary);
         .segment-button {
+            font-size: 14px;
+            font-weight: 600;
             line-height: 70px;
             height: 100%;
             border: none;
             text-transform: capitalize;
         }
         .segment-activated {
+            font-weight: 800;
             font-family: 'Open Sans', Helvetica, sans-serif;
             background: color($colors, primary);
             color: #fff !important;
         }
     }
+    .select {
+        font-weight: 800;
+        border: 0.5px solid color($colors, secondary);
+        max-width: 100% !important;
+        width: 100%;
+        height: 70px;
+        line-height: 40px;
+        .select-icon { 
+            display: block;
+            margin: auto;
+            .select-icon-inner {
+                color: color($colors, primary);
+            }
+        }
+    }
+    /*
     .range {
         padding: 0px 20px;
         height: 70px;
         border: 0.5px solid #999999;
     }
+    */
     .item-checkbox {
         border: none;
-        padding: 20px 20px;
+        padding: 20px 0px;
         .checkbox {
             margin-right: 10px !important;
             .checkbox-icon {

@@ -4,17 +4,17 @@
       <ion-icon color="primary" name="menu"></ion-icon>
     </button>
     <ion-title>
-        <img alt="Logo" height="30" src="../../assets/joon.png">
+        <img alt="Logo" height="30" src="assets/joon.png">
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="openChats()">
-        <img height="25" src="../../assets/chats.png"/>
+        <img height="25" src="assets/chats.png"/>
       </button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
 <ion-content class="discover no-scroll">
-    <div swing-stack #swingContainer [stackConfig]="stackConfig" (throwoutleft)="voteUp(true)" (throwoutright)="voteUp(false)" id="card-stack">
+    <div swing-stack #swingContainer [stackConfig]="stackConfig" (throwoutleft)="voteUp(false)" (throwoutright)="voteUp(true)" id="card-stack">
         <ion-card #cardsContainer swing-card *ngFor="let c of cards">
             <ion-card-content class="crop" *ngIf="c.picture">
                 <img *ngIf="c.picture"[src]="c.picture.large">
@@ -22,7 +22,7 @@
                     <h2>{{ c.name.first }}, {{c.age}}</h2>
                     <p>{{ c.email }}</p>
                     <p class="mutual">
-                        <img src="../../assets/mutual.png"/>
+                        <img src="assets/mutual.png"/>
                         7
                     </p>
                 </ion-item>
@@ -30,9 +30,9 @@
         </ion-card>
     </div>
     <div class="discover-footer">
-        <img src="../../assets/redo.png" (click)="voteUp(false)"/>
-        <img id="lower" src="../../assets/ignore.png" (click)="voteUp(false)"/>
-        <img id="lower" src="../../assets/like.png" (click)="voteUp(true)"/>
-        <img src="../../assets/super-like.png" (click)="voteUp(true)"/>
+        <img src="assets/redo.png" (click)="voteUp(false)"/>
+        <img class="lower" src="assets/ignore.png" (click)="voteUp(false)"/>
+        <img class="lower" src="assets/like.png" (click)="voteUp(true)"/>
+        <img src="assets/super-like.png" (click)="voteUp(true)"/>
     </div>
 </ion-content>
