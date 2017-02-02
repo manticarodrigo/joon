@@ -16,29 +16,29 @@
     <ion-list no-lines>
         <ion-grid class="images" padding>
             <ion-row>
-                <ion-col width-75 class="large">
-                    <img *ngIf="user.picture" [src]="user.picture.large">
-                    <img class="edit" src="assets/edit.png">
-                </ion-col>
-                <ion-col width-25 class="right">
-                    <img *ngIf="user.picture" [src]="user.picture.large">
-                    <img src="assets/add.png">
-                    <img src="assets/add.png">
-                </ion-col>
+              <ion-col width-75 class="large">
+                  <img *ngIf="user.photoURL" [src]="user.photoURL">
+                  <img class="edit" src="assets/edit.png">
+              </ion-col>
+              <ion-col width-25 class="right">
+                  <img *ngIf="user.photoURL" [src]="user.photoURL">
+                  <img src="assets/add.png">
+                  <img src="assets/add.png">
+              </ion-col>
             </ion-row>
             <ion-row class="bottom">
-                <ion-col width-25>
-                    <img src="assets/add.png">
-                </ion-col>
-                <ion-col width-25 class="small">
-                    <img src="assets/add.png">
-                </ion-col>
-                <ion-col width-25 class="small">
-                    <img src="assets/add.png">
-                </ion-col>
-                <ion-col width-25 class="small">
-                    <img src="assets/add.png">
-                </ion-col>
+              <ion-col width-25>
+                  <img src="assets/add.png">
+              </ion-col>
+              <ion-col width-25 class="small">
+                  <img src="assets/add.png">
+              </ion-col>
+              <ion-col width-25 class="small">
+                  <img src="assets/add.png">
+              </ion-col>
+              <ion-col width-25 class="small">
+                  <img src="assets/add.png">
+              </ion-col>
             </ion-row>
         </ion-grid>
         <ion-item>
@@ -68,70 +68,73 @@
             <ion-row>
                 <ion-col width-50>
                     <ion-select placeholder="Feet">
-                        <ion-option value="1">1</ion-option>
-                        <ion-option value="2">2</ion-option>
-                        <ion-option value="3">3</ion-option>
-                        <ion-option value="4">4</ion-option>
-                        <ion-option value="5">5</ion-option>
-                        <ion-option value="6">6</ion-option>
-                        <ion-option value="7">7</ion-option>
-                        <ion-option value="8">8</ion-option>
-                        <ion-option value="9">9</ion-option>
+                      <ion-option value="1">1</ion-option>
+                      <ion-option value="2">2</ion-option>
+                      <ion-option value="3">3</ion-option>
+                      <ion-option value="4">4</ion-option>
+                      <ion-option value="5">5</ion-option>
+                      <ion-option value="6">6</ion-option>
+                      <ion-option value="7">7</ion-option>
+                      <ion-option value="8">8</ion-option>
+                      <ion-option value="9">9</ion-option>
                     </ion-select>
                 </ion-col>
                 <ion-col width-50>
                     <ion-select placeholder="Inches">
-                        <ion-option value="1">1</ion-option>
-                        <ion-option value="2">2</ion-option>
-                        <ion-option value="3">3</ion-option>
-                        <ion-option value="4">4</ion-option>
-                        <ion-option value="5">5</ion-option>
-                        <ion-option value="6">6</ion-option>
-                        <ion-option value="7">7</ion-option>
-                        <ion-option value="8">8</ion-option>
-                        <ion-option value="2">2</ion-option>
-                        <ion-option value="3">3</ion-option>
-                        <ion-option value="4">4</ion-option>
-                        <ion-option value="5">5</ion-option>
-                        <ion-option value="6">6</ion-option>
-                        <ion-option value="7">7</ion-option>
-                        <ion-option value="8">8</ion-option>
-                        <ion-option value="9">9</ion-option>
-                        <ion-option value="10">10</ion-option>
-                        <ion-option value="11">11</ion-option>
-                        <ion-option value="12">12</ion-option>
+                      <ion-option value="1">1</ion-option>
+                      <ion-option value="2">2</ion-option>
+                      <ion-option value="3">3</ion-option>
+                      <ion-option value="4">4</ion-option>
+                      <ion-option value="5">5</ion-option>
+                      <ion-option value="6">6</ion-option>
+                      <ion-option value="7">7</ion-option>
+                      <ion-option value="8">8</ion-option>
+                      <ion-option value="2">2</ion-option>
+                      <ion-option value="3">3</ion-option>
+                      <ion-option value="4">4</ion-option>
+                      <ion-option value="5">5</ion-option>
+                      <ion-option value="6">6</ion-option>
+                      <ion-option value="7">7</ion-option>
+                      <ion-option value="8">8</ion-option>
+                      <ion-option value="9">9</ion-option>
+                      <ion-option value="10">10</ion-option>
+                      <ion-option value="11">11</ion-option>
+                      <ion-option value="12">12</ion-option>
                     </ion-select>
                 </ion-col>
             </ion-row>
         </ion-grid>
     </ion-list>
-    <ion-list no-lines>
-        <ion-item>
-            <ion-input type="text" placeholder="Country"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="City"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="University or School"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="Additional University or School"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="Job Title"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="Company"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="Religion"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="Ethnicity"></ion-input>
-        </ion-item>
-        <ion-textarea class="textarea" placeholder="About Me">
-        </ion-textarea>
-        <button ion-button>Save</button>
-    </ion-list>
+
+    <form (ngSubmit)="editProfileForm()" name="edit-profile-form">
+      <ion-list no-lines>
+          <ion-item>
+              <ion-input type="text" name="user-country" [(ngModel)]="user.country" placeholder="Country"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input type="text" name="user-city" [(ngModel)]="user.city" placeholder="City"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input type="text" name="user-school" [(ngModel)]="user.school" placeholder="University or School"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input type="text" name="user-school2" [(ngModel)]="user.school2" placeholder="Additional University or School"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input type="text" name="user-job" [(ngModel)]="user.job" placeholder="Job Title"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input type="text" name="user-company" [(ngModel)]="user.company" placeholder="Company"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion"></ion-input>
+          </ion-item>
+          <ion-item>
+              <ion-input type="text" name="user-ethnicity" [(ngModel)]="user.ethnicity" placeholder="Ethnicity"></ion-input>
+          </ion-item>
+          <ion-textarea class="textarea" name="user-bio" [(ngModel)]="user.bio" placeholder="About Me">
+          </ion-textarea>
+          <button ion-button type="submit" (click)="editProfileSubmit()" block>Save</button>
+      </ion-list>
+    </form>
 </ion-content>

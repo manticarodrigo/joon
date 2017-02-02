@@ -58,7 +58,6 @@ export class Joon {
     }
     
     
-    
     menuToggled() {
         this.isMenuOpen = !(this.isMenuOpen);
         console.log(this.isMenuOpen);

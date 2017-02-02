@@ -12,6 +12,7 @@ import { FirebaseObjectObservable } from 'angularfire2'
   selector: 'page-profile',
   templateUrl: 'profile.html'
 })
+
 export class ProfilePage {
   user = '';
   mutual: Array<any>;
