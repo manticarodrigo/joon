@@ -25,7 +25,6 @@ export class DiscoverPage {
     
     cards: Array<any>;
     stackConfig: StackConfig;
-    recentCard: string = '';
   
     constructor(public navCtrl: NavController, private http: Http, public navParams: NavParams, public toastCtrl: ToastController, af: AngularFire) {
         this.stackConfig = {
@@ -48,7 +47,7 @@ export class DiscoverPage {
     ngAfterViewInit() {
 	  // Either subscribe in controller or set in HTML
 	  this.swingStack.throwin.subscribe((event: DragEvent) => {
-	    event.target.style.background = '#ffffff';
+	    event.target.style.background = '#000';
 	  });
 	  
 	  this.cards = [{email: ''}];
@@ -74,21 +73,22 @@ export class DiscoverPage {
 
 	// Connected through HTML
 	voteUp(like: boolean) {
-        let removedCard = this.cards.pop();
-        this.addNewCards(1);
+        let currentCard = this.cards.pop();
         if (like) {
-	       this.recentCard = 'You liked: ' + removedCard.email;
+	       this.presentToast('You liked: ' + currentCard.name.first);
+            //currentCard.throwOut(800, 500);
         } else {
-	       this.recentCard = 'You disliked: ' + removedCard.email;
+	       this.presentToast('You ignored: ' + currentCard.name.first);
+            //currentCard.throwOut(-800, 500);
         }
-        this.presentToast();
+        this.addNewCards(1);
 	}
     
     
     
-    presentToast() {
+    presentToast(message) {
         let toast = this.toastCtrl.create({
-            message: this.recentCard,
+            message: message,
             duration: 500,
             position: 'top'
         });

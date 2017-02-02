@@ -26,7 +26,7 @@ export class Joon {
     
     isMenuOpen: boolean = false;
 
-    rootPage: any = ChatsPage;
+    rootPage: any = DiscoverPage;
 
     pages: Array<{title: string, component: any}>;
     
