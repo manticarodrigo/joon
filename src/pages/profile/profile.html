@@ -13,11 +13,11 @@
 </ion-header>
 
 <ion-content>
-    <ion-list no-lines class="centered-list">
-        <ion-slides class="slides" pager>
-            <ion-slide>
-                <img *ngIf="user.picture"[src]="user.picture.large"/>
-            </ion-slide>
+  <ion-list no-lines class="centered-list">
+    <ion-slides class="slides" pager>
+          <ion-slide>
+            <img *ngIf="(userObj | async)" [src]="(userObj | async)?.photoURL" />
+          </ion-slide>
             <ion-slide>
                 <h1>YO!</h1>
             </ion-slide>
