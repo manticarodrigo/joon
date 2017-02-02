@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core'
 
-//import { FacebookService } from './'
-
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
 @Injectable()
