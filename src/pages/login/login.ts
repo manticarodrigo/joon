@@ -26,9 +26,9 @@ export class LoginPage {
     let uid = this.auth.authState.facebook.uid;
     this.userService.addUserByUID(uid, this.auth.authState.facebook);
     this.userService.setCurrentUserUID(uid);
-
-    // console.log("Facebook display name ",this.auth.displayName());
-    // this.navCtrl.push(DiscoverPage);
+    
+    // Pop view and go to root
+    this.navCtrl.pop();
   }
 
 }
