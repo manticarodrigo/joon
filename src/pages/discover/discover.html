@@ -4,11 +4,11 @@
       <ion-icon color="primary" name="menu"></ion-icon>
     </button>
     <ion-title>
-        <img alt="Logo" height="30" src="../../assets/joon.png">
+        <img alt="Logo" height="30" src="assets/joon.png">
     </ion-title>
     <ion-buttons end>
       <button ion-button icon-only (click)="openChats()">
-        <img height="25" src="../../assets/chats.png"/>
+        <img height="25" src="assets/chats.png"/>
       </button>
     </ion-buttons>
   </ion-navbar>
@@ -22,7 +22,7 @@
                     <h2>{{ c.name.first }}, {{c.age}}</h2>
                     <p>{{ c.email }}</p>
                     <p class="mutual">
-                        <img src="../../assets/mutual.png"/>
+                        <img src="assets/mutual.png"/>
                         7
                     </p>
                 </ion-item>
@@ -30,9 +30,9 @@
         </ion-card>
     </div>
     <div class="discover-footer">
-        <img src="../../assets/redo.png" (click)="voteUp(false)"/>
-        <img class="lower" src="../../assets/ignore.png" (click)="voteUp(false)"/>
-        <img class="lower" src="../../assets/like.png" (click)="voteUp(true)"/>
-        <img src="../../assets/super-like.png" (click)="voteUp(true)"/>
+        <img src="assets/redo.png" (click)="voteUp(false)"/>
+        <img class="lower" src="assets/ignore.png" (click)="voteUp(false)"/>
+        <img class="lower" src="assets/like.png" (click)="voteUp(true)"/>
+        <img src="assets/super-like.png" (click)="voteUp(true)"/>
     </div>
 </ion-content>

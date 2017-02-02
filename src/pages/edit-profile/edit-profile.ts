@@ -12,14 +12,9 @@ export class EditProfilePage {
     mutual: Array<any>;
 
     constructor(public navCtrl: NavController, private http: Http) {
-    
-    }
-    
-    ngAfterViewInit() {
         this.generateRandomUser();
         this.mutual = [];
-        
-	}
+    }
 
     generateRandomUser() {
         this.http.get('https://randomuser.me/api/?results=' + 1)
