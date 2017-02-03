@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 
 import { AuthService } from '../../providers/auth-service';
 import { UserService } from '../../providers/user-service';
+import { DiscoverPage } from '../discover/discover';
 
 import { NavController } from 'ionic-angular';
 
@@ -26,10 +27,8 @@ export class LoginPage {
     this.userService.addUserByUID(uid, this.auth.authState.facebook);
     this.userService.setCurrentUserUID(uid);
 
-    // this.navCtrl.pop();
-    console.log("Facebook display name ",this.auth.displayName());
-
-    // TODO: reroute to landing page!
+    // console.log("Facebook display name ",this.auth.displayName());
+    // this.navCtrl.push(DiscoverPage);
   }
 
 }
