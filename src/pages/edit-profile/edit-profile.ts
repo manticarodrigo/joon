@@ -22,53 +22,15 @@ export class EditProfilePage {
                 private http: Http,
                 private userService: UserService,
                 private formBuilder: FormBuilder) {
-        this.userPatch = this.formBuilder.group({
-          country: [''],
-          city: [''],
-          school: [''],
-          jobTitle: [''],
-          company: [''],
-          religion: [''],
-          ethnicity: [''],
-          bio: [''] 
-        });
-        //this.generateRandomUser();
         this.mutual = [];
     }
 
-    mergeUserDefaults(data) {
-      return {
-        firstName: data.firstName || '',
-        country: data.country || '',
-        city: data.country || '',
-        school: data.school || 'School of Merged Data',
-        jobTitle: data.jobTitle || '',
-        company: data.company || '',
-        religion: data.religion || '',
-        ethnicity: data.ethnicity || '',
-        bio: data.bio || '',
-        photoURL: data.photoURL || ''
-      }
-    }
-
-    readOnceCurrentUser() {
-      this.userService.getCurrentUserSnapshots()
-        .subscribe(snapshot => { 
-          if (!this.snapshotTaken) {
-            this.user = this.mergeUserDefaults(snapshot.val());
-            this.snapshotTaken = true;
-          }
-        })
-    }
-
     editProfileSubmit() {
-      console.log(this.user)
       this.userService.getCurrentUser().update(this.user);
     }
 
     ngAfterViewInit() {
-      this.snapshotTaken = false;
-      this.readOnceCurrentUser();
+      this.userService.setCurrentUserSnapshot(data => {this.user = data});
     }
 
 }

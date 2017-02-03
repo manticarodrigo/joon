@@ -13,61 +13,64 @@
 </ion-header>
 
 <ion-content>
+  <form (ngSubmit)="editProfileSubmit()" name="edit-profile-form">
     <ion-list no-lines>
-        <ion-grid class="images" padding>
-            <ion-row>
-              <ion-col width-75 class="large">
-                  <img *ngIf="user.photoURL" [src]="user.photoURL">
-                  <img class="edit" src="assets/edit.png">
-              </ion-col>
-              <ion-col width-25 class="right">
-                  <img *ngIf="user.photoURL" [src]="user.photoURL">
-                  <img src="assets/add.png">
-                  <img src="assets/add.png">
-              </ion-col>
-            </ion-row>
-            <ion-row class="bottom">
-              <ion-col width-25>
-                  <img src="assets/add.png">
-              </ion-col>
-              <ion-col width-25 class="small">
-                  <img src="assets/add.png">
-              </ion-col>
-              <ion-col width-25 class="small">
-                  <img src="assets/add.png">
-              </ion-col>
-              <ion-col width-25 class="small">
-                  <img src="assets/add.png">
-              </ion-col>
-            </ion-row>
-        </ion-grid>
-        <ion-item>
-            <ion-input type="text" placeholder="First Name"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="Birthday"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-input type="text" placeholder="Instagram Handle"></ion-input>
-        </ion-item>
+      <ion-grid class="images" padding>
+        <ion-row>
+          <ion-col width-75 class="large">
+            <img *ngIf="user.photoURL" [src]="user.photoURL">
+            <img class="edit" src="assets/edit.png">
+          </ion-col>
+          <ion-col width-25 class="right">
+            <img *ngIf="user.photoURL" [src]="user.photoURL">
+            <img src="assets/add.png">
+            <img src="assets/add.png">
+          </ion-col>
+        </ion-row>
+        <ion-row class="bottom">
+          <ion-col width-25>
+            <img src="assets/add.png">
+          </ion-col>
+          <ion-col width-25 class="small">
+            <img src="assets/add.png">
+          </ion-col>
+          <ion-col width-25 class="small">
+            <img src="assets/add.png">
+          </ion-col>
+          <ion-col width-25 class="small">
+            <img src="assets/add.png">
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+      <ion-item>
+        <ion-input type="text" name="user-first-name" [(ngModel)]="user.firstName" placeholder="First Name" ></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input type="text" name="user-birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-input type="text" name="user-instagram" [(ngModel)]="user.instagram" placeholder="Instagram Handle" ></ion-input>
+      </ion-item>
     </ion-list>
     <ion-list>
         <ion-grid padding>
+
             <ion-label>Gender:</ion-label>
-            <ion-row>
-                <ion-col width-50>
-                    <ion-checkbox></ion-checkbox>
-                    <ion-label>Male</ion-label>
-                </ion-col>
-                <ion-col width-50>
-                    <ion-checkbox></ion-checkbox>
-                    <ion-label>Female</ion-label>
-                </ion-col>
+            <ion-row radio-group name="user-gender" [(ngModel)]="user.gender">
+              <ion-col width-50>
+                <ion-label>Male</ion-label>
+                <ion-radio value="male"></ion-radio>
+              </ion-col>
+              <ion-col width-50>
+                <ion-label>Female</ion-label>
+                <ion-radio value="female"></ion-radio>
+              </ion-col>
             </ion-row>
+
             <ion-label>Height:</ion-label>
             <ion-row>
                 <ion-col width-50>
-                    <ion-select placeholder="Feet">
+                    <ion-select name="user-height-ft" [(ngModel)]="user.heightFt" placeholder="Feet">
                       <ion-option value="1">1</ion-option>
                       <ion-option value="2">2</ion-option>
                       <ion-option value="3">3</ion-option>
@@ -76,11 +79,11 @@
                       <ion-option value="6">6</ion-option>
                       <ion-option value="7">7</ion-option>
                       <ion-option value="8">8</ion-option>
-                      <ion-option value="9">9</ion-option>
                     </ion-select>
                 </ion-col>
                 <ion-col width-50>
-                    <ion-select placeholder="Inches">
+                    <ion-select name="user-height-in" [(ngModel)]="user.heightIn" placeholder="Inches">
+                      <ion-option value="0">0</ion-option>
                       <ion-option value="1">1</ion-option>
                       <ion-option value="2">2</ion-option>
                       <ion-option value="3">3</ion-option>
@@ -99,14 +102,11 @@
                       <ion-option value="9">9</ion-option>
                       <ion-option value="10">10</ion-option>
                       <ion-option value="11">11</ion-option>
-                      <ion-option value="12">12</ion-option>
                     </ion-select>
                 </ion-col>
             </ion-row>
         </ion-grid>
     </ion-list>
-
-    <form (ngSubmit)="editProfileForm()" name="edit-profile-form">
       <ion-list no-lines>
           <ion-item>
               <ion-input type="text" name="user-country" [(ngModel)]="user.country" placeholder="Country"></ion-input>

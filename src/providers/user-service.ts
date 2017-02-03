@@ -6,25 +6,19 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 export class UserService {
 
   af: any;
+  public currentUserSnapshot: any;
   public currentUserUID: any;
 
   constructor(af: AngularFire) {
     this.af = af;
     this.currentUserUID = null;
+    this.currentUserSnapshot = null;
   }
 
   getCurrentUser() {
     // console.log("***" + this.currentUserUID + "***");
     if (this.currentUserUID != null) {
       return this.af.database.object('/users/' + this.currentUserUID)
-    } else {
-      return null;
-    }
-  }
-
-  getCurrentUserSnapshots() {
-    if (this.currentUserUID != null) {
-      return this.af.database.object('/users/' + this.currentUserUID, { preserveSnapshot: true })
     } else {
       return null;
     }
@@ -39,35 +33,25 @@ export class UserService {
     this.currentUserUID = uid;
   }
 
-  // getProfileDataByUID(uid) {
-  //   return this.af.database.object('/userProfileData/' + uid);
-  // }
+  _getCurrentUserSnapshots() {
+    if (this.currentUserUID != null) {
+      return this.af.database.object('/users/' + this.currentUserUID, { preserveSnapshot: true });
+    } else {
+      return null;
+    }
+  }
 
-  // getFacebookFriendsByUID(uid) {
-  //   return this.af.database.list('/userFriends/' + uid);
-  //   // returns some list of mutually hashable IDs
-  //   // for a users' facebook friends
-  // }
-
-  // getLikesEarnedByUID(uid) {
-  //   return this.af.database.list('/userEarnedLikes/' + uid);
-  // }
-
-  // createLike(uid) {
-  //   if (this.currentUserUID == null) {
-  //     return null;
-  //   }
-  //   let accessor = this.af.database.object('/userEarnedLikes/' + uid);
-  //   accessor.push(this.currentUserUID);
-  // }
-
-  // _getFacebookAPIPublicProfile(uid) {
-  //   return {
-  //     first_name: 'Foo',
-  //     age: 35,
-  //     sex: 'male',
-  //     university: 'School of Hard Knocks',
-  //     location: 'Kansas City, but Not That One'
-  //   }
-  // }
+  setCurrentUserSnapshot(callback) {
+    if (this.currentUserUID != null) {
+      if (this.currentUserSnapshot == null ) {
+        this._getCurrentUserSnapshots().subscribe(snapshot => { 
+          this.currentUserSnapshot = snapshot.val();
+          console.log(this.currentUserSnapshot);
+          callback(this.currentUserSnapshot);
+        });
+      } else {
+        callback(this.currentUserSnapshot);
+      }
+    }
+  }
 }
