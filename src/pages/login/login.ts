@@ -26,9 +26,9 @@ export class LoginPage {
     let uid = this.auth.authState.facebook.uid;
     this.userService.addUserByUID(uid, this.auth.authState.facebook);
     this.userService.setCurrentUserUID(uid);
-    
-    // Pop view and go to root
-    this.navCtrl.pop();
+
+    // Pop to landing page!
+      this.navCtrl.pop();
   }
 
 }
