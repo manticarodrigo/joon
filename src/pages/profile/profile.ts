@@ -12,10 +12,10 @@ import { FirebaseObjectObservable } from 'angularfire2'
   selector: 'page-profile',
   templateUrl: 'profile.html'
 })
+
 export class ProfilePage {
-  user = '';
+  user = {};
   mutual: Array<any>;
-  userObj: FirebaseObjectObservable<any>;
 
   constructor(public navCtrl: NavController, private http: Http,
               private userService: UserService) {
@@ -26,33 +26,9 @@ export class ProfilePage {
   }
   
   ngAfterViewInit() {
-    this.generateRandomUser();
-    this.userObj = this.userService.getCurrentUser();
+    // this.generateRandomUser();
+    // this.userObj = this.userService.getCurrentUser();
+    this.userService.setCurrentUserSnapshot(data => {this.user = data});
 	}
 
-  generateRandomUser() {
-    this.http.get('https://randomuser.me/api/?results=' + 1)
-      .map(data => data.json().results)
-      .subscribe(result => {
-        for (let val of result) {
-          if (val["dob"]) {
-            var age = val["dob"].split(" ")[0];
-            var year = age.split('-')[0];
-            var month = age.split('-')[1];
-            var day = age.split('-')[2];
-            
-            var today = new Date();
-            age = today.getFullYear() - year;
-            if ( today.getMonth() < (month - 1)) {
-                age--;
-            }
-            if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
-                age--;
-            }
-            val["age"] = age;
-          }
-          this.user = val;
-        }
-      })
-  }
 }
