@@ -17,6 +17,7 @@ import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
 
 import { AuthService } from '../providers/auth-service';
+import { UserService } from '../providers/user-service';
 
 @Component({
   templateUrl: 'app.html'
@@ -30,7 +31,7 @@ export class Joon {
 
     pages: Array<{title: string, component: any}>;
     
-    constructor(public platform: Platform, private el: ElementRef, public auth: AuthService) {
+    constructor(public platform: Platform, private el: ElementRef, private auth: AuthService, private user: UserService) {
         this.initializeApp();
 
         // Sidemenu navigation
@@ -71,11 +72,11 @@ export class Joon {
   
     ngAfterViewInit() {
         // Check auth state
-        if (this.auth.authState != null) {
+        if (this.user.currentUserUID != null) {
             console.log(this.auth.displayName());
         } else {
             // Push login page
-            // this.nav.push(LoginPage);
+            this.nav.push(LoginPage);
         }
     }
   
