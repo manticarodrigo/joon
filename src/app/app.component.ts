@@ -31,7 +31,7 @@ export class Joon {
 
     pages: Array<{title: string, component: any}>;
     
-    constructor(public platform: Platform, private el: ElementRef, private auth: AuthService, private user: UserService) {
+constructor(public platform: Platform, private el: ElementRef, private auth: AuthService, private user: UserService) {
         this.initializeApp();
 
         // Sidemenu navigation
@@ -71,10 +71,20 @@ export class Joon {
     }
   
     ngAfterViewInit() {
+        console.log(this.auth.authenticated);
+        console.log(this.user.currentUserUID);
         // Check auth state
-        if (this.user.currentUserUID != null) {
-            console.log(this.auth.displayName());
+        if (this.auth.authenticated) {
+            // User is signed in.
+            // Check user service
+            if (this.user.currentUserUID == null) {
+                let uid = this.auth.getUID();
+                let val = this.auth.getVal();
+                this.user.addUserByUID(uid, val);
+                this.user.setCurrentUserUID(uid);
+            }
         } else {
+            // No user is signed in.
             // Push login page
             this.nav.push(LoginPage);
         }

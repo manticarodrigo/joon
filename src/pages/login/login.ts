@@ -11,24 +11,24 @@ import { NavController } from 'ionic-angular';
   templateUrl: 'login.html'
 })
 export class LoginPage {
-  
-  constructor(public navCtrl: NavController,
-              private auth: AuthService,
-              private userService: UserService) {
-  }
-  
-  signInWithFacebook(): void {
-    this.auth.signInWithFacebook()
-      .then(() => this.onSignInSuccess());
-  }
+    
+    constructor(public navCtrl: NavController,
+                private auth: AuthService,
+                private userService: UserService) {
+    }
+    
+    signInWithFacebook(): void {
+        this.auth.signInWithFacebook()
+            .then(() => this.onSignInSuccess());
+    }
 
-  private onSignInSuccess(): void {
-    let uid = this.auth.authState.facebook.uid;
-    this.userService.addUserByUID(uid, this.auth.authState.facebook);
-    this.userService.setCurrentUserUID(uid);
-
-    // Pop to landing page!
-      this.navCtrl.pop();
-  }
+    private onSignInSuccess(): void {
+        let uid = this.auth.getUID();
+        let val = this.auth.getVal();
+        this.userService.addUserByUID(uid, val);
+        this.userService.setCurrentUserUID(uid);
+        // Pop to landing page!
+        this.navCtrl.pop();
+    }
 
 }
