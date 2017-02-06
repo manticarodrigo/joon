@@ -4,25 +4,24 @@ import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
 @Injectable()
 export class UserService {
+    af: any;
+    public currentUserSnapshot: any;
+    public currentUserUID: any;
 
-  af: any;
-  public currentUserSnapshot: any;
-  public currentUserUID: any;
-
-  constructor(af: AngularFire) {
-    this.af = af;
-    this.currentUserUID = null;
-    this.currentUserSnapshot = null;
-  }
-
-  getCurrentUser() {
-    // console.log("***" + this.currentUserUID + "***");
-    if (this.currentUserUID != null) {
-      return this.af.database.object('/users/' + this.currentUserUID)
-    } else {
-      return null;
+    constructor(af: AngularFire) {
+        this.af = af;
+        this.currentUserUID = null;
+        this.currentUserSnapshot = null;
     }
-  }
+
+    getCurrentUser() {
+        // console.log("***" + this.currentUserUID + "***");
+        if (this.currentUserUID != null) {
+            return this.af.database.object('/users/' + this.currentUserUID)
+        } else {
+            return null;
+        }
+    }
 
   addUserByUID(uid, val) {
     // use update rather than set so the user isn't overwritten on each login

@@ -32,5 +32,9 @@ export class EditProfilePage {
     ngAfterViewInit() {
       this.userService.setCurrentUserSnapshot(data => {this.user = data});
     }
+    
+    addImage() {
+
+    }
 
 }
