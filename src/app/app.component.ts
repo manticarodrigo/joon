@@ -31,7 +31,7 @@ export class Joon {
 
     pages: Array<{title: string, component: any}>;
     
-constructor(public platform: Platform, private el: ElementRef, private auth: AuthService, private user: UserService) {
+    constructor(public platform: Platform, private el: ElementRef, private auth: AuthService, private user: UserService) {
         this.initializeApp();
 
         // Sidemenu navigation
