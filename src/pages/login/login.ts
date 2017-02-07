@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { Http } from '@angular/http';
 
 import { AuthService } from '../../providers/auth-service';
 import { UserService } from '../../providers/user-service';
@@ -15,8 +14,7 @@ export class LoginPage {
     
     constructor(public navCtrl: NavController,
                 private auth: AuthService,
-                private userService: UserService,
-                private http: Http) {
+                private userService: UserService) {
     }
     
     signInWithFacebook(): void {
@@ -29,7 +27,6 @@ export class LoginPage {
         let val = this.auth.getVal();
         this.userService.addUserByUID(uid, val);
         this.userService.setCurrentUserUID(uid);
-        
         // Pop to landing page!
         this.navCtrl.pop();
     }
