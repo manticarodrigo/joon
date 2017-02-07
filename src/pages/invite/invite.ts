@@ -10,5 +10,4 @@ export class InvitePage {
   constructor(public navCtrl: NavController) {
     
   }
-
 }
