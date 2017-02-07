@@ -71,8 +71,8 @@ export class Joon {
     }
   
     ngAfterViewInit() {
-        console.log(this.auth.authenticated);
-        console.log(this.user.currentUserUID);
+        // console.log(this.auth.authenticated);
+        // console.log(this.user.currentUserUID);
         // Check auth state
         if (this.auth.authenticated) {
             // User is signed in.

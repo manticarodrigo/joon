@@ -17,6 +17,7 @@ import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
 import { SwingModule } from 'angular2-swing';
 
+import { Facebook } from 'ionic-native';
 import { AngularFireModule } from 'angularfire2';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
@@ -78,7 +79,8 @@ export const firebaseConfig = {
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
     UserService,
-    StorageService
+    StorageService,
+    Facebook
    ]
 })
 export class AppModule {}
