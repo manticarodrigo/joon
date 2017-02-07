@@ -63,6 +63,20 @@ export class UserService {
     }
     delete rv.education;
 
+    let splitBDay = rv.birthday.split('/');
+    var year = parseInt(splitBDay[2]);
+    var month = parseInt(splitBDay[0]);
+    var day = parseInt(splitBDay[1]);
+    
+    let today = new Date();
+    let age = today.getFullYear() - year;
+    if ( today.getMonth() < (month - 1) ) {
+      age--;
+    } else if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
+      age--;
+    }
+    rv.age = age;
+
     let nJobs = rv.work.length;
     if (nJobs >= 1) {
       rv.job = rv.work[0].position.name;
