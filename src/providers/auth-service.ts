@@ -36,8 +36,4 @@ constructor(public auth$: AngularFireAuth, private af: AngularFire) {
     getVal() {
         return this.authState.facebook;
     }
-
-    getAS() {
-      return this.authState;
-    }
 }
