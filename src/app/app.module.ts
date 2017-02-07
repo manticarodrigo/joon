@@ -20,6 +20,7 @@ import { SwingModule } from 'angular2-swing';
 import { AngularFireModule } from 'angularfire2';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
+import { StorageService } from '../providers/storage-service';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
@@ -76,7 +77,8 @@ export const firebaseConfig = {
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
-    UserService
+    UserService,
+    StorageService
    ]
 })
 export class AppModule {}

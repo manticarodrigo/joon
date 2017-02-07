@@ -45,13 +45,13 @@ export class DiscoverPage {
     }
     
     ngAfterViewInit() {
-	  // Either subscribe in controller or set in HTML
-	  this.swingStack.throwin.subscribe((event: DragEvent) => {
-	    event.target.style.background = '#000';
-	  });
+        // Either subscribe in controller or set in HTML
+        this.swingStack.throwin.subscribe((event: DragEvent) => {
+	       event.target.style.background = '#000';
+        });
 	  
-	  this.cards = [{email: ''}];
-	  this.addNewCards(1);
+        this.cards = [{email: ''}];
+        this.addNewCards(1);
 	}
 
 	// Called whenever we drag an element
