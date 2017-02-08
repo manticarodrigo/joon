@@ -21,7 +21,7 @@ constructor(public auth$: AngularFireAuth, private af: AngularFire) {
         return this.auth$.login({
             provider: AuthProviders.Facebook,
             method: AuthMethods.Popup,
-            scope: ['user_friends', 'user_about_me', 'user_hometown', 'user_location', 'user_religion_politics', 'user_education_history', 'user_work_history']
+            scope: ['user_friends', 'user_birthday', 'user_about_me', 'user_hometown', 'user_location', 'user_religion_politics', 'user_education_history', 'user_work_history']
         });
     }
 
@@ -34,6 +34,6 @@ constructor(public auth$: AngularFireAuth, private af: AngularFire) {
     }
     
     getVal() {
-        return this.authState.facebook
+        return this.authState.facebook;
     }
 }

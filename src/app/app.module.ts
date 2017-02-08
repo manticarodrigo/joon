@@ -17,9 +17,11 @@ import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
 import { SwingModule } from 'angular2-swing';
 
+import { Facebook } from 'ionic-native';
 import { AngularFireModule } from 'angularfire2';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
+import { StorageService } from '../providers/storage-service';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
@@ -76,7 +78,9 @@ export const firebaseConfig = {
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
-    UserService
+    UserService,
+    StorageService,
+    Facebook
    ]
 })
 export class AppModule {}

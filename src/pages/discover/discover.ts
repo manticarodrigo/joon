@@ -27,17 +27,17 @@ export class DiscoverPage {
     stackConfig: StackConfig;
   
     constructor(public navCtrl: NavController, private http: Http, public navParams: NavParams, public toastCtrl: ToastController, af: AngularFire) {
-        this.stackConfig = {
-          throwOutConfidence: (offset, element) => {
-            return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
-          },
-          transform: (element, x, y, r) => {
-            this.onItemMove(element, x, y, r);
-          },
-          throwOutDistance: (d) => {
-            return 800;
-          }
-        };
+      this.stackConfig = {
+        throwOutConfidence: (offset, element) => {
+          return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
+        },
+        transform: (element, x, y, r) => {
+          this.onItemMove(element, x, y, r);
+        },
+        throwOutDistance: (d) => {
+          return 800;
+        }
+      };
     }
   
     openChats() {
@@ -45,13 +45,13 @@ export class DiscoverPage {
     }
     
     ngAfterViewInit() {
-	  // Either subscribe in controller or set in HTML
-	  this.swingStack.throwin.subscribe((event: DragEvent) => {
-	    event.target.style.background = '#000';
-	  });
+        // Either subscribe in controller or set in HTML
+        this.swingStack.throwin.subscribe((event: DragEvent) => {
+	       event.target.style.background = '#000';
+        });
 	  
-	  this.cards = [{email: ''}];
-	  this.addNewCards(1);
+        this.cards = [{email: ''}];
+        this.addNewCards(1);
 	}
 
 	// Called whenever we drag an element

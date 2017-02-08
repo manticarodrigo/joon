@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Nav, Platform } from 'ionic-angular';
+import { Nav, Platform, MenuController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 
 import { LoginPage } from '../pages/login/login';
@@ -31,7 +31,7 @@ export class Joon {
 
     pages: Array<{title: string, component: any}>;
     
-    constructor(public platform: Platform, private el: ElementRef, private auth: AuthService, private user: UserService) {
+    constructor(public platform: Platform, private menu: MenuController, private el: ElementRef, private auth: AuthService, private user: UserService) {
         this.initializeApp();
 
         // Sidemenu navigation
@@ -71,8 +71,8 @@ export class Joon {
     }
   
     ngAfterViewInit() {
-        console.log(this.auth.authenticated);
-        console.log(this.user.currentUserUID);
+        // Disable sidemenu swipe gesture
+        this.menu.swipeEnable(false, 'sidemenu');
         // Check auth state
         if (this.auth.authenticated) {
             // User is signed in.

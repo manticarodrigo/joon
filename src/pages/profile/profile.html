@@ -13,47 +13,49 @@
 </ion-header>
 
 <ion-content>
-  <ion-list no-lines class="centered-list">
-    <ion-slides class="slides" pager>
-          <ion-slide>
-            <img *ngIf="user.photoURL" [src]="user.photoURL" />
-          </ion-slide>
+    <ion-list no-lines class="centered-list">
+        <ion-slides class="slides" pager>
             <ion-slide>
-                <h1>YO!</h1>
+                <img *ngIf="user.photoURL" [src]="user.photoURL" />
+            </ion-slide>
+            <ion-slide *ngFor="let image of images">
+                <img [src]="image">
             </ion-slide>
         </ion-slides>
-        <h1 *ngIf="user.lastName"> {{ user.lastName }}, {{ user.age }} </h1>
+        <h1 *ngIf="user.firstName">
+          {{ user.firstName }}<span *ngIf="user.age">, {{ user.age }}</span>
+        </h1>
         <div class="middle-section">
-            <ion-item>
-                <h5 *ngIf="user.instagram">@{{ user.instagram }}</h5>
+            <ion-item *ngIf="user.instagram">
+                <h5>@{{ user.instagram }}</h5>
                 <h6>instagram</h6>
             </ion-item>
-            <ion-item>
+            <ion-item *ngIf="user.heightFt">
                 <h2>{{ user.heightFt || 0}}'{{ user.heightIn || 0}}</h2>
                 <h6>Height</h6>
             </ion-item>
-            <ion-item>
-                <h2 *ngIf="user.location">{{ user.location }}</h2>
+            <ion-item *ngIf="user.city">
+                <h2>{{ user.city }}, {{ user.country }}</h2>
                 <h6>Location</h6>
             </ion-item>
-            <ion-item>
-                <h2 *ngIf="user.school">{{ user.school }}</h2>
+            <ion-item *ngIf="user.school">
+                <h2>{{ user.school }}</h2>
                 <h6>University</h6>
             </ion-item>
-            <ion-item>
-                <h2 *ngIf="user.job">{{ user.job }}, {{ user.company }}</h2>
+            <ion-item *ngIf="user.job">
+                <h2>{{ user.job }}, {{ user.company }}</h2>
                 <h6>Career</h6>
             </ion-item>
         </div>
-        <ion-item>
+        <ion-item *ngIf="user.religion">
             <h2>{{ user.religion }}</h2>
             <h6>Spirituality</h6>
         </ion-item>
-        <ion-item>
+        <ion-item *ngIf="user.ethnicity">
             <h2>{{ user.ethnicity }}</h2>
             <h6>Ethnicity</h6>
         </ion-item>
-        <ion-item>
+        <ion-item *ngIf="user.bio">
             <h3>{{ user.bio }}</h3>
         </ion-item>
         <ion-item *ngIf="viewingUser">
@@ -62,7 +64,7 @@
                 <ion-row wrap>
                     <ion-col width-33 *ngFor="let friend of mutual">
                         <img *ngIf="friend.photoURL" [src]="friend.photoURL">
-                        <h6 *ngIf="friend.firstNamename">
+                        <h6 *ngIf="friend.firstName">
                             {{ friend.firstName }}
                         </h6>
                     </ion-col>
