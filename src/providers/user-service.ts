@@ -85,7 +85,7 @@ export class UserService {
     delete rv.work;
 
     delete rv.friends.summary;
-
+    
     return rv;
   }
 

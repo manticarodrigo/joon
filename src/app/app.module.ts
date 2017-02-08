@@ -21,6 +21,7 @@ import { Facebook } from 'ionic-native';
 import { AngularFireModule } from 'angularfire2';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
+import { StorageService } from '../providers/storage-service';
 
 export const firebaseConfig = {
   apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
@@ -78,6 +79,7 @@ export const firebaseConfig = {
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
     UserService,
+    StorageService,
     Facebook
    ]
 })

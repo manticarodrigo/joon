@@ -18,12 +18,13 @@ page-edit-profile {
     }
     
     .select {
+        position: relative;
         border: 0.5px solid color($colors, secondary);
         max-width: 100% !important;
         width: 100%;
         height: 70px;
         line-height: 40px;
-        .select-icon { 
+        .select-icon {
             display: block;
             margin: auto;
             .select-icon-inner {
@@ -58,22 +59,33 @@ page-edit-profile {
     .images {
         background: #FFFDF8;
         padding-top: 1px;
+        input {
+            display: none;
+        }
+        ion-col {
+            position: relative;
+        }
         img {
             min-width: 100%;
+            min-height: 100%;
             border-radius: 1px;
             border: 0.5px solid color($colors, secondary);
         }
         .edit {
             position: absolute;
-            top: 10px;
-            left: 64%;
+            top: 5px;
+            right: 5px;
             width: 30px !important;
-            min-width: 10px;
+            min-width: 30px;
+            min-height: 30px;
             border: none;
         }
         .right {
+            div {
+                position: relative;
+            }
             img {
-                margin-bottom: 7px; 
+                margin-bottom: 7px;
             }
         }
     }
@@ -81,6 +93,10 @@ page-edit-profile {
     .input {
         border: 1px solid color($colors, secondary);
         border-bottom: none;
+    }
+    
+    #insta {
+        border-bottom: 1px solid color($colors, secondary);
     }
     
     .item-input:last-child {
