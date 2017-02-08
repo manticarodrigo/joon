@@ -40,4 +40,5 @@
         <variable name="APP_ID" value="713879188793156" />
         <variable name="APP_NAME" value="Joon" />
     </plugin>
+    <engine name="android" spec="~6.1.2" />
 </widget>
