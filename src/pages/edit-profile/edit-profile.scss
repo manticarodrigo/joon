@@ -67,20 +67,25 @@ page-edit-profile {
         }
         img {
             min-width: 100%;
+            min-height: 100%;
             border-radius: 1px;
             border: 0.5px solid color($colors, secondary);
         }
         .edit {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 5px;
+            right: 5px;
             width: 30px !important;
-            min-width: 10px;
+            min-width: 30px;
+            min-height: 30px;
             border: none;
         }
         .right {
+            div {
+                position: relative;
+            }
             img {
-                margin-bottom: 7px; 
+                margin-bottom: 7px;
             }
         }
     }

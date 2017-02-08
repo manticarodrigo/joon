@@ -17,29 +17,31 @@
         <ion-row>
             <ion-col width-75 class="large">
                 <label for="file-input">
-                    <img class="edit" src="assets/edit.png">
+                    <img *ngIf="user.photoURL" class="edit" src="assets/edit.png">
+                    <img *ngIf="!user.photoURL" src="assets/add.png">
                 </label>
                 <input id="file-input" type="file" accept="image/*;capture=camera" (change)="uploadProfileImage($event)">
                 <img *ngIf="user.photoURL" [src]="user.photoURL">
             </ion-col>
             <ion-col width-25 class="right">
-                <img *ngIf="user.photoURL" [src]="user.photoURL">
-                <img src="assets/add.png">
-                <img src="assets/add.png">
+                <div *ngFor="let i of [0, 1, 2]">
+                    <label for={{i}}>
+                        <img *ngIf="images && images[i]" class="edit" src="assets/edit.png">
+                        <img *ngIf="!(images && images[i])" src="assets/add.png">
+                    </label>
+                    <input id={{i}} type="file" accept="image/*;capture=camera" (change)="uploadImage($event, i)">
+                    <img *ngIf="images && images[i]" [src]="images[i]">
+                </div>
             </ion-col>
         </ion-row>
         <ion-row class="bottom">
-            <ion-col width-25>
-                <img src="assets/add.png">
-            </ion-col>
-            <ion-col width-25>
-                <img src="assets/add.png">
-            </ion-col>
-            <ion-col width-25>
-                <img src="assets/add.png">
-            </ion-col>
-            <ion-col width-25>
-                <img src="assets/add.png">
+            <ion-col width-25 *ngFor="let i of [3, 4, 5, 6]">
+                <label for={{i}}>
+                    <img *ngIf="images && images[i]" class="edit" src="assets/edit.png">
+                    <img *ngIf="!(images && images[i])" src="assets/add.png">
+                </label>
+                <input id={{i}} type="file" accept="image/*;capture=camera" (change)="uploadImage($event, i)">
+                <img *ngIf="images && images[i]" [src]="images[i]">
             </ion-col>
         </ion-row>
     </ion-grid>
