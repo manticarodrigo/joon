@@ -4,6 +4,8 @@ import { Http } from '@angular/http';
 import 'rxjs/Rx';
 
 import { UserService } from '../../providers/user-service';
+import { StorageService } from '../../providers/storage-service';
+
 import { EditProfilePage } from '../edit-profile/edit-profile';
 
 import { FirebaseObjectObservable } from 'angularfire2'
@@ -14,21 +16,27 @@ import { FirebaseObjectObservable } from 'angularfire2'
 })
 
 export class ProfilePage {
-  user = {};
-  mutual: Array<any>;
+    user = {};
+    images: Array<any>;
+    mutual: Array<any>;
+    
+    constructor(public navCtrl: NavController,
+                private http: Http,
+                private userService: UserService,
+                private storage: StorageService) {
+    }
+    
+    getUserImages() {
+        this.storage.getImagesFor(this.userService.currentUserUID, (urlList) => {this.images = urlList});
+    }
 
-  constructor(public navCtrl: NavController, private http: Http,
-              private userService: UserService) {
-  }
-
-  editProfile() {
-      this.navCtrl.push(EditProfilePage);
-  }
+    editProfile() {
+        this.navCtrl.push(EditProfilePage);
+    }
   
-  ngAfterViewInit() {
-    // this.generateRandomUser();
-    // this.userObj = this.userService.getCurrentUser();
-    this.userService.setCurrentUserSnapshot(data => {this.user = data});
+    ngAfterViewInit() {
+        this.userService.setCurrentUserSnapshot(data => {this.user = data});
+        this.getUserImages();
 	}
 
 }

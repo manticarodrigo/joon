@@ -13,13 +13,13 @@
 </ion-header>
 
 <ion-content>
-  <ion-list no-lines class="centered-list">
-    <ion-slides class="slides" pager>
-          <ion-slide>
-            <img *ngIf="user.photoURL" [src]="user.photoURL" />
-          </ion-slide>
+    <ion-list no-lines class="centered-list">
+        <ion-slides class="slides" pager>
             <ion-slide>
-                <h1>YO!</h1>
+                <img *ngIf="user.photoURL" [src]="user.photoURL" />
+            </ion-slide>
+            <ion-slide *ngFor="let image of images">
+                <img [src]="image">
             </ion-slide>
         </ion-slides>
         <h1 *ngIf="user.firstName">
@@ -64,7 +64,7 @@
                 <ion-row wrap>
                     <ion-col width-33 *ngFor="let friend of mutual">
                         <img *ngIf="friend.photoURL" [src]="friend.photoURL">
-                        <h6 *ngIf="friend.firstNamename">
+                        <h6 *ngIf="friend.firstName">
                             {{ friend.firstName }}
                         </h6>
                     </ion-col>
