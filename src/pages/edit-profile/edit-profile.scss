@@ -73,19 +73,35 @@ page-edit-profile {
         }
         .edit {
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 10px;
+            right: 10px;
             width: 30px !important;
             min-width: 30px;
             min-height: 30px;
             border: none;
         }
+        .large {
+            height: 75vw;
+        }
         .right {
             div {
                 position: relative;
+                //width: 25vw;
+                height: 21vw;
+                margin-bottom: 22%;
             }
-            img {
-                margin-bottom: 7px;
+            div:last-of-type {
+                margin-bottom: 0px;
+            }
+            .edit {
+                top: 5px;
+                right: 5px; 
+            }
+        }
+        
+        .bottom {
+            ion-col {
+                height: 25vw;
             }
         }
     }
