@@ -85,9 +85,7 @@ export class UserService {
     delete rv.work;
 
     delete rv.friends.summary;
-      
-    // TODO: Add user image list node
-      
+    
     return rv;
   }
 
