@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-
 import { AngularFire, AuthProviders, AngularFireAuth, FirebaseAuthState, AuthMethods } from 'angularfire2';
 import { Facebook } from 'ionic-native';
 import firebase from 'firebase';
@@ -28,7 +27,7 @@ export class AuthService {
         'user_education_history', 
         'user_work_history'
       ];
-
+        
       Facebook.login(permissions).then(
         (response) => { this.isAuthorized = true; resolve(response); },
         (error) => { reject(error); }
@@ -72,7 +71,7 @@ export class AuthService {
       }
     });
   }
-
+    
   isUserEqual (facebookAuthResponse, firebaseUser) {
     if (firebaseUser) {
       var providerData = firebaseUser.providerData;

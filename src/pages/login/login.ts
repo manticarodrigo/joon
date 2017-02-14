@@ -1,9 +1,5 @@
 import { Component } from '@angular/core';
 
-import { AuthService } from '../../providers/auth-service';
-import { UserService } from '../../providers/user-service';
-import { DiscoverPage } from '../discover/discover';
-
 import { NavController } from 'ionic-angular';
 import { Facebook, NativeStorage } from 'ionic-native';
 
@@ -51,7 +47,6 @@ export class LoginPage {
 
   private onSignInSuccess(): void {
     console.log("onSignInSuccess");
-    
     // Pop to landing page!
     //   this does not work on Android;
     //   either because the stack is somehow empty

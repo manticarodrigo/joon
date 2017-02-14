@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core'
-
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { Facebook } from 'ionic-native';
 import firebase from 'firebase';
@@ -16,6 +15,11 @@ export class UserService {
     this.currentUserUID = null;
     this.currentUserSnapshot = null;
   }
+
+    getUserSnapshot(uid) {
+        return this.af.database.object('/users/' + uid, {
+        preserveSnapshot: true });
+    }
 
   getCurrentUser() {
     // console.log("***" + this.currentUserUID + "***");

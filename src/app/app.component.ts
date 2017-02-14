@@ -45,8 +45,7 @@ export class Joon {
           { title: 'App Settings', component: SettingsPage },
           { title: 'Help & Support', component: HelpPage },
           { title: 'Feedback', component: FeedbackPage },
-          { title: 'Invite A Friend to Joon', component: InvitePage },
-          { title: 'Joon Plus Logout', component: LoginPage }
+          { title: 'Invite A Friend to Joon', component: InvitePage }
         ];
 
     }
@@ -88,6 +87,12 @@ export class Joon {
         if (!this.userFoundCached) {
           this.nav.push(LoginPage);
         }
+    }
+    
+    logoutApp() {
+        this.auth.signOut();
+        this.nav.push(LoginPage);
+        this.menu.close();
     }
   
 }
