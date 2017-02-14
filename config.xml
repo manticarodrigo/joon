@@ -27,6 +27,7 @@
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="FadeSplashScreenDuration" value="300" />
     <preference name="SplashShowOnlyFirstTime" value="false" />
+    <preference name="LoadUrlTimeoutValue" value="70000" />
     <feature name="StatusBar">
         <param name="ios-package" onload="true" value="CDVStatusBar" />
     </feature>
@@ -41,4 +42,5 @@
         <variable name="APP_NAME" value="Joon" />
     </plugin>
     <engine name="android" spec="~6.1.2" />
+    <plugin name="cordova-plugin-nativestorage" spec="~2.2.1" />
 </widget>

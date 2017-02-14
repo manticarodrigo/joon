@@ -1,6 +1,6 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Nav, Platform, MenuController } from 'ionic-angular';
-import { StatusBar, Splashscreen } from 'ionic-native';
+import { StatusBar, Splashscreen, NativeStorage } from 'ionic-native';
 
 import { LoginPage } from '../pages/login/login';
 import { DiscoverPage } from '../pages/discover/discover';
@@ -26,6 +26,8 @@ export class Joon {
     @ViewChild(Nav) nav: Nav;
     
     isMenuOpen: boolean = false;
+
+    userFoundCached: boolean = false;
 
     rootPage: any = DiscoverPage;
 
@@ -55,6 +57,17 @@ export class Joon {
           // Here you can do any higher level native things you might need.
           StatusBar.styleDefault();
           Splashscreen.hide();
+
+          let env = this;
+          NativeStorage.getItem('user')
+          .then((data) => {
+            // alert('User found in native store, name = ' + data.name);
+            this.userFoundCached = true;
+            this.nav.pop();
+          }, (error) => {
+            ; // user not present in native storage, must go through login
+          });
+
         });
     }
     
@@ -74,15 +87,15 @@ export class Joon {
         // Disable sidemenu swipe gesture
         this.menu.swipeEnable(false, 'sidemenu');
         // Check auth state
-        if (this.auth.authenticated) {
+        if (this.userFoundCached) {
             // User is signed in.
             // Check user service
-            if (this.user.currentUserUID == null) {
-                let uid = this.auth.getUID();
-                let val = this.auth.getVal();
-                this.user.addUserByUID(uid, val);
-                this.user.setCurrentUserUID(uid);
-            }
+            // if (this.user.currentUserUID == null) {
+            //     let uid = this.auth.getUID();
+            //     let val = this.auth.getVal();
+            //     this.user.addUserByUID(uid, val);
+            //     this.user.setCurrentUserUID(uid);
+            // }
         } else {
             // No user is signed in.
             // Push login page
