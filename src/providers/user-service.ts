@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
-import { Facebook } from 'ionic-native';
+// import { Facebook } from 'ionic-native';
 
 @Injectable()
 export class UserService {
@@ -28,19 +28,25 @@ export class UserService {
     // use update rather than set so the user isn't overwritten on each login
     this.af.database.object('/users/' + uid).update(val);
 
+    alert("addUserByID");
+    
     // when adding or updating a user, also re-fetch facebook info
-    Facebook.getLoginStatus().then((response) => {
-      if (response.status == 'connected') {
-        this.callFacebookAPI((data) => {
-          this.af.database.object('/users/' + uid).update(data);
-        });
-      } else {
-        console.log('Error: Facebook.getLoginStatus response status != connected');
-      }
-    }, (error) => {
-      console.log("Facebook.getLoginStatus returned error:");
-      console.log(error);
-    });
+    // Facebook.getLoginStatus().then((response) => {
+    //   if (response.status == 'connected') {
+    //     alert("connected status - calling facebook API");
+    //     this.callFacebookAPI((data) => {
+    //       this.af.database.object('/users/' + uid).update(data);
+    //     });
+    //   } else {
+    //     //console.log('Error: Facebook.getLoginStatus response status != connected');
+    //     alert('Error: Facebook.getLoginStatus response status != connected');
+    //   }
+    // }, (error) => {
+    //   //console.log("Facebook.getLoginStatus returned error:");
+    //   //console.log(error);
+    //   alert("Facebook.getLoginStatus returned error:");
+    //   alert(error);
+    // });
 
   }
 
@@ -89,16 +95,16 @@ export class UserService {
     return rv;
   }
 
-  callFacebookAPI(callback) {
-    Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends', []).then(
-      (data) => {
-        callback(this.parseFacebookUserData(data));
-      }, (error) => { 
-        console.log("callFacebookAPI error:");
-        console.log(error); 
-      } 
-    );
-  }
+  // callFacebookAPI(callback) {
+  //   Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends', []).then(
+  //     (data) => {
+  //       callback(this.parseFacebookUserData(data));
+  //     }, (error) => { 
+  //       console.log("callFacebookAPI error:");
+  //       console.log(error); 
+  //     } 
+  //   );
+  // }
 
   setCurrentUserUID(uid) {
     this.currentUserUID = uid;

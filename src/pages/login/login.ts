@@ -18,17 +18,31 @@ export class LoginPage {
     }
     
     signInWithFacebook(): void {
-        this.auth.signInWithFacebook()
-            .then(() => this.onSignInSuccess());
+      alert('attempting signInWithFacebook:');
+      this.auth.signInWithFacebook()
+      .then(
+        () => this.onSignInSuccess(),
+        (error) => {
+          alert('signInWithFacebook Error (follows)');
+          alert(error);
+        }
+      );
+    }
+
+    testAction(): void {
+      alert('foo!');
     }
 
     private onSignInSuccess(): void {
-        let uid = this.auth.getUID();
-        let val = this.auth.getVal();
-        this.userService.addUserByUID(uid, val);
-        this.userService.setCurrentUserUID(uid);
-        // Pop to landing page!
-        this.navCtrl.pop();
+        alert('signInSuccess');
+        // let uid = this.auth.getUID();
+        // let val = this.auth.getVal();
+        // this.userService.addUserByUID(uid, val);
+        // this.userService.setCurrentUserUID(uid);
+        // // Pop to landing page!
+        // alert('before navCtrl in login.ts');
+        // this.navCtrl.pop();
+        // alert('after navCtrl in login.ts');
     }
 
 }
