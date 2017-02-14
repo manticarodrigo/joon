@@ -18,8 +18,9 @@ export class LoginPage {
     }
     
     signInWithFacebook(): void {
-        this.auth.signInWithFacebook()
-            .then(() => this.onSignInSuccess());
+        this.auth.facebookLogin()
+            .then(() => this.onSignInSuccess(),
+            (error) => alert(error));
     }
 
     private onSignInSuccess(): void {
