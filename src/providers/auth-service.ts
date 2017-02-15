@@ -18,7 +18,16 @@ export class AuthService {
 
   authFacebook(): Promise<any> {
     return new Promise((resolve, reject) => {
-      let permissions = ["public_profile"];
+      let permissions = [
+        'user_friends', 
+        'user_birthday', 
+        'user_about_me', 
+        'user_hometown', 
+        'user_location', 
+        'user_religion_politics', 
+        'user_education_history', 
+        'user_work_history'
+      ];
 
       Facebook.login(permissions).then(
         (response) => { this.isAuthorized = true; resolve(response); },
