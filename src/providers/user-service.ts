@@ -9,6 +9,7 @@ export class UserService {
   af: any;
   public currentUserSnapshot: any;
   public currentUserUID: any;
+  public user: any;
 
   constructor(af: AngularFire) {
     this.af = af;

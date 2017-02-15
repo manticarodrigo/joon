@@ -35,8 +35,10 @@ export class LoginPage {
           console.log("login 66");
 
           this.userS.setupUser(uid).then(
-            () => { 
-            console.log("login 70");
+            (user) => { 
+            this.userS.user = user;
+            this.userS.currentUserSnapshot = user;
+            this.userS.currentUserUID = user.uid;
             this.onSignInSuccess(); },
           (error) => { alert(error); }
         ) },
