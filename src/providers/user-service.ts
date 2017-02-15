@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core'
 
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 import { Facebook } from 'ionic-native';
+import firebase from 'firebase';
 
 @Injectable()
 export class UserService {
@@ -24,25 +25,15 @@ export class UserService {
     }
   }
 
-  addUserByUID(uid, val) {
-    // use update rather than set so the user isn't overwritten on each login
-    this.af.database.object('/users/' + uid).update(val);
-
-    // when adding or updating a user, also re-fetch facebook info
-    Facebook.getLoginStatus().then((response) => {
-      if (response.status == 'connected') {
-        this.callFacebookAPI((data) => {
-          this.af.database.object('/users/' + uid).update(data);
-        });
-      } else {
-        console.log('Error: Facebook.getLoginStatus response status != connected');
-      }
-    }, (error) => {
-      console.log("Facebook.getLoginStatus returned error:");
-      console.log(error);
-    });
-
-  }
+  // addUserByUID(uid) {
+  //   return new Promise((resolve, reject) => {
+  //     this.callFacebookAPI().then((data) => {
+  //       this.af.database.object('/users/' + uid).update(data);
+  //     }, (error) => {
+  //       alert(error);
+  //     });
+  //   });
+  // }
 
   parseFacebookUserData(data) {
     let rv = data;
@@ -89,15 +80,15 @@ export class UserService {
     return rv;
   }
 
-  callFacebookAPI(callback) {
-    Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends', []).then(
-      (data) => {
-        callback(this.parseFacebookUserData(data));
-      }, (error) => { 
-        console.log("callFacebookAPI error:");
-        console.log(error); 
-      } 
-    );
+  callFacebookAPI() {
+    console.log("user 83");
+    return new Promise((resolve, reject) => {
+      Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends', [])
+      .then(
+        (data) => { console.log("user 87!"); resolve(this.parseFacebookUserData(data)); },
+        (error) => { reject(error); } 
+      );
+    });
   }
 
   setCurrentUserUID(uid) {
@@ -124,5 +115,33 @@ export class UserService {
         callback(this.currentUserSnapshot);
       }
     }
+  }
+
+  updateUserInDB(data): Promise<any> {
+    let uid = this.currentUserUID;
+    console.log("user 122");
+    return new Promise((resolve, reject) => {
+      let ref = firebase.database().ref('/users/' + uid);
+      ref.update(data, (error) => {
+        if (error) {
+          reject(error);
+        } else { 
+          ref.once('value').then(snapshot => { resolve(snapshot.val()); });
+        }
+      });
+    });
+  }
+
+  setupUser(uid): Promise<any> {
+    console.log("user 132");
+    this.currentUserUID = uid;
+    return new Promise((resolve, reject) => {
+      console.log("user 135");
+      this.callFacebookAPI()
+      .then((data) => { this.updateUserInDB(data).then(
+        (data) => { console.log("user 138"); resolve(data); },
+        (error) => {reject(error);}); 
+      }, (error) => { reject(error); });
+    });
   }
 }

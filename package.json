@@ -23,7 +23,7 @@
     "@ionic/storage": "1.1.7",
     "angular2-swing": "^0.10.0",
     "angularfire2": "^2.0.0-beta.7",
-    "firebase": "^3.6.8",
+    "firebase": "^3.6.9",
     "ionic-angular": "2.0.0",
     "ionic-native": "2.4.1",
     "ionicons": "3.0.0",
