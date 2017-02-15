@@ -123,10 +123,10 @@ export class UserService {
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/users/' + uid);
       ref.update(data, (error) => {
-        if (error) {
+        if (error) { 
           reject(error);
         } else { 
-          ref.once('value').then(snapshot => { resolve(snapshot.val()); });
+          ref.once('value').then(snapshot => { resolve(snapshot.val()); })
         }
       });
     });

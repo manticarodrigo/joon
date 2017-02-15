@@ -47,13 +47,13 @@ export class LoginPage {
   }
 
   private onSignInSuccess(): void {
-    alert("oSIS");
-
+    console.log("onSignInSuccess");
+    
     // Pop to landing page!
+    //   this does not work on Android;
+    //   either because the stack is somehow empty
+    //   or because LoginPage is also the previous page in the stack
     // this.navCtrl.pop();
-    // this does not work on Android;
-    // either because the stack is somehow empty
-    // or because LoginPage is also the previous page in the stack
 
     this.navCtrl.setRoot(DiscoverPage);
   }

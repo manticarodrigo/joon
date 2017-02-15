@@ -58,15 +58,15 @@ export class Joon {
           StatusBar.styleDefault();
           Splashscreen.hide();
 
-          let env = this;
-          NativeStorage.getItem('user')
-          .then((data) => {
-            // alert('User found in native store, name = ' + data.name);
-            this.userFoundCached = true;
-            this.nav.pop();
-          }, (error) => {
-            ; // user not present in native storage, must go through login
-          });
+          // let env = this;
+          // NativeStorage.getItem('user')
+          // .then((data) => {
+          //   // alert('User found in native store, name = ' + data.name);
+          //   this.userFoundCached = true;
+          //   this.nav.pop();
+          // }, (error) => {
+          //   ; // user not present in native storage, must go through login
+          // });
 
         });
     }
@@ -87,19 +87,8 @@ export class Joon {
         // Disable sidemenu swipe gesture
         this.menu.swipeEnable(false, 'sidemenu');
         // Check auth state
-        if (this.userFoundCached) {
-            // User is signed in.
-            // Check user service
-            // if (this.user.currentUserUID == null) {
-            //     let uid = this.auth.getUID();
-            //     let val = this.auth.getVal();
-            //     this.user.addUserByUID(uid, val);
-            //     this.user.setCurrentUserUID(uid);
-            // }
-        } else {
-            // No user is signed in.
-            // Push login page
-            this.nav.push(LoginPage);
+        if (!this.userFoundCached) {
+          this.nav.push(LoginPage);
         }
     }
   
