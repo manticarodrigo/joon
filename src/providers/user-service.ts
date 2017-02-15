@@ -97,6 +97,7 @@ export class UserService {
   }
 
   _getCurrentUserSnapshots() {
+    // alert("currentUserUID: " + this.currentUserUID);
     if (this.currentUserUID != null) {
       return this.af.database.object('/users/' + this.currentUserUID, { preserveSnapshot: true });
     } else {
@@ -123,12 +124,14 @@ export class UserService {
     console.log("user 122");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/users/' + uid);
-      ref.update(data, (error) => {
-        if (error) { 
-          reject(error);
-        } else { 
-          ref.once('value').then(snapshot => { resolve(snapshot.val()); })
-        }
+      ref.update(data).then( data => {
+        //console.log("user 128 @@@");
+        return ref.once('value');
+      }).then( snapshot => {
+        //console.log("user 131 @@@@");
+        let val = snapshot.val();
+        // alert("snapshot val: " + JSON.stringify(val));
+        resolve(val);
       });
     });
   }

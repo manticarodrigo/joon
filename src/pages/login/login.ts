@@ -36,6 +36,7 @@ export class LoginPage {
 
           this.userS.setupUser(uid).then(
             (user) => { 
+              
             this.userS.user = user;
             this.userS.currentUserSnapshot = user;
             this.userS.currentUserUID = user.uid;

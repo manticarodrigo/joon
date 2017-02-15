@@ -58,16 +58,14 @@ export class Joon {
           StatusBar.styleDefault();
           Splashscreen.hide();
 
-          // let env = this;
-          // NativeStorage.getItem('user')
-          // .then((data) => {
-          //   // alert('User found in native store, name = ' + data.name);
-          //   this.userFoundCached = true;
-          //   this.nav.pop();
-          // }, (error) => {
-          //   ; // user not present in native storage, must go through login
+          // for debugging
+          // let key = 'x';
+          // NativeStorage.getItem('cache-known')
+          // .then(data => { alert('cache-known found:' + JSON.stringify(data)); } )
+          // .catch(() => { 
+          //   alert('cache-known empty.'); 
+          //   NativeStorage.setItem('cache-known', key);
           // });
-
         });
     }
     
