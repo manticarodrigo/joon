@@ -10,6 +10,7 @@ export class UserService {
   public currentUserSnapshot: any;
   public currentUserUID: any;
   public user: any;
+  public searchPrefs: any;
 
   constructor(af: AngularFire) {
     this.af = af;
@@ -68,6 +69,7 @@ export class UserService {
       age--;
     }
     rv.age = age;
+    rv.showAge = true;
 
     let nJobs = rv.work.length;
     if (nJobs >= 1) {
@@ -132,31 +134,86 @@ export class UserService {
 
   updateUserInDB(data): Promise<any> {
     let uid = this.currentUserUID;
-    console.log("user 122");
+    console.log("updating user in db in user-service");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/users/' + uid);
       ref.update(data).then( data => {
-        //console.log("user 128 @@@");
         return ref.once('value');
-      }).then( snapshot => {
-        //console.log("user 131 @@@@");
-        let val = snapshot.val();
-        // alert("snapshot val: " + JSON.stringify(val));
-        resolve(val);
+      }).then( snapshot => { 
+        resolve(snapshot.val());
       });
     });
   }
 
+  getUserSearch(): Promise<any> {
+    let uid = this.user.id;
+    let ref = firebase.database().ref('user_search/' + uid);
+    // this wrapping just converts from firebase.Promise to ordinary Promise
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshot => { resolve(snapshot.val()); });
+    });
+  }
+
+  updateSearchInDB(data): Promise<any> {
+    let uid = this.user.id;
+    let ref = firebase.database().ref('user_search/' + uid);
+    return new Promise((resolve, reject) => {
+      ref.update(data).then(() => { 
+        this.getUserSearch().then(data => { resolve(data); }); 
+      });
+    });
+  }
+
+  userSearchExistsInDB(uid): Promise<boolean> {
+    let ref = firebase.database().ref('user_search/' + uid);
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
+  createUserSearchInDB(user): Promise<any> {
+    let searchData = {
+      female: (user.gender == 'female'),
+      lfm: (user.gender == 'female'),
+      lff: (user.gender == 'male'),
+      distance: 'global',
+      country: user.country,
+      age: user.age,
+      geoLat: null,
+      geoLong: null
+    }
+    return this.updateSearchInDB(searchData);
+  }
+
   setupUser(uid): Promise<any> {
-    console.log("user 132");
+    console.log("setting up user in user-service");
     this.currentUserUID = uid;
     return new Promise((resolve, reject) => {
-      console.log("user 135");
+      console.log("calling facebook API in user-service");
       this.callFacebookAPI()
-      .then((data) => { this.updateUserInDB(data).then(
-        (data) => { console.log("user 138"); resolve(data); },
-        (error) => {reject(error);}); 
-      }, (error) => { reject(error); });
+      .then((fbData) => { return this.updateUserInDB(fbData); })
+      .then((dbData) => { 
+        this.user = dbData;
+        this.userSearchExistsInDB(uid).then(() => {
+          this.getUserSearch().then((searchPrefs) => { 
+            this.searchPrefs = searchPrefs;
+            resolve(dbData); 
+          })
+        }).catch(() => { 
+          this.createUserSearchInDB(dbData)
+          .then((searchPrefs) => { 
+            this.searchPrefs = searchPrefs;
+            resolve(dbData); 
+          });
+        });
+      })
+      .catch(error => { reject(error); } );
     });
   }
 }

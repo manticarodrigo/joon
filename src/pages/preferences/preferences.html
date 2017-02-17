@@ -27,15 +27,16 @@
     
     <ion-label>Search Distance</ion-label>
     <ion-item class="borderless">
-        <ion-select [(ngModel)]="distance">
-            <ion-option value="local" selected="true">Local</ion-option>
-            <ion-option value="national">National</ion-option>
-            <ion-option value="global">Global</ion-option>
+        <ion-select [(ngModel)]="searchPrefs.distance">
+            <!-- see about replacing this verbose way of binding selectedDistance -->
+            <ion-option value="local" selected="true" (ionSelect)="selectedDistance('local')">Local</ion-option>
+            <ion-option value="national" (ionSelect)="selectedDistance('national')">National</ion-option>
+            <ion-option value="global" (ionSelect)="selectedDistance('global')">Global</ion-option>
         </ion-select>
     </ion-item>
     
     <ion-item class="borderless">
-        <ion-checkbox [(ngModel)]="showAge"></ion-checkbox>
+        <ion-checkbox [(ngModel)]="user.showAge"></ion-checkbox>
         <ion-label>Show Age</ion-label>
     </ion-item>
     
