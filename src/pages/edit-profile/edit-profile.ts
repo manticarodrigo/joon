@@ -35,6 +35,7 @@ export class EditProfilePage {
 
     ngAfterViewInit() {
         this.user = this.userService.user;
+        this.getUserImages();
         //this.userService.setCurrentUserSnapshot(data => {this.user = data; this.getUserImages()});
     }
     

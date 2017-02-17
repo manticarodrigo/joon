@@ -21,6 +21,7 @@ import { Facebook, NativeStorage } from 'ionic-native';
 import { AngularFireModule } from 'angularfire2';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
+import { DiscoverService } from '../providers/discover-service';
 import { StorageService } from '../providers/storage-service';
 
 export const firebaseConfig = {
@@ -79,6 +80,7 @@ export const firebaseConfig = {
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
     UserService,
+    DiscoverService,
     StorageService,
     Facebook,
     NativeStorage

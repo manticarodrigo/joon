@@ -1,10 +1,9 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { NavController, NavParams, ToastController } from 'ionic-angular';
+import { DiscoverService } from '../../providers/discover-service';
 import { ChatsPage } from '../chats/chats';
 import { Http } from '@angular/http';
 import 'rxjs/Rx';
-
-import { AngularFire, FirebaseListObservable } from 'angularfire2';
  
 import {
   StackConfig,
@@ -26,7 +25,7 @@ export class DiscoverPage {
     cards: Array<any>;
     stackConfig: StackConfig;
   
-    constructor(public navCtrl: NavController, private http: Http, public navParams: NavParams, public toastCtrl: ToastController, af: AngularFire) {
+    constructor(public navCtrl: NavController, private http: Http, public navParams: NavParams, public toastCtrl: ToastController, private discoverS: DiscoverService) {
       this.stackConfig = {
         throwOutConfidence: (offset, element) => {
           return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -70,12 +69,16 @@ export class DiscoverPage {
 	  element.style.background = color;
 	  element.style['transform'] = `translate3d(0, 0, 0) translate(${x}px, ${y}px) rotate(${r}deg)`;
 	}
-
-	// Connected through HTML
-	voteUp(like: boolean) {
+    
+    swipeLeft(uid) {
+        let currentCard = this.cards.pop();
+    }
+    
+	swipeRight(uid) {
         let currentCard = this.cards.pop();
         if (like) {
 	       this.presentToast('You liked: ' + currentCard.name.first);
+            this.discoverS.like(uid);
             //currentCard.throwOut(800, 500);
         } else {
 	       this.presentToast('You ignored: ' + currentCard.name.first);
@@ -83,6 +86,14 @@ export class DiscoverPage {
         }
         this.addNewCards(1);
 	}
+    
+    doubleLike(uid) {
+        
+    }
+    
+    undo() {
+        console.log("undo");
+    }
     
     
     

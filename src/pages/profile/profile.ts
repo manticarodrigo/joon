@@ -35,9 +35,9 @@ export class ProfilePage {
     }
   
     ngAfterViewInit() {
-        alert("cuUID: " + this.userService.currentUserUID);
+        // alert("cuUID: " + this.userService.currentUserUID);
         this.user = this.userService.user;
-        alert("user: " + JSON.stringify(this.user));
+        // alert("user: " + JSON.stringify(this.user));
         //this.userService.setCurrentUserSnapshot(data => {this.user = data});
         this.getUserImages();
 	}

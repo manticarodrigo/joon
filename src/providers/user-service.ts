@@ -1,5 +1,4 @@
-import { Injectable } from '@angular/core'
-import { AngularFire, FirebaseListObservable } from 'angularfire2';
+import { Injectable } from '@angular/core';
 import { Facebook } from 'ionic-native';
 import firebase from 'firebase';
 
@@ -10,10 +9,7 @@ export class UserService {
   public currentUserUID: any;
   public user: any;
 
-  constructor(af: AngularFire) {
-    this.af = af;
-    this.currentUserUID = null;
-    this.currentUserSnapshot = null;
+  constructor() {
   }
 
     getUserSnapshot(uid) {
@@ -40,59 +36,88 @@ export class UserService {
   //   });
   // }
 
-  parseFacebookUserData(data) {
-    let rv = data;
+    parseFacebookUserData(data) {
+        let rv = data;
+        if (rv.first_name) {
+            console.log("rv has first name");
+            rv.firstName = rv.first_name;
+            delete rv.first_name;
+            console.log(rv.firstName);
+        }
+        if (rv.location) {
+            console.log("rv has location");
+            if (rv.location.name) {
+                rv.location = rv.location.name;
+                console.log(rv.location);
+            }
+            /*if (rv.location.location.city && rv.location.location.country) {
+                rv.city = rv.location.location.city;
+                rv.country = rv.location.location.country;
+                console.log(rv.city);
+                console.log(rv.country);
+            }*/
+        }
+        if (rv.education) {
+            console.log("rv has school");
+            let nSchools = rv.education.length;
+            if (nSchools >= 1) {
+              rv.school = rv.education[nSchools - 1].school.name;
+            }
+            if (nSchools >= 2) {
+              rv.school2 = rv.education[nSchools - 2].school.name;
+            }
+            delete rv.education;
+            console.log(rv.school);
+            console.log(rv.school2);
+        }
+        if (rv.birthday) {
+            console.log("rv has birthday");
+            let splitBDay = rv.birthday.split('/');
+            var year = parseInt(splitBDay[2]);
+            var month = parseInt(splitBDay[0]);
+            var day = parseInt(splitBDay[1]);
 
-    rv.firstName = rv.first_name;
-    delete rv.first_name;
+            let today = new Date();
+            let age = today.getFullYear() - year;
+            if ( today.getMonth() < (month - 1) ) {
+              age--;
+            } else if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
+              age--;
+            }
+            rv.age = age;
+            console.log(rv.age);
+        }
+        if (rv.work) {
+            console.log("rv has job");
+            let nJobs = rv.work.length;
+            if (nJobs >= 1) {
+              rv.job = rv.work[0].position.name;
+              rv.company = rv.work[0].employer.name;
+            }
+            delete rv.work;
+            console.log(rv.job);
+        }
 
-    rv.city = rv.location.location.city;
-    rv.country = rv.location.location.country;
-    delete rv.location;
-
-    let nSchools = rv.education.length;
-    if (nSchools >= 1) {
-      rv.school = rv.education[nSchools - 1].school.name;
+        delete rv.friends.summary;
+        
+        console.log(rv);
+        return rv;
     }
-    if (nSchools >= 2) {
-      rv.school2 = rv.education[nSchools - 2].school.name;
-    }
-    delete rv.education;
-
-    let splitBDay = rv.birthday.split('/');
-    var year = parseInt(splitBDay[2]);
-    var month = parseInt(splitBDay[0]);
-    var day = parseInt(splitBDay[1]);
-    
-    let today = new Date();
-    let age = today.getFullYear() - year;
-    if ( today.getMonth() < (month - 1) ) {
-      age--;
-    } else if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
-      age--;
-    }
-    rv.age = age;
-
-    let nJobs = rv.work.length;
-    if (nJobs >= 1) {
-      rv.job = rv.work[0].position.name;
-      rv.company = rv.work[0].employer.name;
-    }
-    delete rv.work;
-
-    delete rv.friends.summary;
-    
-    return rv;
-  }
 
   callFacebookAPI() {
     console.log("user 83");
     return new Promise((resolve, reject) => {
-      Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends', [])
+    Facebook.api('me/?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends', [])
       .then(
-        (data) => { console.log("user 87!"); resolve(this.parseFacebookUserData(data)); },
-        (error) => { reject(error); } 
-      );
+        (data) => {
+            console.log("user 87");
+            console.log(data);
+            resolve(this.parseFacebookUserData(data));
+        },
+        (error) => {
+            reject(error);
+            console.log("API request returned error!");
+        });
     });
   }
 

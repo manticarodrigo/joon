@@ -85,4 +85,17 @@ export class AuthService {
     }
     return false;
   }
+    
+    signOut() {
+        // Facebook logout
+        Facebook.logout()
+        .then(function(response) {
+          //user logged out so we will remove him from the NativeStorage
+          // NativeStorage.remove('user');
+        }, function(error){
+          console.log(error);
+        });
+        // Firebase logout
+        firebase.auth().signOut();
+    }
 }

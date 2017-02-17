@@ -1,5 +1,9 @@
 import { Component } from '@angular/core';
 
+import { AuthService } from '../../providers/auth-service';
+import { UserService } from '../../providers/user-service';
+import { DiscoverPage } from '../discover/discover';
+
 import { NavController } from 'ionic-angular';
 import { Facebook, NativeStorage } from 'ionic-native';
 
@@ -37,11 +41,11 @@ export class LoginPage {
             this.userS.currentUserSnapshot = user;
             this.userS.currentUserUID = user.uid;
             this.onSignInSuccess(); },
-          (error) => { alert(error); }
+          (error) => { console.log(error); }
         ) },
-        (error) => { alert(error); }
+        (error) => { console.log(error); }
       ) },
-      (error) => { alert(error); }
+      (error) => { console.log(error); }
     );
   }
 
