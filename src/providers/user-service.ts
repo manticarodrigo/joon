@@ -84,11 +84,22 @@ export class UserService {
   callFacebookAPI() {
     console.log("user 83");
     return new Promise((resolve, reject) => {
-      Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends', [])
-      .then(
-        (data) => { console.log("user 87!"); resolve(this.parseFacebookUserData(data)); },
-        (error) => { reject(error); } 
-      );
+      // on Browser and Android, specify location{location} to reduce to 1 request
+      // this does not work on iPhone
+      Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location,religion,work,friends', [])
+      .then( (data) => { 
+        console.log('requesting location data from facebook API');
+        let apiStr = '/' + data.location.id + '?fields=location';
+        Facebook.api(apiStr, [])
+        .then((locData) => {
+          console.log('location data retrieved from facebook API');
+          data.location = locData;
+          //alert(JSON.stringify(data));
+          resolve(this.parseFacebookUserData(data));
+        }).catch((error) => {
+          reject(error);
+        });
+      }, (error) => { reject(error); });
     });
   }
 
