@@ -86,5 +86,11 @@ export class Joon {
         this.nav.push(LoginPage);
         this.menu.close();
     }
+    
+    logoutApp() {
+        this.auth.signOut();
+        this.nav.push(LoginPage);
+        this.menu.close();
+    }
   
 }

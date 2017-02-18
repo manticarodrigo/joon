@@ -51,7 +51,7 @@ export class ChatService {
             }
         return chatId;
     }
-
+    
     private fetchChat(chatId): Promise<any> {
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/chats/'+ chatId);

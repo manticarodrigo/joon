@@ -17,7 +17,7 @@ export class LoginPage {
                 private userS: UserService) {
 
     }
-
+    
     login() {
         console.log("login pressed...");
         // push any waiting-for-connection segue visual here

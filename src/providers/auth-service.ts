@@ -103,6 +103,23 @@ export class AuthService {
             });
         });
     }
+    
+    facebookLogin(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            Facebook.login(['email', 'user_friends', 'user_birthday', 'user_about_me', 'user_hometown', 'user_location', 'user_religion_politics', 'user_education_history', 'user_work_history']).then(
+            (response) => {
+            let facebookCredential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
+            firebase.auth().signInWithCredential(facebookCredential).then((success) => {
+                    // alert("Firebase success: " + JSON.stringify(success));
+                    resolve(success);
+                }).catch((error) => {
+                    // alert("Firebase failure: " + JSON.stringify(error));
+                    reject(error);
+                });
+            },
+            (error) => { reject(error); });
+        });
+    }
 
     authFirebaseWith(facebookAuthResponse): Promise<any> {
         var env = this;
@@ -268,7 +285,7 @@ export class AuthService {
             delete rv.work;
             console.log(rv.job);
         }
-
+        
         delete rv.friends.summary;
         
         console.log(rv);
