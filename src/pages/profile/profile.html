@@ -34,8 +34,8 @@
                 <h2>{{ user.heightFt || 0}}'{{ user.heightIn || 0}}</h2>
                 <h6>Height</h6>
             </ion-item>
-            <ion-item *ngIf="user.location">
-                <h2>{{ user.city || user.location }}, {{ user.country }}</h2>
+            <ion-item *ngIf="user.city">
+                <h2>{{ user.city }}, {{ user.country }}</h2>
                 <h6>Location</h6>
             </ion-item>
             <ion-item *ngIf="user.school">

@@ -33,9 +33,9 @@ export class Joon {
 
     pages: Array<{title: string, component: any}>;
     
-    constructor(public platform: Platform, private menu: MenuController, private el: ElementRef, private auth: AuthService, private user: UserService) {
+    constructor(public platform: Platform, private menu: MenuController, private el: ElementRef, private authS: AuthService, private user: UserService) {
+        this.authS.init();
         this.initializeApp();
-
         // Sidemenu navigation
         this.pages = [
           { title: 'Discover', component: DiscoverPage },
@@ -52,20 +52,20 @@ export class Joon {
 
     initializeApp() {
         this.platform.ready().then(() => {
-          // Okay, so the platform is ready and our plugins are available.
-          // Here you can do any higher level native things you might need.
-          StatusBar.styleDefault();
-          Splashscreen.hide();
-
-          // for debugging
-          // let key = 'x';
-          // NativeStorage.getItem('cache-known')
-          // .then(data => { alert('cache-known found:' + JSON.stringify(data)); } )
-          // .catch(() => { 
-          //   alert('cache-known empty.'); 
-          //   NativeStorage.setItem('cache-known', key);
-          // });
+            // Okay, so the platform is ready and our plugins are available.
+            // Here you can do any higher level native things you might need.
+            StatusBar.styleDefault();
+            Splashscreen.hide();
         });
+    }
+    
+    ionViewDidLoad() {
+        // Disable sidemenu swipe gesture
+        this.menu.swipeEnable(false, 'sidemenu');
+        // Check auth state
+        if (!this.userFoundCached) {
+          this.nav.push(LoginPage);
+        }
     }
     
     
@@ -79,18 +79,9 @@ export class Joon {
         // we wouldn't want the back button to show in this scenario
         this.nav.setRoot(page.component);
     }
-  
-    ngAfterViewInit() {
-        // Disable sidemenu swipe gesture
-        this.menu.swipeEnable(false, 'sidemenu');
-        // Check auth state
-        if (!this.userFoundCached) {
-          this.nav.push(LoginPage);
-        }
-    }
     
     logoutApp() {
-        this.auth.signOut();
+        this.authS.signOut();
         this.nav.popToRoot();
         this.nav.push(LoginPage);
         this.menu.close();

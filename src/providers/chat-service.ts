@@ -1,27 +1,36 @@
 import { Injectable } from '@angular/core';
-import { AngularFire } from 'angularfire2';
 import { UserService } from './user-service';
+import firebase from 'firebase';
 
 @Injectable()
 export class ChatService {
 
-    constructor(private af: AngularFire, private userService: UserService) {
+    constructor(private userS: UserService) {
         
     }
     
-    getChats() {
-        if (this.userService.currentUserUID) {
-            let chats = this.af.database.list(`/users/${this.userService.currentUserUID}/chats`);
-            return chats;
-        } else {
-            return null;
-        }
+    fetchChats(): Promise<any> {
+        console.log("fetching user chats");
+        return new Promise((resolve, reject) => {
+            let chatRef = firebase.database().ref('/users/' + this.userS.user.uid + '/chats');
+            chatRef.once('value').then((snap) => {
+                console.log("fetch returned user's chats");
+                let snapArr = [];
+                snap.forEach(snapshot => {
+                    snapArr.push(snapshot.val());
+                })
+                resolve(snapArr);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        });
     }
   
     chatWith(uid, callback) {
-        var chatId = this.chatIdWith(uid);
-        this.getChat(chatId).then(chat => {
-            this.addUserToChat(this.userService.currentUserUID, chat);
+        let chatId = this.chatIdWith(uid);
+        this.fetchChat(chatId).then(chat => {
+            this.addUserToChat(this.userS.user.uid, chat);
         }).catch(error => {
             this.createChatWithUser(uid, chat => {
                 if (chat) {
@@ -35,40 +44,43 @@ export class ChatService {
     
     private chatIdWith(uid) {
         var chatId = '';
-            if (this.userService.currentUserUID < uid) {
-                chatId = this.userService.currentUserUID + "_" + uid;
+            if (this.userS.user.uid < uid) {
+                chatId = this.userS.user.uid + "_" + uid;
             } else {
-                chatId = uid + "_" + this.userService.currentUserUID;
+                chatId = uid + "_" + this.userS.user.uid;
             }
         return chatId;
     }
 
-    private getChat(chatId) {
-        let chatRef = this.af.database.object(`/chats/${chatId}`, {preserveSnapshot:true});
-        let promise = new Promise((resolve, reject) => {
-            chatRef.subscribe(snapshot => {
-                let a = snapshot.exists();
-                if(a) {
-                    resolve(`/chats/${chatId}`);
+    private fetchChat(chatId): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let ref = firebase.database().ref('/chats/'+ chatId);
+            ref.once('value').then(snap => {
+                let val = snap.val();
+                if (val) {
+                    console.log(val);
+                    resolve(val);
                 } else {
+                    console.log("No chat found");
                     reject(null);
                 }
+            }).catch(error => {
+                console.log(error);
+                reject(null);
             });
         });
-
-        return promise;
     }
         
     private createChatWithUser(uid, callback) {
-        let userSnapshot = this.userService.getUserSnapshot(uid).then(userSnap => {
+        let userSnapshot = this.userS.fetchUser(uid).then(userSnap => {
             var chatId = this.chatIdWith(uid);
             this.addUserToChat(uid, chatId);
-            this.addUserToChat(this.userService.currentUserUID, chatId);
-            var lastMessage = this.userService.currentUserSnapshot.firstName + 
+            this.addUserToChat(this.userS.user.uid, chatId);
+            var lastMessage = this.userS.user.firstName + 
             "added " + userSnap.firstName + " to the conversation.";
             var now = JSON.stringify(new Date());
             var val = { "lastMessage" : lastMessage, "timestamp" : now };
-            this.af.database.object('/chats/' + chatId).update(val);
+            firebase.database().ref('/chats/' + chatId).update(val);
             callback(chatId);
         }).catch(error => {
             callback(null);
@@ -76,11 +88,13 @@ export class ChatService {
     }
     
     private addUserToChat(uid, chatId) {
-        this.af.database.object('/chats/' + chatId + '/users/' + uid).set(true);
+        console.log("Adding user with id: " + uid + "to chat with id: " + chatId);
+        firebase.database().ref('/chats/' + chatId + '/users/' + uid).set(true);
     }
     
     private removeUserFromChat(uid, chatId) {
-        this.af.database.object('/chats/' + chatId + '/users/' + uid).set(false);
+        console.log("Removing user with id: " + uid + "from chat with id: " + chatId);
+        firebase.database().ref('/chats/' + chatId + '/users/' + uid).set(false);
     }
     
     /*
