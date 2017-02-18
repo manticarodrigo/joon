@@ -27,18 +27,18 @@ export class ProfilePage {
   }
   
   getUserImages() {
-      this.storage.getImagesFor(this.userService.currentUserUID, (urlList) => {this.images = urlList});
+    this.storage.getImagesFor(this.userService.currentUserUID, (urlList) => {this.images = urlList});
   }
 
   editProfile() {
-      this.navCtrl.push(EditProfilePage);
+    this.navCtrl.push(EditProfilePage);
   }
 
   ngAfterViewInit() {
-      this.user = this.userService.user;
-      // alert("user: " + JSON.stringify(this.user));
-      //this.userService.setCurrentUserSnapshot(data => {this.user = data});
-      this.getUserImages();
+    this.user = this.userService.user;
+    // alert("user: " + JSON.stringify(this.user));
+    //this.userService.setCurrentUserSnapshot(data => {this.user = data});
+    this.getUserImages();
 	}
 
 }

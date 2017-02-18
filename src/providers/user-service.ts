@@ -154,6 +154,22 @@ export class UserService {
     });
   }
 
+  getAllUserSearchPrefs(): Promise<any> {
+    let ref = firebase.database().ref('user_search');
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshots => { 
+        let arr = [];
+        let temp = null;
+        snapshots.forEach(snapshot => {
+          temp = snapshot.val();
+          temp.id = snapshot.key;
+          arr.push(temp);
+        });
+        resolve(arr);
+      });
+    });
+  }
+
   updateSearchInDB(data): Promise<any> {
     let uid = this.user.id;
     let ref = firebase.database().ref('user_search/' + uid);
@@ -161,6 +177,29 @@ export class UserService {
       ref.update(data).then(() => { 
         this.getUserSearch().then(data => { resolve(data); }); 
       });
+    });
+  }
+
+  fetchSeenUserIds(): Promise<any> {
+    let uid = this.user.uid;
+    let ref = firebase.database().ref('user_likes/' + uid);
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshots => {
+        let arr = [];
+        snapshots.forEach(snapshot => {
+          arr.push(snapshot.key);
+        });
+        resolve(arr);
+      })
+    });   
+  }
+
+  fetchVisibleUsers(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      Promise.all([
+        this.fetchSeenUserIds,
+        this.getAllUserSearchPrefs
+      ]).then(data => { ; });
     });
   }
 
@@ -179,16 +218,30 @@ export class UserService {
 
   createUserSearchInDB(user): Promise<any> {
     let searchData = {
-      female: (user.gender == 'female'),
-      lfm: (user.gender == 'female'),
-      lff: (user.gender == 'male'),
-      distance: 'global',
-      country: user.country,
       age: user.age,
-      geoLat: null,
-      geoLong: null
+      country: user.country,
+      distance: 'global',
+      female: (user.gender == 'female'),
+      lff: (user.gender == 'male'),
+      lfm: (user.gender == 'female')
     }
     return this.updateSearchInDB(searchData);
+  }
+
+  shouldSeeOtherByPrefs(searchPrefs) {
+    let self = this.searchPrefs;
+    let other = searchPrefs;
+
+    if (other.female && !self.lff) return false;
+    if (!other.female && !self.lfm) return false;
+
+    if (self.female && !other.lff) return false;
+    if (!self.female && !other.lfm) return false;
+
+    if (self.distance != 'global' && self.country != other.country)
+      return false;
+
+    return true;
   }
 
   setupUser(uid): Promise<any> {
