@@ -16,30 +16,29 @@ import { FirebaseObjectObservable } from 'angularfire2'
 })
 
 export class ProfilePage {
-    user = {};
-    images: Array<any>;
-    mutual: Array<any>;
-    
-    constructor(public navCtrl: NavController,
-                private http: Http,
-                private userService: UserService,
-                private storage: StorageService) {
-    }
-    
-    getUserImages() {
-        this.storage.getImagesFor(this.userService.currentUserUID, (urlList) => {this.images = urlList});
-    }
-
-    editProfile() {
-        this.navCtrl.push(EditProfilePage);
-    }
+  user = {};
+  images: Array<any>;
+  mutual: Array<any>;
   
-    ngAfterViewInit() {
-        alert("cuUID: " + this.userService.currentUserUID);
-        this.user = this.userService.user;
-        alert("user: " + JSON.stringify(this.user));
-        //this.userService.setCurrentUserSnapshot(data => {this.user = data});
-        this.getUserImages();
+  constructor(public navCtrl: NavController,
+              private http: Http,
+              private userService: UserService,
+              private storage: StorageService) {
+  }
+  
+  getUserImages() {
+    this.storage.getImagesFor(this.userService.currentUserUID, (urlList) => {this.images = urlList});
+  }
+
+  editProfile() {
+    this.navCtrl.push(EditProfilePage);
+  }
+
+  ngAfterViewInit() {
+    this.user = this.userService.user;
+    // alert("user: " + JSON.stringify(this.user));
+    //this.userService.setCurrentUserSnapshot(data => {this.user = data});
+    this.getUserImages();
 	}
 
 }

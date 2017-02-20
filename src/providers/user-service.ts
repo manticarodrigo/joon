@@ -10,6 +10,7 @@ export class UserService {
   public currentUserSnapshot: any;
   public currentUserUID: any;
   public user: any;
+  public searchPrefs: any;
 
   constructor(af: AngularFire) {
     this.af = af;
@@ -68,6 +69,7 @@ export class UserService {
       age--;
     }
     rv.age = age;
+    rv.showAge = true;
 
     let nJobs = rv.work.length;
     if (nJobs >= 1) {
@@ -132,31 +134,175 @@ export class UserService {
 
   updateUserInDB(data): Promise<any> {
     let uid = this.currentUserUID;
-    console.log("user 122");
+    console.log("updating user in db in user-service");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/users/' + uid);
       ref.update(data).then( data => {
-        //console.log("user 128 @@@");
         return ref.once('value');
-      }).then( snapshot => {
-        //console.log("user 131 @@@@");
-        let val = snapshot.val();
-        // alert("snapshot val: " + JSON.stringify(val));
-        resolve(val);
+      }).then( snapshot => { 
+        resolve(snapshot.val());
       });
     });
   }
 
+  getUserSearch(): Promise<any> {
+    let uid = this.user.id;
+    let ref = firebase.database().ref('user_search/' + uid);
+    // this wrapping just converts from firebase.Promise to ordinary Promise
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshot => { 
+        console.log("user-service -- retrieved and resolving with user_search/" + uid);
+        console.log(snapshot.val());
+        resolve(snapshot.val()); 
+      });
+    });
+  }
+
+  getAllUserSearchPrefs(): Promise<any> {
+    let ref = firebase.database().ref('user_search');
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshot => { 
+        console.log("user-service -- retrieved and resolving with user_search");
+        console.log(snapshot.val());
+        resolve(snapshot.val());
+        // let arr = [];
+        // let temp = null;
+        // snapshots.forEach(snapshot => {
+        //   temp = snapshot.val();
+        //   temp.id = snapshot.key;
+        //   arr.push(temp);
+        // });
+        // resolve(arr);
+      });
+    });
+  }
+
+  updateSearchInDB(data): Promise<any> {
+    let uid = this.user.id;
+    let ref = firebase.database().ref('user_search/' + uid);
+    return new Promise((resolve, reject) => {
+      ref.update(data).then(() => { 
+        this.getUserSearch().then(data => { resolve(data); }); 
+      });
+    });
+  }
+
+  fetchUserDataByIds(userIds): Promise<any> {
+    var pArr = [];
+    let ref = firebase.database().ref('users');
+    userIds.forEach((uid) => {
+      pArr.push(new Promise((resolve, reject) => {
+        ref.child(uid).once('value').then(snapshot => {
+          resolve(snapshot);
+        });
+      }));
+    });
+    return Promise.all(pArr);
+  }
+
+  fetchSeenUserIds(): Promise<any> {
+    let uid = this.user.id;
+    let ref = firebase.database().ref('user_seen/' + uid);
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshot => {
+        console.log('user-service -- retrieved and resolving with user_seen/' + uid);
+        console.log(snapshot.val());
+        resolve(snapshot.val());
+      })
+    });   
+  }
+
+  shouldSeeOtherByPrefs(searchPrefs) {
+    let self = this.searchPrefs;
+    let other = searchPrefs;
+
+    if (other.female && !self.lff) return false;
+    if (!other.female && !self.lfm) return false;
+
+    if (self.female && !other.lff) return false;
+    if (!self.female && !other.lfm) return false;
+
+    if (self.distance != 'global' && self.country != other.country)
+      return false;
+
+    return true;
+  }
+
+  fetchDiscoverableUserIds(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      return Promise.all([
+        this.getAllUserSearchPrefs(),
+        this.fetchSeenUserIds(),
+      ]).then(dataArr => { 
+        let allSearchPrefs = dataArr[0];
+        let seenUserIds = dataArr[1] || {};
+        // we could check every entry against all seen ids, but this scales
+        // m x n for the two array sizes, getting slower as more users are seen.
+        // it is faster to hash all-users and seen together then delete collisions.
+        // Fortunately, they come from firebases as dictionarys already.
+        let rv = {};
+        let val = null;
+        Object.keys(allSearchPrefs).forEach(key => {
+          let val = allSearchPrefs[key];
+          if (this.shouldSeeOtherByPrefs(val)
+              && !(key in seenUserIds)
+              && !(key == this.user.id)) {
+            rv[key] = allSearchPrefs[key];
+          }
+        });
+        resolve(rv);
+      });
+    });
+  }
+
+  userSearchExistsInDB(uid): Promise<boolean> {
+    let ref = firebase.database().ref('user_search/' + uid);
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshot => {
+        if (snapshot.exists()) {
+          resolve();
+        } else {
+          reject();
+        }
+      });
+    });
+  }
+
+  createUserSearchInDB(user): Promise<any> {
+    let searchData = {
+      age: user.age,
+      country: user.country,
+      distance: 'global',
+      female: (user.gender == 'female'),
+      lff: (user.gender == 'male'),
+      lfm: (user.gender == 'female')
+    }
+    return this.updateSearchInDB(searchData);
+  }
+
   setupUser(uid): Promise<any> {
-    console.log("user 132");
+    console.log("setting up user in user-service");
     this.currentUserUID = uid;
     return new Promise((resolve, reject) => {
-      console.log("user 135");
+      console.log("calling facebook API in user-service");
       this.callFacebookAPI()
-      .then((data) => { this.updateUserInDB(data).then(
-        (data) => { console.log("user 138"); resolve(data); },
-        (error) => {reject(error);}); 
-      }, (error) => { reject(error); });
+      .then((fbData) => { return this.updateUserInDB(fbData); })
+      .then((dbData) => { 
+        this.user = dbData;
+        this.userSearchExistsInDB(uid).then(() => {
+          this.getUserSearch().then((searchPrefs) => { 
+            this.searchPrefs = searchPrefs;
+            resolve(dbData); 
+          })
+        }).catch(() => { 
+          this.createUserSearchInDB(dbData)
+          .then((searchPrefs) => { 
+            this.searchPrefs = searchPrefs;
+            resolve(dbData); 
+          });
+        });
+      })
+      .catch(error => { reject(error); } );
     });
   }
 }
