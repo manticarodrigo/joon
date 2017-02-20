@@ -150,22 +150,29 @@ export class UserService {
     let ref = firebase.database().ref('user_search/' + uid);
     // this wrapping just converts from firebase.Promise to ordinary Promise
     return new Promise((resolve, reject) => {
-      ref.once('value').then(snapshot => { resolve(snapshot.val()); });
+      ref.once('value').then(snapshot => { 
+        console.log("user-service -- retrieved and resolving with user_search/" + uid);
+        console.log(snapshot.val());
+        resolve(snapshot.val()); 
+      });
     });
   }
 
   getAllUserSearchPrefs(): Promise<any> {
     let ref = firebase.database().ref('user_search');
     return new Promise((resolve, reject) => {
-      ref.once('value').then(snapshots => { 
-        let arr = [];
-        let temp = null;
-        snapshots.forEach(snapshot => {
-          temp = snapshot.val();
-          temp.id = snapshot.key;
-          arr.push(temp);
-        });
-        resolve(arr);
+      ref.once('value').then(snapshot => { 
+        console.log("user-service -- retrieved and resolving with user_search");
+        console.log(snapshot.val());
+        resolve(snapshot.val());
+        // let arr = [];
+        // let temp = null;
+        // snapshots.forEach(snapshot => {
+        //   temp = snapshot.val();
+        //   temp.id = snapshot.key;
+        //   arr.push(temp);
+        // });
+        // resolve(arr);
       });
     });
   }
@@ -180,26 +187,71 @@ export class UserService {
     });
   }
 
-  fetchSeenUserIds(): Promise<any> {
-    let uid = this.user.uid;
-    let ref = firebase.database().ref('user_likes/' + uid);
-    return new Promise((resolve, reject) => {
-      ref.once('value').then(snapshots => {
-        let arr = [];
-        snapshots.forEach(snapshot => {
-          arr.push(snapshot.key);
+  fetchUserDataByIds(userIds): Promise<any> {
+    var pArr = [];
+    let ref = firebase.database().ref('users');
+    userIds.forEach((uid) => {
+      pArr.push(new Promise((resolve, reject) => {
+        ref.child(uid).once('value').then(snapshot => {
+          resolve(snapshot);
         });
-        resolve(arr);
+      }));
+    });
+    return Promise.all(pArr);
+  }
+
+  fetchSeenUserIds(): Promise<any> {
+    let uid = this.user.id;
+    let ref = firebase.database().ref('user_seen/' + uid);
+    return new Promise((resolve, reject) => {
+      ref.once('value').then(snapshot => {
+        console.log('user-service -- retrieved and resolving with user_seen/' + uid);
+        console.log(snapshot.val());
+        resolve(snapshot.val());
       })
     });   
   }
 
-  fetchVisibleUsers(): Promise<any> {
+  shouldSeeOtherByPrefs(searchPrefs) {
+    let self = this.searchPrefs;
+    let other = searchPrefs;
+
+    if (other.female && !self.lff) return false;
+    if (!other.female && !self.lfm) return false;
+
+    if (self.female && !other.lff) return false;
+    if (!self.female && !other.lfm) return false;
+
+    if (self.distance != 'global' && self.country != other.country)
+      return false;
+
+    return true;
+  }
+
+  fetchDiscoverableUserIds(): Promise<any> {
     return new Promise((resolve, reject) => {
-      Promise.all([
-        this.fetchSeenUserIds,
-        this.getAllUserSearchPrefs
-      ]).then(data => { ; });
+      return Promise.all([
+        this.getAllUserSearchPrefs(),
+        this.fetchSeenUserIds(),
+      ]).then(dataArr => { 
+        let allSearchPrefs = dataArr[0];
+        let seenUserIds = dataArr[1] || {};
+        // we could check every entry against all seen ids, but this scales
+        // m x n for the two array sizes, getting slower as more users are seen.
+        // it is faster to hash all-users and seen together then delete collisions.
+        // Fortunately, they come from firebases as dictionarys already.
+        let rv = {};
+        let val = null;
+        Object.keys(allSearchPrefs).forEach(key => {
+          let val = allSearchPrefs[key];
+          if (this.shouldSeeOtherByPrefs(val)
+              && !(key in seenUserIds)
+              && !(key == this.user.id)) {
+            rv[key] = allSearchPrefs[key];
+          }
+        });
+        resolve(rv);
+      });
     });
   }
 
@@ -226,22 +278,6 @@ export class UserService {
       lfm: (user.gender == 'female')
     }
     return this.updateSearchInDB(searchData);
-  }
-
-  shouldSeeOtherByPrefs(searchPrefs) {
-    let self = this.searchPrefs;
-    let other = searchPrefs;
-
-    if (other.female && !self.lff) return false;
-    if (!other.female && !self.lfm) return false;
-
-    if (self.female && !other.lff) return false;
-    if (!self.female && !other.lfm) return false;
-
-    if (self.distance != 'global' && self.country != other.country)
-      return false;
-
-    return true;
   }
 
   setupUser(uid): Promise<any> {
