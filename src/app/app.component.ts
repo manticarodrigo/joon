@@ -94,24 +94,24 @@ export class Joon {
 
     fetchCurrentUser() {
         var storedUser: any;
-        this.storage.get('user').then((val) => {
-            if (val) {
-                if (firebase.auth().currentUser.uid) {
-                    storedUser = val;
-                    console.log('Stored user found: ', val);
+        this.storage.get('user').then((storedUser) => {
+            if (storedUser.accessToken) {
+                console.log('Stored user found: ', storedUser);
+                let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
+                this.authS.authenticateWith(facebookCredential).then(success => {
                     if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
-                        this.userS.user = storedUser;
                         // User is logged in
-                        console.log("Current user: " + this.userS.user);
+                        console.log("Current user: " + storedUser);
+                        this.userS.user = storedUser;
                         this.nav.setRoot(DiscoverPage);
                     } else {
                         // No current user
                         console.log("Stored user does not match authenticated firebase user.");
                         this.logoutApp();
                     }
-                } else {
-                    console.log("No Firebase user found!");
-                }
+                }).catch(error => {
+                    console.log(error);
+                });
             } else {
                 console.log('No stored user found!');
             }

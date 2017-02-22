@@ -19,7 +19,9 @@
     <ion-grid>
         <ion-row wrap>
             <ion-col width-33 *ngFor="let i of numbers">
-                <img *ngIf="user.picture" [src]="user.picture.large">
+                <div class="avatar" *ngIf="user.picture">
+                    <img [src]="user.picture.large">
+                </div>
                 <h6 *ngIf="user.name">
                     {{ user.name.first }}, {{ user.age }}
                 </h6>

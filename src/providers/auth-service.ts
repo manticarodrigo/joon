@@ -44,6 +44,7 @@ export class AuthService {
                                 env.setupUser(userData).then(user => {
                                     if (user) {
                                         console.log("Set current user: ");
+                                        user["accessToken"] = response.authResponse.accessToken;
                                         console.log(user);
                                         env.userS.updateCurrentUser(user);
                                         resolve(user);
@@ -80,10 +81,10 @@ export class AuthService {
     }
 
     facebookLogin(): Promise<any> {
-        console.log("Starting Facebook login...");
         return new Promise((resolve, reject) => {
             // Check If Cordova/Mobile
             if (this.platform.is('cordova')) {
+                console.log("Starting Mobile Facebook login...");
                 Facebook.login(this.permissions).then(response => {
                     console.log("Mobile Facebook login returned response.");
                     resolve(response);
@@ -92,6 +93,7 @@ export class AuthService {
                     reject(error);
                 });
             } else {
+                console.log("Starting Core Facebook login...");
                 this.fb.login(this.permissions).then(response => {
                     console.log("Core Facebook login returned response.");
                     resolve(response);
@@ -260,6 +262,20 @@ export class AuthService {
         
         console.log(rv);
         return rv;
+    }
+
+    authenticateWith(credential): Promise<any> {
+        return new Promise((resolve, reject) => {
+            firebase.auth().signInWithCredential(credential).then(() => {
+                // User re-authenticated.
+                console.log("Current user authenticated!");
+                resolve('success');
+            }).catch(error => {
+                // An error happened.
+                console.log(error);
+                reject(error);
+            });
+        });
     }
     
     signOut() {
