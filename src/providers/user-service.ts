@@ -79,6 +79,8 @@ export class UserService {
     delete rv.work;
 
     delete rv.friends.summary;
+
+    rv.photoURL = "https://graph.facebook.com/" + rv.uid + "/picture?type=large";
     
     return rv;
   }
@@ -159,12 +161,12 @@ export class UserService {
   }
 
   getAllUserSearchPrefs(): Promise<any> {
-    let ref = firebase.database().ref('user_search');
+    let ref = firebase.database().ref('/user_search/');
     return new Promise((resolve, reject) => {
-      ref.once('value').then(snapshot => { 
+      ref.once('value').then(snapshots => { 
         console.log("user-service -- retrieved and resolving with user_search");
-        console.log(snapshot.val());
-        resolve(snapshot.val());
+        // //console.log(snapshot.val());
+        // //resolve(snapshot.val());
         // let arr = [];
         // let temp = null;
         // snapshots.forEach(snapshot => {
@@ -172,7 +174,8 @@ export class UserService {
         //   temp.id = snapshot.key;
         //   arr.push(temp);
         // });
-        // resolve(arr);
+        // console.log(arr);
+        resolve(snapshots.val());
       });
     });
   }
@@ -188,12 +191,13 @@ export class UserService {
   }
 
   fetchUserDataByIds(userIds): Promise<any> {
+    console.log("fetching user data for id list: " + JSON.stringify(userIds));
     var pArr = [];
     let ref = firebase.database().ref('users');
-    userIds.forEach((uid) => {
+    userIds.forEach(uid => {
       pArr.push(new Promise((resolve, reject) => {
         ref.child(uid).once('value').then(snapshot => {
-          resolve(snapshot);
+          resolve(snapshot.val());
         });
       }));
     });
@@ -202,10 +206,10 @@ export class UserService {
 
   fetchSeenUserIds(): Promise<any> {
     let uid = this.user.id;
-    let ref = firebase.database().ref('user_seen/' + uid);
+    let ref = firebase.database().ref('users_seen/' + uid);
     return new Promise((resolve, reject) => {
       ref.once('value').then(snapshot => {
-        console.log('user-service -- retrieved and resolving with user_seen/' + uid);
+        console.log('retrieved and resolving with users_seen/' + uid);
         console.log(snapshot.val());
         resolve(snapshot.val());
       })
@@ -234,22 +238,25 @@ export class UserService {
         this.getAllUserSearchPrefs(),
         this.fetchSeenUserIds(),
       ]).then(dataArr => { 
+        console.log("determining visible user ids");
         let allSearchPrefs = dataArr[0];
         let seenUserIds = dataArr[1] || {};
         // we could check every entry against all seen ids, but this scales
         // m x n for the two array sizes, getting slower as more users are seen.
         // it is faster to hash all-users and seen together then delete collisions.
         // Fortunately, they come from firebases as dictionarys already.
-        let rv = {};
+        let rv = [];
         let val = null;
         Object.keys(allSearchPrefs).forEach(key => {
           let val = allSearchPrefs[key];
           if (this.shouldSeeOtherByPrefs(val)
               && !(key in seenUserIds)
               && !(key == this.user.id)) {
-            rv[key] = allSearchPrefs[key];
+            rv.push(key);
           }
         });
+        console.log("visible users id array constructed")
+        console.log(rv);
         resolve(rv);
       });
     });

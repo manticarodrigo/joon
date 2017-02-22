@@ -8,6 +8,7 @@ import { NavController, NavParams, ToastController } from 'ionic-angular';
 import 'rxjs/Rx';
 import { AngularFire, FirebaseListObservable } from 'angularfire2';
 
+
 import {
   StackConfig,
   Stack,
@@ -27,7 +28,7 @@ export class DiscoverPage {
   @ViewChildren('cardsContainer') swingCards: QueryList<SwingCardComponent>;
 
   cards: Array<any>;
-  discovIdsHash: any;
+  discovIds: Array<any>;
   discovUsers: Array<any>;
   stackConfig: StackConfig;
 
@@ -35,6 +36,7 @@ export class DiscoverPage {
               private userS: UserService, 
               public navParams: NavParams, 
               public toastCtrl: ToastController, 
+              private http: Http,
               af: AngularFire) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
@@ -59,8 +61,8 @@ export class DiscoverPage {
       event.target.style.background = '#000';
     });
 
-    this.discovIdsHash = null;
-    this.cards = [{email: ''}];
+    this.discovIds = null;
+    this.cards = [{email: ''}, {email: ''}, {email: ''}, {email: ''}, {email: ''}];
     this.addNewCards(1);
   }
 
@@ -97,10 +99,10 @@ export class DiscoverPage {
   voteUp(like: boolean) {
     let currentCard = this.cards.pop();
     if (like) {
-      this.presentToast('You liked: ' + currentCard.name.first);
+      this.presentToast('You liked: ' + currentCard.firstName);
       //currentCard.throwOut(800, 500);
     } else {
-      this.presentToast('You ignored: ' + currentCard.name.first);
+      this.presentToast('You ignored: ' + currentCard.firstName);
       //currentCard.throwOut(-800, 500);
     }
     this.addNewCards(1);
@@ -116,62 +118,60 @@ export class DiscoverPage {
   }
 
   getCardData(fetchIds: Array<any>): Promise<any> {
-    return new Promise((resolve, reject) => {
-      let arr = [];
-      this.userS.fetchUserDataByIds(fetchIds).then((users) => {
-        Object.keys(users).forEach(key => {
-          arr.push(users[key]);
-        });
-        resolve(arr);
-      });
-    });
+    return this.userS.fetchUserDataByIds(fetchIds);
   }
 
 
-  // relies on this.discovIdsHash being set
+  // relies on this.discovIds being set
   writeCardData(count: number) {
-    let fetchIds = Object.keys(this.discovIdsHash).slice(0, count);
-    fetchIds.forEach((id) => { 
-      delete this.discovIdsHash[id];
-    });
+    let fetchIds = this.discovIds.slice(0, count);
+
+    this.discovIds = this.discovIds.slice(count, this.discovIds.length);
+
     this.getCardData(fetchIds).then(newCards => { 
-      this.cards = this.cards.concat(newCards); 
+      console.log("newCards returned: " + JSON.stringify(newCards));
+      this.cards = this.cards.concat(newCards);
+      console.log("now this.cards is: " + JSON.stringify(this.cards));
     });
   }
 
-  // Add new cards, which are other users, to the array
+  // // Add new cards, which are other users, to the array
+  // addNewCards(count: number) {
+  //   if (this.discovIds != null) {
+  //     this.writeCardData(count);
+  //   } else {
+  //     this.userS.fetchDiscoverableUserIds().then(discovIds => {
+  //       this.discovIds = discovIds;
+  //       this.writeCardData(count);
+  //     });
+  //   };
+  // }
+
   addNewCards(count: number) {
-    if (this.discovIdsHash != null) {
-      this.writeCardData(count);
-    } else {
-      this.userS.fetchDiscoverableUserIds().then(discovIds => {
-        this.discovIdsHash = discovIds;
-        this.writeCardData(count);
-      });
-    };
+    this.http.get('https://randomuser.me/api/?results=' + count)
+    .map(data => data.json().results)
+    .subscribe(result => {
+      for (let val of result) {
+        if (val["dob"]) {
+          var age = val["dob"].split(" ")[0];
+          var year = age.split('-')[0];
+          var month = age.split('-')[1];
+          var day = age.split('-')[2];
+
+          var today = new Date();
+          age = today.getFullYear() - year;
+          if ( today.getMonth() < (month - 1)) {
+            age--;
+          }
+          if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
+            age--;
+          }
+          val["age"] = age;
+        }
+        val["firstName"] = val["name"]["first"];
+        val["photoURL"] = val["picture"]["medium"];
+        this.cards.push(val);
+      }
+    })
   }
-
-    // this.http.get('https://randomuser.me/api/?results=' + count)
-    // .map(data => data.json().results)
-    // .subscribe(result => {
-    //   for (let val of result) {
-    //     if (val["dob"]) {
-    //       var age = val["dob"].split(" ")[0];
-    //       var year = age.split('-')[0];
-    //       var month = age.split('-')[1];
-    //       var day = age.split('-')[2];
-
-    //       var today = new Date();
-    //       age = today.getFullYear() - year;
-    //       if ( today.getMonth() < (month - 1)) {
-    //         age--;
-    //       }
-    //       if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
-    //         age--;
-    //       }
-    //       val["age"] = age;
-    //     }
-    //     this.cards.push(val);
-    //   }
-    // })
 }
