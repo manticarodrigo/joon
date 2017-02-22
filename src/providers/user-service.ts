@@ -16,7 +16,7 @@ export class UserService {
         this.user = user;
         this.storage.set('user', user);
     }
-    
+  
     fetchUser(uid): Promise<any> {
         console.log("Getting user with id: " + uid);
         return new Promise((resolve, reject) => {
