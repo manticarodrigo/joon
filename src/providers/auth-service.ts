@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { Facebook } from 'ionic-native';
+import { FacebookService, FacebookLoginResponse } from 'ng2-facebook-sdk';
 import firebase from 'firebase';
-import { Http } from '@angular/http';
-import 'rxjs/Rx';
+
+import { UserService } from './user-service';
 
 @Injectable()
 export class AuthService {
-    private isAuthorized: boolean;
     private FB_APP_ID: number = 713879188793156;
     private permissions: Array<string> = [
                 'user_friends',
@@ -21,136 +21,82 @@ export class AuthService {
             ];
     
 
-    constructor(public platform: Platform) {
-        this.isAuthorized = false;
+    constructor(public platform: Platform, private userS: UserService, private fb: FacebookService) {
         Facebook.browserInit(this.FB_APP_ID, "v2.8");
-    }
-    
-    init() {
-        const firebaseConfig = {
-            apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
-            authDomain: "joon-702c0.firebaseapp.com",
-            databaseURL: "https://joon-702c0.firebaseio.com",
-            storageBucket: "joon-702c0.appspot.com",
-            messagingSenderId: '516717911226'
-        };
-        firebase.initializeApp(firebaseConfig);
     }
     
     beginAuth(): Promise<any> {
         console.log("Starting auth...");
+        var env = this;
         return new Promise((resolve, reject) => {
-            // Check If Cordova/Mobile
-            if (this.platform.is('cordova')) {
-                this.authOnMobile().then(response => {
+            this.facebookLogin().then(response => {
+                if (response.authResponse) {
                     let uid = response.authResponse.userID;
-                    this.setupUser().then((user) => {
-                        console.log("DB returned user");
-                        resolve(user);
-                    }, (error) => {
-                        console.log(error);
+                    // User is signed-in Facebook.
+                    var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
+                        unsubscribe();
+                        // Check if we are already signed-in Firebase with the correct user.
+                        if (!env.isUserEqual(response, firebaseUser)) {
+                            let facebookCredential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
+                            firebase.auth().signInWithCredential(facebookCredential).then((userData) => {
+                                console.log("Firebase returned user object: ");
+                                console.log(userData);
+                                env.setupUser(userData).then(user => {
+                                    if (user) {
+                                        console.log("Set current user: ");
+                                        console.log(user);
+                                        env.userS.updateCurrentUser(user);
+                                        resolve(user);
+                                    } else {
+                                        reject('No user object returned');
+                                    }
+                                }).catch(error => {
+                                    console.log(error);
+                                    reject(error);
+                                });
+                            }).catch((error) => {
+                                console.log(error);
+                                reject(error);
+                            });
+                        } else {
+                            // User is already signed-in Firebase with the correct user.
+                            console.log("User is already signed-in Firebase with the correct user.")
+                            resolve(uid);
+                        }
+                    });
+                } else {
+                    // User is signed-out of Facebook.
+                    firebase.auth().signOut().then(() => {
+                        reject('disconnected');
+                    }).catch(error => {
                         reject(error);
                     });
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                });
-            } else {
-                this.authOnCore().then(response => {
-                    // This gives you a Facebook Access Token. You can use it to access the Facebook API.
-                    // let token = response.credential.accessToken;
-                    // The signed-in user info.
-                    // let uid = response.user.providerData[0].uid;
-                    console.log("FB returned user");
-                    resolve(response.user.providerData[0]);
-                }).catch(error => {
-                    console.log(error);
-                });
-            }
-        });
-    }
-    
-    authOnMobile(): Promise<any> {
-        console.log("Starting mobile auth...");
-        return new Promise((resolve, reject) => {
-            console.log("Facebook Auth started...");
-            Facebook.login(this.permissions).then((response) => {
-                console.log("Facebook Auth authenticated!");
-                this.authFirebaseWith(response).then(() => { 
-                    console.log("Mobile auth returned facebook auth response!");
-                    this.isAuthorized = true;
-                    resolve(response);
-                }, (error) => {
-                    console.log(error);
-                    reject(error);
-                });
-            }, (error) => {
-                console.log("Facebook Auth failed.");
-                reject(error); 
-            });
-        });
-    }
-    
-    authOnCore(): Promise<any> {
-        console.log("Starting core auth...");
-        return new Promise((resolve, reject) => {
-            this.authFirebase().then(response => {
-                console.log("Core auth returned facebook auth response!");
-                resolve(response); 
+                }
             }).catch(error => {
                 console.log(error);
                 reject(error);
             });
         });
     }
-    
+
     facebookLogin(): Promise<any> {
+        console.log("Starting Facebook login...");
         return new Promise((resolve, reject) => {
-            Facebook.login(['email', 'user_friends', 'user_birthday', 'user_about_me', 'user_hometown', 'user_location', 'user_religion_politics', 'user_education_history', 'user_work_history']).then(
-            (response) => {
-            let facebookCredential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
-            firebase.auth().signInWithCredential(facebookCredential).then((success) => {
-                    // alert("Firebase success: " + JSON.stringify(success));
-                    resolve(success);
-                }).catch((error) => {
-                    // alert("Firebase failure: " + JSON.stringify(error));
+            // Check If Cordova/Mobile
+            if (this.platform.is('cordova')) {
+                Facebook.login(this.permissions).then(response => {
+                    console.log("Mobile Facebook login returned response.");
+                    resolve(response);
+                }).catch(error => {
+                    console.log(error);
                     reject(error);
                 });
-            },
-            (error) => { reject(error); });
-        });
-    }
-
-    authFirebaseWith(facebookAuthResponse): Promise<any> {
-        var env = this;
-        return new Promise((resolve, reject) => {
-            //Authenticate with firebase
-            if (facebookAuthResponse.authResponse) {
-            // User is signed-in Facebook.
-            var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
-                unsubscribe();
-                // Check if we are already signed-in Firebase with the correct user.
-                if (!env.isUserEqual(facebookAuthResponse, firebaseUser)) {
-                // Build Firebase credential with the Facebook auth token.
-                console.log("Building Firebase credential with the Facebook auth token.");
-                var credential = firebase.auth.FacebookAuthProvider.credential(facebookAuthResponse.authResponse.accessToken);
-                // Sign in with the credential from the Facebook user.
-                console.log("Signing in with the credential from the Facebook user.");
-                firebase.auth().signInWithCredential(credential).then(() => { 
-                    console.log("Sign in success"); 
-                    resolve('connected'); 
-                }, (error) => {
-                    reject(error); 
-                });
-                } else {
-                    // User is already signed-in Firebase with the correct user.
-                }
-            });
             } else {
-                // User is signed-out of Facebook.
-                firebase.auth().signOut().then(() => {
-                    resolve('disconnected'); 
-                }, (error) => {
+                this.fb.login(this.permissions).then(response => {
+                    console.log("Core Facebook login returned response.");
+                    resolve(response);
+                }).catch(error => {
+                    console.log(error);
                     reject(error);
                 });
             }
@@ -171,32 +117,19 @@ export class AuthService {
         return false;
     }
     
-    authFirebase(): Promise<any> {
-        console.log("Starting core firebase auth...");
-        var env = this;
-        return new Promise((resolve, reject) => {
-            var provider = new firebase.auth.FacebookAuthProvider();
-            for (var i = 0; i < this.permissions.length; i++) {
-                provider.addScope(this.permissions[i]);
-            }
-            console.log("Passed scope variables");
-            firebase.auth().signInWithPopup(provider).then(response => {
-                console.log("Core firebase auth returned response: " + response);
-                resolve(response);
-            }).catch(error => {
-                console.log(error);
-                reject(error);
-            });
-        });
-    }
-    
-    setupUser(): Promise<any> {
-        console.log("Setting up native user...");
+    setupUser(user): Promise<any> {
+        console.log("Setting up current user...");
         return new Promise((resolve, reject) => {
             this.callFacebookAPI().then(data => {
-                this.updateUserInDB(data).then(user => {
+                // Add Facebook user snapshot data to API data
+                let uid = user.providerData[0].uid;
+                data["id"] = uid;
+                data["photoURL"] = "https://graph.facebook.com/" + uid + "/picture?type=large";
+                console.log(data);
+                this.updateUserInDB(data).then(returnedUser => {
                     console.log("DB update returned data");
-                    resolve(user);
+                    returnedUser["firebaseId"] = user.uid;
+                    resolve(returnedUser);
                 }).catch(error => {
                     console.log(error);
                     reject(error);
@@ -209,26 +142,56 @@ export class AuthService {
     }
     
     callFacebookAPI() {
-        console.log("Calling Native Facebook API...");
         return new Promise((resolve, reject) => {
-            Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location,religion,work,friends', []).then( (data) => {
-                console.log('requesting location data from facebook API');
-                let apiStr = '/' + data.location.id + '?fields=location';
-                Facebook.api(apiStr, []).then((locData) => {
-                    console.log('location data retrieved from facebook API');
-                    data.location = locData;
-                    resolve(this.parseFacebookUserData(data));
-                }).catch((error) => {
+            // Check If Cordova/Mobile
+            if (this.platform.is('cordova')) {
+                console.log("Calling mobile Facebook API...");
+                Facebook.api('/me?fields=id,name,gender,birthday,education,first_name,location,religion,work,friends', []).then( (data) => {
+                    console.log('requesting location data from facebook API');
+                    let apiStr = '/' + data.location.id + '?fields=location';
+                    Facebook.api(apiStr, []).then((locData) => {
+                        console.log('location data retrieved from facebook API');
+                        data.location = locData;
+                        console.log('Facebook API returned:');
+                        console.log(data);
+                        resolve(this.parseFacebookUserData(data));
+                    }).catch((error) => {
+                        reject(error);
+                    });
+                }, (error) => {
                     reject(error);
                 });
-            }, (error) => {
-                reject(error);
+            } else {
+                console.log("Calling core Facebook API...");
+                this.fb.api('/me?fields=id,name,gender,birthday,education,first_name,location{location},religion,work,friends').then((data) => {
+                    console.log('Facebook API returned:');
+                    console.log(data);
+                    resolve(this.parseFacebookUserData(data));
+                }, (error) => {
+                    reject(error);
+                });
+            }
+        });
+    }
+
+    updateUserInDB(user): Promise<any> {
+        console.log("Updating user in DB");
+        return new Promise((resolve, reject) => {
+            let ref = firebase.database().ref('/users/' + user.id);
+            ref.update(user).then(data => {
+                console.log("DB saved user data");
+                return ref.once('value');
+            }).then( snapshot => {
+                console.log("DB returned user snapshot");
+                let val = snapshot.val();
+                resolve(val);
             });
         });
     }
     
     parseFacebookUserData(data) {
         let rv = data;
+        console.log(rv);
         if (rv.first_name) {
             console.log("rv has first name");
             rv.firstName = rv.first_name;
@@ -285,42 +248,30 @@ export class AuthService {
             delete rv.work;
             console.log(rv.job);
         }
-        
-        delete rv.friends.summary;
+
+        if (rv.friends) {
+            let idArray = [];
+            for (var i=0; i < rv.friends.data.length; i++) {
+                idArray.push(rv.friends.data[i]["id"]);
+            }
+            rv.friends = idArray;
+            console.log(rv.friends);
+        }
         
         console.log(rv);
         return rv;
     }
     
-    updateUserInDB(user): Promise<any> {
-        let uid = user.uid;
-        console.log("Updating user in DB");
-        return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/users/' + uid);
-            ref.update(user).then(data => {
-                console.log("DB saved data");
-                return ref.once('value');
-            }).then( snapshot => {
-                console.log("DB returned snapshot");
-                let val = snapshot.val();
-                resolve(val);
-            });
-        });
-    }
-    
     signOut() {
         // Check If Cordova/Mobile
         if (this.platform.is('cordova')) {
-            // Facebook logout
-            Facebook.logout().then(response => {
-                //user logged out so we will remove him from the NativeStorage
-                // NativeStorage.remove('user');
-            }).catch(error => {
-                console.log(error);
-            });
+            // Mobile Facebook logout
+            Facebook.logout();
+        } else {
+            // Core Facebook logout
+            this.fb.logout();
         }
         // Firebase logout
         firebase.auth().signOut();
-        this.isAuthorized = false;
     }
 }

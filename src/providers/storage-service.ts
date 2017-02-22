@@ -12,7 +12,7 @@ export class StorageService {
         console.log("Uploading image to storage...");
         var updates = {};
         updates[index] = url;
-        firebase.database().ref('/userImages/' + uid).update(updates)
+        firebase.database().ref('/user-images/' + uid).update(updates)
     }
     
     setProfileImageFor(uid, url) {
@@ -23,7 +23,7 @@ export class StorageService {
     fetchImagesFor(uid): Promise<any> {
         console.log("Fetching image urls for: " + uid);
         return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/userImages/' + uid);
+            let ref = firebase.database().ref('/user-images/' + uid);
             ref.once('value').then((snap) => {
                 console.log("fetch returned user images");
                 let snapArr = [];

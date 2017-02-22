@@ -1,6 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Nav, Platform, MenuController } from 'ionic-angular';
-import { StatusBar, Splashscreen, NativeStorage } from 'ionic-native';
+import { StatusBar, Splashscreen } from 'ionic-native';
+import { Storage } from '@ionic/storage';
 
 import { LoginPage } from '../pages/login/login';
 import { DiscoverPage } from '../pages/discover/discover';
@@ -19,23 +20,39 @@ import { ChatPage } from '../pages/chat/chat';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
 
+import firebase from 'firebase';
+import { FacebookService, FacebookInitParams } from 'ng2-facebook-sdk';
+
 @Component({
   templateUrl: 'app.html'
 })
 export class Joon {
     @ViewChild(Nav) nav: Nav;
-    
     isMenuOpen: boolean = false;
-
-    userFoundCached: boolean = false;
-
-    rootPage: any = DiscoverPage;
-
+    rootPage: any = LoginPage;
     pages: Array<{title: string, component: any}>;
     
-    constructor(public platform: Platform, private menu: MenuController, private el: ElementRef, private authS: AuthService, private user: UserService) {
-        this.authS.init();
+    constructor(public platform: Platform,
+                private menu: MenuController,
+                private el: ElementRef,
+                private authS: AuthService,
+                private userS: UserService,
+                private fb: FacebookService,
+                private storage: Storage) {
+
         this.initializeApp();
+        firebase.initializeApp({
+            apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
+            authDomain: "joon-702c0.firebaseapp.com",
+            databaseURL: "https://joon-702c0.firebaseio.com",
+            storageBucket: "joon-702c0.appspot.com",
+            messagingSenderId: '516717911226'
+        });
+        // Remove web facebook sdk for production mobile apps
+        fb.init({
+            appId: '713879188793156',
+            version: 'v2.8'
+        });
         // Sidemenu navigation
         this.pages = [
           { title: 'Discover', component: DiscoverPage },
@@ -47,7 +64,11 @@ export class Joon {
           { title: 'Feedback', component: FeedbackPage },
           { title: 'Invite A Friend to Joon', component: InvitePage }
         ];
-
+        // Check current user auth state
+        storage.ready().then(() => {
+            console.log("Local storage ready. Fetching stored user...");
+            this.fetchCurrentUser();
+        });
     }
 
     initializeApp() {
@@ -56,22 +77,13 @@ export class Joon {
             // Here you can do any higher level native things you might need.
             StatusBar.styleDefault();
             Splashscreen.hide();
+            // Disable sidemenu swipe gesture
+            this.menu.swipeEnable(false, 'sidemenu');
         });
     }
     
-    ionViewDidLoad() {
-        // Disable sidemenu swipe gesture
-        this.menu.swipeEnable(false, 'sidemenu');
-        // Check auth state
-        if (!this.userFoundCached) {
-          this.nav.push(LoginPage);
-        }
-    }
-    
-    
     menuToggled() {
         this.isMenuOpen = !(this.isMenuOpen);
-        console.log(this.isMenuOpen);
     }
     
     openPage(page) {
@@ -79,18 +91,38 @@ export class Joon {
         // we wouldn't want the back button to show in this scenario
         this.nav.setRoot(page.component);
     }
+
+    fetchCurrentUser() {
+        var storedUser: any;
+        this.storage.get('user').then((val) => {
+            if (val) {
+                if (firebase.auth().currentUser.uid) {
+                    storedUser = val;
+                    console.log('Stored user found: ', val);
+                    if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
+                        this.userS.user = storedUser;
+                        // User is logged in
+                        console.log("Current user: " + this.userS.user);
+                        this.nav.setRoot(DiscoverPage);
+                    } else {
+                        // No current user
+                        console.log("Stored user does not match authenticated firebase user.");
+                        this.logoutApp();
+                    }
+                } else {
+                    console.log("No Firebase user found!");
+                }
+            } else {
+                console.log('No stored user found!');
+            }
+        });
+    }
     
     logoutApp() {
+        this.userS.updateCurrentUser(null);
         this.authS.signOut();
-        this.nav.popToRoot();
-        this.nav.push(LoginPage);
+        this.nav.setRoot(LoginPage);
         this.menu.close();
     }
-    
-    logoutApp() {
-        this.auth.signOut();
-        this.nav.push(LoginPage);
-        this.menu.close();
-    }
-  
+
 }

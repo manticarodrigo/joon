@@ -9,17 +9,17 @@ export class DiscoverService {
         
     }
     
-    seen(uid): Promise<any> {
+    saw(uid): Promise<any> {
         console.log("saw user");
         var data = {};
         data[uid] = true;
         return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/users_seen/' + this.userS.user.uid);
+            let ref = firebase.database().ref('/user_saw/' + this.userS.user.uid);
             ref.update(data).then( data => {
-                console.log("user seen saved to db");
+                console.log("user saw saved to db");
                 return ref.once('value');
             }).then( snapshot => {
-                console.log("user seen returned from db");
+                console.log("user saw returned from db");
                 let val = snapshot.val();
                 console.log("snapshot val: " + JSON.stringify(val));
                 resolve(val);
@@ -30,17 +30,17 @@ export class DiscoverService {
         });
     }
     
-    like(uid): Promise<any> {
+    liked(uid): Promise<any> {
         console.log("liking user");
         var data = {};
         data[uid] = true;
         return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/users_liked/' + this.userS.user.uid);
+            let ref = firebase.database().ref('/user_liked/' + this.userS.user.uid);
             ref.update(data).then( data => {
-                console.log("user like saved to db");
+                console.log("user liked saved to db");
                 return ref.once('value');
             }).then( snapshot => {
-                console.log("user like returned from db");
+                console.log("user liked returned from db");
                 let val = snapshot.val();
                 console.log("snapshot val: " + JSON.stringify(val));
                 resolve(val);
@@ -51,12 +51,12 @@ export class DiscoverService {
         });
     }
     
-    doubleLike(uid): Promise<any> {
+    doubleLiked(uid): Promise<any> {
         console.log("double liking user");
         var data = {};
         data[uid] = true;
         return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/users_liked/' + this.userS.user.uid);
+            let ref = firebase.database().ref('/user_liked/' + this.userS.user.uid);
             ref.update(data).then( data => {
                 console.log("user double like saved to db");
                 return ref.once('value');

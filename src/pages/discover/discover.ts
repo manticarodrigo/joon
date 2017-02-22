@@ -87,7 +87,7 @@ export class DiscoverPage {
         if (this.loadedUsersIndex < this.users.length) {
             let currentCard = this.loadedUsers.pop();
             console.log(currentCard);
-            this.discoverS.seen(currentCard.id).then(success => {
+            this.discoverS.saw(currentCard.id).then(success => {
                 this.presentToast('You did not like: ' + currentCard.firstName);
                 this.loadedUsers.push(this.users[this.loadedUsersIndex]);
                 this.loadedUsersIndex++;
@@ -104,8 +104,8 @@ export class DiscoverPage {
         if (this.loadedUsersIndex < this.users.length) {
             let currentCard = this.loadedUsers.pop();
             console.log(currentCard);
-            this.discoverS.seen(currentCard.id).then(success => {
-                this.discoverS.like(currentCard.id).then(success => {
+            this.discoverS.saw(currentCard.id).then(success => {
+                this.discoverS.liked(currentCard.id).then(success => {
                     this.presentToast('You liked: ' + currentCard.firstName);
                     this.loadedUsers.push(this.users[this.loadedUsersIndex]);
                     this.loadedUsersIndex++;

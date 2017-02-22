@@ -1,11 +1,20 @@
 import { Injectable } from '@angular/core';
+import { Storage } from '@ionic/storage';
 import firebase from 'firebase';
 
 @Injectable()
 export class UserService {
+
     public user: any;
 
-    constructor() {
+    constructor(private storage: Storage) {
+        
+    }
+
+    updateCurrentUser(user) {
+        console.log("Updating user data in local storage and user service...");
+        this.user = user;
+        this.storage.set('user', user);
     }
     
     fetchUser(uid): Promise<any> {
@@ -13,11 +22,26 @@ export class UserService {
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/users/' + uid);
             ref.once('value').then((snap) => {
-                console.log("fetch returned user");
+                console.log("Fetch returned user!");
                 let val = snap.val();
                 if (!val["photoURL"]) {
                     val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
                 }
+                resolve(val);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        });
+    }
+
+    updateUser(user): Promise<any> {
+        console.log("Updating user with id: " + user.id);
+        return new Promise((resolve, reject) => {
+            let ref = firebase.database().ref('/users/' + user.id);
+            ref.update(user).then((snap) => {
+                console.log("Update returned user!");
+                let val = snap.val();
                 resolve(val);
             }).catch(error => {
                 console.log(error);

@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 
 import { AuthService } from '../../providers/auth-service';
-import { UserService } from '../../providers/user-service';
 
 import { DiscoverPage } from '../discover/discover';
 
@@ -13,8 +12,7 @@ import { DiscoverPage } from '../discover/discover';
 export class LoginPage {
 
     constructor(public navCtrl: NavController,
-                private authS: AuthService,
-                private userS: UserService) {
+                private authS: AuthService) {
 
     }
     
@@ -22,16 +20,14 @@ export class LoginPage {
         console.log("login pressed...");
         // push any waiting-for-connection segue visual here
         this.authS.beginAuth().then(user => {
-            console.log("Auth succeeded!");
-            this.userS.user = user;
-            this.onSignInSuccess();
+            if (user) {
+                console.log("Auth succeeded!");
+                this.navCtrl.setRoot(DiscoverPage);
+            } else {
+                console.log("No user returned");
+            }
         }).catch(error => {
             console.log(error);
         });
-    }
-
-    private onSignInSuccess(): void {
-        console.log("onSignInSuccess");
-        this.navCtrl.setRoot(DiscoverPage);
     }
 }

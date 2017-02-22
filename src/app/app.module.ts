@@ -17,7 +17,9 @@ import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
 import { SwingModule } from 'angular2-swing';
 
+import { Storage } from '@ionic/storage';
 import { Facebook, NativeStorage } from 'ionic-native';
+import { FacebookService } from 'ng2-facebook-sdk';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
 import { DiscoverService } from '../providers/discover-service';
@@ -73,7 +75,9 @@ import { StorageService } from '../providers/storage-service';
     DiscoverService,
     StorageService,
     Facebook,
-    NativeStorage
+    FacebookService,
+    NativeStorage,
+    Storage
    ]
 })
 export class AppModule {}

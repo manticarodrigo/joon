@@ -30,25 +30,26 @@ export class EditProfilePage {
     }
     
     fetchUserImages() {
-        this.storageS.fetchImagesFor(this.userS.user.uid).then(urlList => {
+        this.storageS.fetchImagesFor(this.userS.user.id).then(urlList => {
             this.images = urlList;
         });
     }
 
     editProfileSubmit() {
-        this.userS.user.update(this.user);
+        this.userS.updateCurrentUser(this.user);
+        this.userS.updateUser(this.user);
     }
     
     uploadProfileImage(event) {
         var file = event.srcElement.files[0];
-        this.storageS.uploadProfileImageFor(this.userS.user.uid, file);
+        this.storageS.uploadProfileImageFor(this.userS.user.id, file);
         // Refetch user data
         // this.userS.setCurrentUserSnapshot(data => {this.user = data});
     }
     
     uploadImage(event, index) {
         var file = event.srcElement.files[0];
-        this.storageS.uploadImageFor(this.userS.user.uid, file, index);
+        this.storageS.uploadImageFor(this.userS.user.id, file, index);
         this.fetchUserImages();
     }
 
