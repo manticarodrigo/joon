@@ -15,7 +15,9 @@ export class ChatsPage {
     user: '';
     users: Array<any>;
 
-    constructor(private nav: NavController, navParams: NavParams, private http: Http) {
+    constructor(private navCtrl: NavController,
+                private navParams: NavParams,
+                private http: Http) {
     
         this.generateRandomUser();
         this.users = [];
@@ -52,7 +54,7 @@ export class ChatsPage {
 
     userTapped(event, user) {
         // That's right, we're pushing to ourselves!
-        this.nav.push(ChatPage, {
+        this.navCtrl.push(ChatPage, {
             user: user
         });
     }

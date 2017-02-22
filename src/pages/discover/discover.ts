@@ -1,6 +1,7 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { NavController, NavParams, ToastController } from 'ionic-angular';
 import { DiscoverService } from '../../providers/discover-service';
+import { UserService } from '../../providers/user-service';
 import { ChatsPage } from '../chats/chats';
  
 import {
@@ -22,10 +23,10 @@ export class DiscoverPage {
     
     users: Array<any>;
     loadedUsers: Array<any>;
-    loadedUsersIndex: 0;
+    loadedUsersIndex: number = 0;
     stackConfig: StackConfig;
   
-    constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, private discoverS: DiscoverService) {
+    constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, private discoverS: DiscoverService, private userS: UserService) {
       this.stackConfig = {
         throwOutConfidence: (offset, element) => {
           return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -66,7 +67,7 @@ export class DiscoverPage {
     
     fetchUsers() {
         console.log("fetching global users");
-        this.discoverS.fetchGlobalUsers().then(data => {
+        this.userS.fetchGlobalUsers().then(data => {
             console.log("fetch returned global users");
             console.log(data);
             this.users = data;
@@ -119,12 +120,17 @@ export class DiscoverPage {
 	}
     
     doubleLike() {
-        this.presentToast("double like!" + this.users[0].id );
+        this.presentToast("You double liked " + this.users[0].firstName );
         
     }
     
     undo() {
-        this.presentToast("undo!");
+        this.presentToast("Undo pressed!");
+        /*
+        this.loadedUsers[1] = this.loadedUsers[0];
+        this.loadedUsersIndex--;
+        this.loadedUsers.pop();
+        this.loadedUsers.push(this.users[this.loadedUsersIndex]);*/
     }
 
     // Called whenever we drag an element

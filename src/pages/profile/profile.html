@@ -5,9 +5,12 @@
     </button>
     <ion-title>My Profile</ion-title>
     <ion-buttons end>
-        <button color="primary" ion-button (click)="editProfile()">
+        <button *ngIf="user.id == this.userS.user.id" color="primary" ion-button (click)="editProfile()">
             Edit
         </button>
+        <button *ngIf="user.id != this.userS.user.id" ion-button icon-only>
+            <img height="25" src="assets/empty.png"/>
+          </button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
