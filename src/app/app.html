@@ -6,10 +6,14 @@
   </ion-header>
 
   <ion-content>
-    <ion-list class="sidemenu">
-      <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
-        {{p.title}}
-      </button>
+      <ion-list class="sidemenu">
+        <button menuClose ion-item *ngFor="let p of pages" (click)="openPage(p)">
+            {{p.title}}
+        </button>
+        <button ion-item (click)="logoutApp()">
+            <!--Add this static button for logout-->
+            Joon Plus Logout
+        </button>
     </ion-list>
   </ion-content>
 </ion-menu>

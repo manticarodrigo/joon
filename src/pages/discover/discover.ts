@@ -1,10 +1,7 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { NavController, NavParams, ToastController } from 'ionic-angular';
+import { DiscoverService } from '../../providers/discover-service';
 import { ChatsPage } from '../chats/chats';
-import { Http } from '@angular/http';
-import 'rxjs/Rx';
-
-import { AngularFire, FirebaseListObservable } from 'angularfire2';
  
 import {
   StackConfig,
@@ -23,10 +20,12 @@ export class DiscoverPage {
     @ViewChild('swingContainer') swingStack: SwingStackComponent;
     @ViewChildren('cardsContainer') swingCards: QueryList<SwingCardComponent>;
     
-    cards: Array<any>;
+    users: Array<any>;
+    loadedUsers: Array<any>;
+    loadedUsersIndex: 0;
     stackConfig: StackConfig;
   
-    constructor(public navCtrl: NavController, private http: Http, public navParams: NavParams, public toastCtrl: ToastController, af: AngularFire) {
+    constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, private discoverS: DiscoverService) {
       this.stackConfig = {
         throwOutConfidence: (offset, element) => {
           return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -39,22 +38,96 @@ export class DiscoverPage {
         }
       };
     }
-  
+    
+    ionViewDidLoad() {
+        // Either subscribe in controller or set in HTML
+        this.swingStack.throwin.subscribe((event: DragEvent) => {
+	       event.target.style.background = '#fff';
+        });
+	}
+    
+    ionViewWillEnter() {
+        console.log("Entered discover page");
+        this.fetchUsers();
+    }
+    
     openChats() {
         this.navCtrl.push(ChatsPage);
     }
     
-    ngAfterViewInit() {
-        // Either subscribe in controller or set in HTML
-        this.swingStack.throwin.subscribe((event: DragEvent) => {
-	       event.target.style.background = '#000';
+    presentToast(message) {
+        let toast = this.toastCtrl.create({
+            message: message,
+            duration: 500,
+            position: 'top'
         });
-	  
-        this.cards = [{email: ''}];
-        this.addNewCards(1);
+        toast.present();
+    }
+    
+    fetchUsers() {
+        console.log("fetching global users");
+        this.discoverS.fetchGlobalUsers().then(data => {
+            console.log("fetch returned global users");
+            console.log(data);
+            this.users = data;
+            this.loadedUsers = [];
+            this.loadedUsers.push(this.users[this.loadedUsersIndex]);
+            this.loadedUsersIndex++;
+            this.loadedUsers.push(this.users[this.loadedUsersIndex]);
+            this.loadedUsersIndex++;
+        }).catch(error => {
+            alert(error);
+        });
+    }
+    
+    swipeLeft() {
+        console.log("Swiping left...");
+        console.log(this.loadedUsersIndex);
+        console.log(this.users.length);
+        if (this.loadedUsersIndex < this.users.length) {
+            let currentCard = this.loadedUsers.pop();
+            console.log(currentCard);
+            this.discoverS.saw(currentCard.id).then(success => {
+                this.presentToast('You did not like: ' + currentCard.firstName);
+                this.loadedUsers.push(this.users[this.loadedUsersIndex]);
+                this.loadedUsersIndex++;
+            }).catch(error => {
+                this.presentToast('Error saving swipe');
+            });
+        }
+    }
+    
+	swipeRight() {
+        console.log("Swiping right...");
+        console.log(this.loadedUsersIndex);
+        console.log(this.users.length);
+        if (this.loadedUsersIndex < this.users.length) {
+            let currentCard = this.loadedUsers.pop();
+            console.log(currentCard);
+            this.discoverS.saw(currentCard.id).then(success => {
+                this.discoverS.liked(currentCard.id).then(success => {
+                    this.presentToast('You liked: ' + currentCard.firstName);
+                    this.loadedUsers.push(this.users[this.loadedUsersIndex]);
+                    this.loadedUsersIndex++;
+                }).catch(error => {
+                    this.presentToast('Error saving swipe');
+                });
+            }).catch(error => {
+                this.presentToast('Error saving swipe');
+            });
+        }
 	}
+    
+    doubleLike() {
+        this.presentToast("double like!" + this.users[0].id );
+        
+    }
+    
+    undo() {
+        this.presentToast("undo!");
+    }
 
-	// Called whenever we drag an element
+    // Called whenever we drag an element
 	onItemMove(element, x, y, r) {
 	  var color = '';
 	  var abs = Math.abs(x);
@@ -69,57 +142,6 @@ export class DiscoverPage {
 	  
 	  element.style.background = color;
 	  element.style['transform'] = `translate3d(0, 0, 0) translate(${x}px, ${y}px) rotate(${r}deg)`;
-	}
-
-	// Connected through HTML
-	voteUp(like: boolean) {
-        let currentCard = this.cards.pop();
-        if (like) {
-	       this.presentToast('You liked: ' + currentCard.name.first);
-            //currentCard.throwOut(800, 500);
-        } else {
-	       this.presentToast('You ignored: ' + currentCard.name.first);
-            //currentCard.throwOut(-800, 500);
-        }
-        this.addNewCards(1);
-	}
-    
-    
-    
-    presentToast(message) {
-        let toast = this.toastCtrl.create({
-            message: message,
-            duration: 500,
-            position: 'top'
-        });
-        toast.present();
-    }
-
-	// Add new cards to our array
-	addNewCards(count: number) {
-	  this.http.get('https://randomuser.me/api/?results=' + count)
-	  .map(data => data.json().results)
-	  .subscribe(result => {
-	    for (let val of result) {
-            if (val["dob"]) {
-                        var age = val["dob"].split(" ")[0];
-                        var year = age.split('-')[0];
-                        var month = age.split('-')[1];
-                        var day = age.split('-')[2];
-                        
-                        var today = new Date();
-                        age = today.getFullYear() - year;
-                        if ( today.getMonth() < (month - 1)) {
-                            age--;
-                        }
-                        if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
-                            age--;
-                        }
-                        val["age"] = age;
-                    }
-	      this.cards.push(val);
-	    }
-	  })
 	}
 
 	// http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript

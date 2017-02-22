@@ -1,33 +1,40 @@
 import { Injectable } from '@angular/core';
-import * as firebase from 'firebase';
-import { AngularFire, FirebaseListObservable } from 'angularfire2';
+import firebase from 'firebase';
 
 @Injectable()
 export class StorageService {
+    storageRef = firebase.storage().ref();
     
-    storageRef = firebase.storage().ref(); 
-    
-    af: any;
-
-    constructor(af: AngularFire) {
-        this.af = af;
+    constructor() {
     }
     
     updateImageFor(uid, url, index) {
+        console.log("Uploading image to storage...");
         var updates = {};
         updates[index] = url;
-        this.af.database.object('/userImages/' + uid).update(updates);
+        firebase.database().ref('/user-images/' + uid).update(updates)
     }
     
     setProfileImageFor(uid, url) {
-        this.af.database.object('/users/' + uid + '/photoURL/').set(url);
+        console.log("Setting profile image url in DB...");
+        firebase.database().ref('/users/' + uid + '/photoURL/').set(url);
     }
     
-    getImagesFor(uid, callback) {
-        this.af.database.list('/userImages/' + uid, { preserveSnapshot: true }).subscribe(snapshots => { 
-            let snapshotsArr = [];
-            snapshots.forEach(sn => { snapshotsArr.push(sn.val()) });
-            callback(snapshotsArr);
+    fetchImagesFor(uid): Promise<any> {
+        console.log("Fetching image urls for: " + uid);
+        return new Promise((resolve, reject) => {
+            let ref = firebase.database().ref('/user-images/' + uid);
+            ref.once('value').then((snap) => {
+                console.log("fetch returned user images");
+                let snapArr = [];
+                snap.forEach(snapshot => {
+                    snapArr.push(snapshot.val());
+                })
+                resolve(snapArr);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
         });
     }
     

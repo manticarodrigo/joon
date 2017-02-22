@@ -1,11 +1,8 @@
 import { Component } from '@angular/core';
-import { Http } from '@angular/http';
+import { NavController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { StorageService } from '../../providers/storage-service';
-
-import { NavController } from 'ionic-angular';
-import 'rxjs/Rx';
 
 @Component({
   selector: 'page-edit-profile',
@@ -19,36 +16,41 @@ export class EditProfilePage {
     snapshotTaken = false;
 
     constructor(public navCtrl: NavController,
-                private http: Http,
-                private userService: UserService,
-                private storage: StorageService) {
+                private userS: UserService,
+                private storageS: StorageService) {
         this.mutual = [];
     }
     
-    getUserImages() {
-        this.storage.getImagesFor(this.userService.currentUserUID, (urlList) => {this.images = urlList});
+    ionViewDidLoad() {
+        this.user = this.userS.user;
+	}
+    
+    ionViewWillEnter() {
+        this.fetchUserImages();
+    }
+    
+    fetchUserImages() {
+        this.storageS.fetchImagesFor(this.userS.user.id).then(urlList => {
+            this.images = urlList;
+        });
     }
 
     editProfileSubmit() {
-        this.userService.getCurrentUser().update(this.user);
-    }
-
-    ngAfterViewInit() {
-        this.user = this.userService.user;
-        //this.userService.setCurrentUserSnapshot(data => {this.user = data; this.getUserImages()});
+        this.userS.updateCurrentUser(this.user);
+        this.userS.updateUser(this.user);
     }
     
     uploadProfileImage(event) {
         var file = event.srcElement.files[0];
-        this.storage.uploadProfileImageFor(this.userService.currentUserUID, file);
+        this.storageS.uploadProfileImageFor(this.userS.user.id, file);
         // Refetch user data
-        this.userService.setCurrentUserSnapshot(data => {this.user = data});
+        // this.userS.setCurrentUserSnapshot(data => {this.user = data});
     }
     
     uploadImage(event, index) {
         var file = event.srcElement.files[0];
-        this.storage.uploadImageFor(this.userService.currentUserUID, file, index);
-        this.getUserImages();
+        this.storageS.uploadImageFor(this.userS.user.id, file, index);
+        this.fetchUserImages();
     }
 
 }

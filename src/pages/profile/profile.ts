@@ -1,14 +1,10 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
-import { Http } from '@angular/http';
-import 'rxjs/Rx';
 
 import { UserService } from '../../providers/user-service';
 import { StorageService } from '../../providers/storage-service';
 
 import { EditProfilePage } from '../edit-profile/edit-profile';
-
-import { FirebaseObjectObservable } from 'angularfire2'
 
 @Component({
   selector: 'page-profile',
@@ -21,25 +17,26 @@ export class ProfilePage {
     mutual: Array<any>;
     
     constructor(public navCtrl: NavController,
-                private http: Http,
-                private userService: UserService,
-                private storage: StorageService) {
+                private userS: UserService,
+                private storageS: StorageService) {
     }
     
-    getUserImages() {
-        this.storage.getImagesFor(this.userService.currentUserUID, (urlList) => {this.images = urlList});
+    ionViewDidLoad() {
+        this.user = this.userS.user;
+	}
+    
+    ionViewWillEnter() {
+        this.fetchUserImages();
+    }
+    
+    fetchUserImages() {
+        this.storageS.fetchImagesFor(this.userS.user.uid).then(urlList => {
+            this.images = urlList;
+        });
     }
 
     editProfile() {
         this.navCtrl.push(EditProfilePage);
     }
-  
-    ngAfterViewInit() {
-        alert("cuUID: " + this.userService.currentUserUID);
-        this.user = this.userService.user;
-        alert("user: " + JSON.stringify(this.user));
-        //this.userService.setCurrentUserSnapshot(data => {this.user = data});
-        this.getUserImages();
-	}
 
 }
