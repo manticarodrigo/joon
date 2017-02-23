@@ -22,8 +22,7 @@ export class DiscoverPage {
     @ViewChildren('cardsContainer') swingCards: QueryList<SwingCardComponent>;
     
     users: Array<any>;
-    loadedUsers: Array<any>;
-    loadedUsersIndex: number = 0;
+    undoHistory: Array<any>;
     stackConfig: StackConfig;
   
     constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, private discoverS: DiscoverService, private userS: UserService) {
@@ -38,6 +37,8 @@ export class DiscoverPage {
           return 800;
         }
       };
+      this.users = [];
+      this.undoHistory = [];
     }
     
     ionViewDidLoad() {
@@ -66,16 +67,13 @@ export class DiscoverPage {
     }
     
     fetchUsers() {
-        console.log("fetching global users");
-        this.userS.fetchGlobalUsers().then(data => {
-            console.log("fetch returned global users");
+        console.log("fetching visible users");
+        // this.userS.fetchGlobalUsers().then(data => {
+        //     console.log("fetch returned global users");
+        this.discoverS.fetchVisibleUsers().then(data => {
+            console.log("fetch returned visible users");
             console.log(data);
             this.users = data;
-            this.loadedUsers = [];
-            this.loadedUsers.push(this.users[this.loadedUsersIndex]);
-            this.loadedUsersIndex++;
-            this.loadedUsers.push(this.users[this.loadedUsersIndex]);
-            this.loadedUsersIndex++;
         }).catch(error => {
             alert(error);
         });
@@ -83,15 +81,13 @@ export class DiscoverPage {
     
     swipeLeft() {
         console.log("Swiping left...");
-        console.log(this.loadedUsersIndex);
         console.log(this.users.length);
-        if (this.loadedUsersIndex < this.users.length) {
-            let currentCard = this.loadedUsers.pop();
+        if (this.users.length > 0) {
+            let currentCard = this.users.pop();
+            this.undoHistory.push(currentCard);
             console.log(currentCard);
             this.discoverS.saw(currentCard.id).then(success => {
                 this.presentToast('You did not like: ' + currentCard.firstName);
-                this.loadedUsers.push(this.users[this.loadedUsersIndex]);
-                this.loadedUsersIndex++;
             }).catch(error => {
                 this.presentToast('Error saving swipe');
             });
@@ -100,16 +96,14 @@ export class DiscoverPage {
     
 	swipeRight() {
         console.log("Swiping right...");
-        console.log(this.loadedUsersIndex);
         console.log(this.users.length);
-        if (this.loadedUsersIndex < this.users.length) {
-            let currentCard = this.loadedUsers.pop();
+        if (this.users.length > 0) {
+            let currentCard = this.users.pop();
+            this.undoHistory.push(currentCard);
             console.log(currentCard);
             this.discoverS.saw(currentCard.id).then(success => {
                 this.discoverS.liked(currentCard.id).then(success => {
                     this.presentToast('You liked: ' + currentCard.firstName);
-                    this.loadedUsers.push(this.users[this.loadedUsersIndex]);
-                    this.loadedUsersIndex++;
                 }).catch(error => {
                     this.presentToast('Error saving swipe');
                 });
@@ -126,11 +120,8 @@ export class DiscoverPage {
     
     undo() {
         this.presentToast("Undo pressed!");
-        /*
-        this.loadedUsers[1] = this.loadedUsers[0];
-        this.loadedUsersIndex--;
-        this.loadedUsers.pop();
-        this.loadedUsers.push(this.users[this.loadedUsersIndex]);*/
+        let undoCard = this.undoHistory.pop();
+        this.users.push(undoCard);
     }
 
     // Called whenever we drag an element

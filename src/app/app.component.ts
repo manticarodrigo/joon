@@ -95,6 +95,7 @@ export class Joon {
     fetchCurrentUser() {
       var storedUser: any;
 
+      console.log('erasing storage for login debugging');
       this.storage.clear().then(() => { // clear cache for login debugging
 
         this.storage.get('user').then((storedUser) => {

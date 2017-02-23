@@ -10,6 +10,8 @@ export class DiscoverService {
     }
     
     isVisibleTo(user1, user2): boolean {
+      if (user1.id == user2.id)
+        return false;
       if (user1.gender == 'male' && !user2.lfm)
         return false;
       if (user1.gender == 'female' && !user2.lff)
@@ -28,10 +30,12 @@ export class DiscoverService {
       let env = this;
       return new Promise((resolve, reject) => {
         this.userS.fetchGlobalUsers().then(allUsers => {
+          console.log("fetched global users :");
+          console.log(allUsers);
           let visibleUsers = [];
           allUsers.forEach(other => {
             if (env.isVisibleTo(user, other)) {
-              visibleUsers.push[other];
+              visibleUsers.push(other);
             }
           });
           resolve(visibleUsers);
