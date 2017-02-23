@@ -47,15 +47,21 @@ export class AuthService {
                   console.log("Error: mismatch in facebook auth UID and firebase provider facebook UID");
                 }
 
-                //facebookUID = user.providerData[0].uid;
-                //firebaseUID = user.uid;
                 env.setupUser(facebookUID, firebaseUID).then(user => {
                   if (user) {
-                    console.log("Set current user: ");
                     user["accessToken"] = response.authResponse.accessToken;
-                    console.log(user);
                     env.userS.updateCurrentUser(user);
-                    resolve(user);
+                    console.log("Set current user: ");
+                    console.log(user);
+
+                    // also ensure search exists before resolving
+                    // ensureSearch must be run after updateCurrentUser
+                    env.ensureSearch().then(() => {
+                      resolve(user);
+                    }).catch(error => {
+                      reject(error);
+                    })
+
                   } else {
                     reject('No user object returned');
                   }
@@ -139,11 +145,57 @@ export class AuthService {
         return false;
     }
 
+
+    hasSearch(): Promise<boolean> {
+      let uid = this.userS.user.id;
+      let ref = firebase.database().ref('/users/' + uid);
+      return new Promise((resolve, reject) => {
+        ref.once('value')
+        .then(snapshot => {
+          resolve(snapshot.hasChild('lff') && snapshot.hasChild('lfm'));
+        }).catch(error => { reject(error); });
+      });
+    }
+
+    createSearch(): firebase.Promise<any> {
+      let user = this.userS.user;
+      return firebase.database().ref('/users/' + user.id).update({
+        distance: 'global',
+        lff: (user.gender == 'male'),
+        lfm: (user.gender == 'female')
+      });
+    }
+
+    ensureSearch(): Promise<boolean> {
+      console.log('ensuring presence of search');
+      let uid = this.userS.user.id;
+      return new Promise((resolve, reject) => {
+        this.hasSearch()
+        .then(hasSearch => {
+          if (hasSearch) {
+            console.log('user search already exists');
+            resolve(true);
+          } else {
+            console.log('user search does not exist, creating')
+            this.createSearch()
+            .then(() => { 
+              console.log('user search created')
+              resolve(true); 
+            }).catch(error => { reject(error); });
+          }
+        })
+        .catch(error => {
+          reject(error);
+        });
+      });
+    }
+    
+
     setupUser(facebookUID, firebaseUID): Promise<any> {
         console.log("Setting up current user...");
         return new Promise((resolve, reject) => {
+          // Get Facebook API data for initial field population
           this.callFacebookAPI().then(data => {
-            // Add Facebook user snapshot data to API data
             data["id"] = facebookUID;
             data["photoURL"] = "https://graph.facebook.com/" + facebookUID + "/picture?type=large";
             console.log(data);
