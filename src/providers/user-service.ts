@@ -58,17 +58,16 @@ export class UserService {
     }
 
     updateUser(user): Promise<any> {
-        console.log("Updating user with id: " + user.id);
-        return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/users/' + user.id);
-            ref.update(user).then((snap) => {
-                console.log("Update returned user!");
-                let val = snap.val();
-                resolve(val);
-            }).catch(error => {
-                console.log(error);
-                reject(error);
-            });
-        });
+      console.log("Updating user with id: " + user.id);
+      return new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/users/' + user.id);
+          ref.update(user).then(() => {
+            console.log("Update succeeded");
+            resolve(true);
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
+      });
     }
 }
