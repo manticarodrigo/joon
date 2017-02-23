@@ -10,7 +10,7 @@ import { NavController } from 'ionic-angular';
 })
 export class PreferencesPage {
   user = {
-    showAge: null,
+    showAge: true,
     lfm: null,
     lff: null,
     distance: null
