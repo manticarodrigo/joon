@@ -68,8 +68,8 @@ export class DiscoverPage {
   }
 
   fetchUsers() {
-    console.log("fetching visible users");
-    this.discoverS.fetchVisibleUsers().then(data => {
+    console.log("fetching discoverable users");
+    this.discoverS.fetchDiscoverableUsers().then(data => {
       console.log("fetch returned visible users");
       console.log(data);
       this.users = data;

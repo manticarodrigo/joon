@@ -9,8 +9,10 @@ export class DiscoverService {
         
     }
     
-    isVisibleTo(user1, user2): boolean {
+    isDiscoverableTo(user1, user2, seenUIDs): boolean {
       if (user1.id == user2.id)
+        return false;
+      if (seenUIDs && user2.id in seenUIDs)
         return false;
       if (user1.gender == 'male' && !user2.lfm)
         return false;
@@ -25,23 +27,58 @@ export class DiscoverService {
       return true;
     }
 
-    fetchVisibleUsers(): Promise<any> {
+    fetchSeenUIDs(): Promise<any> {
+      return new Promise((resolve, reject) => {
+        firebase.database().ref('/user_saw/' + this.userS.user.id).once('value').
+        then(snapshot => {
+          console.log('fetched Seen UIDs:');
+          console.log(snapshot.val());
+          resolve(snapshot.val());
+        }).catch(error => {
+          reject(error);
+        })
+      });
+    }
+
+    fetchDiscoverableUsers(): Promise<any> {
       let user = this.userS.user;
       let env = this;
       return new Promise((resolve, reject) => {
-        this.userS.fetchGlobalUsers().then(allUsers => {
-          console.log("fetched global users :");
-          console.log(allUsers);
+        Promise.all([this.userS.fetchGlobalUsers(), this.fetchSeenUIDs()])
+        .then(data => {
+          let allUsers = data[0];
+          let seenUIDs = data[1];
           let visibleUsers = [];
+
+          // this method for parsing out seenUIDs is not totally optimal
+          // - better to remove keys when both are dictionaries
+
           allUsers.forEach(other => {
-            if (env.isVisibleTo(user, other)) {
+            if (env.isDiscoverableTo(user, other, seenUIDs)) {
               visibleUsers.push(other);
             }
           });
           resolve(visibleUsers);
-        }).catch(error => { reject(error); })
+        }).catch(error => {
+          reject(error);
+        })
       });
     }
+
+
+    //     this.userS.fetchGlobalUsers().then(allUsers => {
+    //       console.log("fetched global users :");
+    //       console.log(allUsers);
+    //       let visibleUsers = [];
+    //       allUsers.forEach(other => {
+    //         if (env.isDiscoverableTo(user, other)) {
+    //           visibleUsers.push(other);
+    //         }
+    //       });
+    //       resolve(visibleUsers);
+    //     }).catch(error => { reject(error); })
+    //   });
+    // }
 
     saw(uid): Promise<any> {
         console.log("saw user");
