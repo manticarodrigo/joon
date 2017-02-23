@@ -65,21 +65,6 @@ export class DiscoverService {
       });
     }
 
-
-    //     this.userS.fetchGlobalUsers().then(allUsers => {
-    //       console.log("fetched global users :");
-    //       console.log(allUsers);
-    //       let visibleUsers = [];
-    //       allUsers.forEach(other => {
-    //         if (env.isDiscoverableTo(user, other)) {
-    //           visibleUsers.push(other);
-    //         }
-    //       });
-    //       resolve(visibleUsers);
-    //     }).catch(error => { reject(error); })
-    //   });
-    // }
-
     saw(uid): Promise<any> {
         console.log("saw user");
         return new Promise((resolve, reject) => {
