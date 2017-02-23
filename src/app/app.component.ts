@@ -93,29 +93,36 @@ export class Joon {
     }
 
     fetchCurrentUser() {
-        var storedUser: any;
+      var storedUser: any;
+
+      // this.storage.clear().then(() => { // clear cache for login debugging
+
         this.storage.get('user').then((storedUser) => {
-            if (storedUser.accessToken) {
-                console.log('Stored user found: ', storedUser);
-                let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
-                this.authS.authenticateWith(facebookCredential).then(success => {
-                    if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
-                        // User is logged in
-                        console.log("Current user: " + storedUser);
-                        this.userS.user = storedUser;
-                        this.nav.setRoot(DiscoverPage);
-                    } else {
-                        // No current user
-                        console.log("Stored user does not match authenticated firebase user.");
-                        this.logoutApp();
-                    }
-                }).catch(error => {
-                    console.log(error);
-                });
-            } else {
-                console.log('No stored user found!');
-            }
+          if (!storedUser) {
+            console.log('No stored user found!')
+          } else if (storedUser.accessToken) {
+            console.log('Stored user found: ', storedUser);
+            let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
+            this.authS.authenticateWith(facebookCredential).then(success => {
+              if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
+                // User is logged in
+                console.log("Current user: " + storedUser);
+                this.userS.user = storedUser;
+                this.nav.setRoot(DiscoverPage);
+              } else {
+                // No current user
+                console.log("Stored user does not match authenticated firebase user.");
+                this.logoutApp();
+              }
+            }).catch(error => {
+              console.log(error);
+            });
+          } else {
+            console.log('No stored user found!');
+          }
         });
+
+      // }); // clear cache for login debug
     }
     
     logoutApp() {

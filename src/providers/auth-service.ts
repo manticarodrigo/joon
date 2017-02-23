@@ -25,59 +25,79 @@ export class AuthService {
         Facebook.browserInit(this.FB_APP_ID, "v2.8");
     }
     
-    beginAuth(): Promise<any> {
-        console.log("Starting auth...");
-        var env = this;
-        return new Promise((resolve, reject) => {
-            this.facebookLogin().then(response => {
-                if (response.authResponse) {
-                    let uid = response.authResponse.userID;
-                    // User is signed-in Facebook.
-                    var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
-                        unsubscribe();
-                        // Check if we are already signed-in Firebase with the correct user.
-                        if (!env.isUserEqual(response, firebaseUser)) {
-                            let facebookCredential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
-                            firebase.auth().signInWithCredential(facebookCredential).then((userData) => {
-                                console.log("Firebase returned user object: ");
-                                console.log(userData);
-                                env.setupUser(userData).then(user => {
-                                    if (user) {
-                                        console.log("Set current user: ");
-                                        user["accessToken"] = response.authResponse.accessToken;
-                                        console.log(user);
-                                        env.userS.updateCurrentUser(user);
-                                        resolve(user);
-                                    } else {
-                                        reject('No user object returned');
-                                    }
-                                }).catch(error => {
-                                    console.log(error);
-                                    reject(error);
-                                });
-                            }).catch((error) => {
-                                console.log(error);
-                                reject(error);
-                            });
-                        } else {
-                            // User is already signed-in Firebase with the correct user.
-                            console.log("User is already signed-in Firebase with the correct user.")
-                            resolve(uid);
-                        }
-                    });
-                } else {
-                    // User is signed-out of Facebook.
-                    firebase.auth().signOut().then(() => {
-                        reject('disconnected');
-                    }).catch(error => {
-                        reject(error);
-                    });
+
+    firebaseAuth(response): Promise<any> {
+      let env = this;
+      return new Promise((resolve, reject) => {
+        if (response.authResponse) {
+          let uid = response.authResponse.userID;
+          // User is signed-in Facebook.
+          var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
+            unsubscribe();
+            // Check if we are already signed-in Firebase with the correct user.
+            if (!env.isUserEqual(response, firebaseUser)) {
+              let facebookCredential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
+              firebase.auth().signInWithCredential(facebookCredential).then((userData) => {
+                console.log("Firebase returned user object: ");
+                console.log(userData);
+
+                let facebookUID = userData.providerData[0].uid;
+                let firebaseUID = userData.uid;
+                if (facebookUID != uid) {
+                  console.log("Error: mismatch in facebook auth UID and firebase provider facebook UID");
                 }
-            }).catch(error => {
+
+                //facebookUID = user.providerData[0].uid;
+                //firebaseUID = user.uid;
+                env.setupUser(facebookUID, firebaseUID).then(user => {
+                  if (user) {
+                    console.log("Set current user: ");
+                    user["accessToken"] = response.authResponse.accessToken;
+                    console.log(user);
+                    env.userS.updateCurrentUser(user);
+                    resolve(user);
+                  } else {
+                    reject('No user object returned');
+                  }
+                }).catch(error => {
+                  console.log(error);
+                  reject(error);
+                });
+              }).catch((error) => {
                 console.log(error);
                 reject(error);
-            });
+              });
+            } else {
+              // User is already signed-in Firebase with the correct user.
+              console.log("User is already signed-in Firebase with the correct user.")
+              resolve(uid);
+            }
+          });
+        } else {
+          // User is signed-out of Facebook.
+          firebase.auth().signOut().then(() => {
+            reject('disconnected');
+          }).catch(error => {
+            reject(error);
+          });
+        }
+      });
+    }
+
+    beginAuth(): Promise<any> {
+      console.log("Starting auth...");
+      var env = this;
+      return new Promise((resolve, reject) => {
+        this.facebookLogin().then(response => {
+          return this.firebaseAuth(response);
+        }).then(() => {
+          resolve(true);
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
         });
+      });
     }
 
     facebookLogin(): Promise<any> {
@@ -118,28 +138,27 @@ export class AuthService {
         }
         return false;
     }
-    
-    setupUser(user): Promise<any> {
+
+    setupUser(facebookUID, firebaseUID): Promise<any> {
         console.log("Setting up current user...");
         return new Promise((resolve, reject) => {
-            this.callFacebookAPI().then(data => {
-                // Add Facebook user snapshot data to API data
-                let uid = user.providerData[0].uid;
-                data["id"] = uid;
-                data["photoURL"] = "https://graph.facebook.com/" + uid + "/picture?type=large";
-                console.log(data);
-                this.updateUserInDB(data).then(returnedUser => {
-                    console.log("DB update returned data");
-                    returnedUser["firebaseId"] = user.uid;
-                    resolve(returnedUser);
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                }); 
+          this.callFacebookAPI().then(data => {
+            // Add Facebook user snapshot data to API data
+            data["id"] = facebookUID;
+            data["photoURL"] = "https://graph.facebook.com/" + facebookUID + "/picture?type=large";
+            console.log(data);
+            this.updateUserInDB(data).then(returnedUser => {
+              console.log("DB update returned data");
+              returnedUser["firebaseId"] = firebaseUID;
+              resolve(returnedUser);
             }).catch(error => {
-                console.log(error);
-                reject(error);
-            });
+              console.log(error);
+              reject(error);
+            }); 
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
         });
     }
     
