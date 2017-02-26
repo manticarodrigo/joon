@@ -62,7 +62,10 @@ export class UserService {
       return new Promise((resolve, reject) => {
           let ref = firebase.database().ref('/users/' + user.id);
           ref.update(user).then(() => {
-            console.log("Update succeeded");
+            console.log("Update succeeded!");
+            if (user.id == this.user.id) {
+                this.updateCurrentUser(user);
+            }
             resolve(true);
           }).catch(error => {
             console.log(error);

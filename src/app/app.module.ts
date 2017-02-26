@@ -3,7 +3,9 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { Joon } from './app.component';
 
 import { LoginPage } from '../pages/login/login';
+import { LoadingPage } from '../pages/loading/loading';
 import { DiscoverPage } from '../pages/discover/discover';
+import { MatchedPage } from '../pages/matched/matched';
 import { ProfilePage } from '../pages/profile/profile';
 import { EditProfilePage } from '../pages/edit-profile/edit-profile';
 import { TopUsersPage } from '../pages/top-users/top-users';
@@ -22,14 +24,18 @@ import { Facebook, NativeStorage } from 'ionic-native';
 import { FacebookService } from 'ng2-facebook-sdk';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
+import { LoadingService } from '../providers/loading-service';
 import { DiscoverService } from '../providers/discover-service';
+import { ChatService } from '../providers/chat-service';
 import { StorageService } from '../providers/storage-service';
 
 @NgModule({
   declarations: [
     Joon,
     LoginPage,
+    LoadingPage,
     DiscoverPage,
+    MatchedPage,
     ProfilePage,
     EditProfilePage,
     TopUsersPage,
@@ -55,7 +61,9 @@ import { StorageService } from '../providers/storage-service';
   entryComponents: [
     Joon,
     LoginPage,
+    LoadingPage,
     DiscoverPage,
+    MatchedPage,
     ProfilePage,
     EditProfilePage,
     TopUsersPage,
@@ -72,7 +80,9 @@ import { StorageService } from '../providers/storage-service';
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
     UserService,
+    LoadingService,
     DiscoverService,
+    ChatService,
     StorageService,
     Facebook,
     FacebookService,

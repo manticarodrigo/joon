@@ -25,7 +25,7 @@ export class ProfilePage {
             console.log("Found passed user:", user);
             this.user = user;
         } else {
-            console.log("Set current user for profile page!")
+            console.log("Set current user for profile page!", this.userS.user)
             this.user = this.userS.user;
         }
     }

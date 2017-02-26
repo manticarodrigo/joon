@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
-import { UserService } from './user-service';
+import 'rxjs/Rx';
+import { Observable } from "rxjs/Observable";
 import firebase from 'firebase';
+
+import { UserService } from './user-service';
 
 @Injectable()
 export class ChatService {
@@ -8,61 +11,55 @@ export class ChatService {
     constructor(private userS: UserService) {
         
     }
-    
-    fetchChats(): Promise<any> {
-        console.log("fetching user chats");
+  
+    chatWith(user): Promise<any> {
+        console.log("Chatting with user...");
         return new Promise((resolve, reject) => {
-            let chatRef = firebase.database().ref('/users/' + this.userS.user.uid + '/chats');
-            chatRef.once('value').then((snap) => {
-                console.log("fetch returned user's chats");
-                let snapArr = [];
-                snap.forEach(snapshot => {
-                    snapArr.push(snapshot.val());
-                })
-                resolve(snapArr);
+            let chatId = this.chatIdWith(user.id);
+            this.fetchChat(chatId).then(chat => {
+                if (chat) {
+                    resolve(chat);
+                } else {
+                    this.createChatWithUser(user.id).then(chat => {
+                        if (chat) {
+                            resolve(chat);
+                        } else {
+                            reject(null);
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                        reject(error);
+                    });
+                }
             }).catch(error => {
                 console.log(error);
                 reject(error);
             });
         });
     }
-  
-    chatWith(uid, callback) {
-        let chatId = this.chatIdWith(uid);
-        this.fetchChat(chatId).then(chat => {
-            this.addUserToChat(this.userS.user.uid, chat);
-        }).catch(error => {
-            this.createChatWithUser(uid, chat => {
-                if (chat) {
-                    callback(chat);
-                } else {
-                    callback(null);
-                }
-            });
-        });
-    }
     
-    private chatIdWith(uid) {
+    chatIdWith(uid) {
         var chatId = '';
-            if (this.userS.user.uid < uid) {
-                chatId = this.userS.user.uid + "_" + uid;
+            if (this.userS.user.id < uid) {
+                chatId = this.userS.user.id + "_" + uid;
             } else {
-                chatId = uid + "_" + this.userS.user.uid;
+                chatId = uid + "_" + this.userS.user.id;
             }
         return chatId;
     }
     
-    private fetchChat(chatId): Promise<any> {
+    fetchChat(chatId): Promise<any> {
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/chats/'+ chatId);
             ref.once('value').then(snap => {
                 let val = snap.val();
                 if (val) {
+                    console.log("Found existing chat!");
                     console.log(val);
                     resolve(val);
                 } else {
-                    console.log("No chat found");
-                    reject(null);
+                    console.log("No chat found!");
+                    resolve(null);
                 }
             }).catch(error => {
                 console.log(error);
@@ -71,31 +68,78 @@ export class ChatService {
         });
     }
         
-    private createChatWithUser(uid, callback) {
-        let userSnapshot = this.userS.fetchUser(uid).then(userSnap => {
-            var chatId = this.chatIdWith(uid);
-            this.addUserToChat(uid, chatId);
-            this.addUserToChat(this.userS.user.uid, chatId);
-            var lastMessage = this.userS.user.firstName + 
-            "added " + userSnap.firstName + " to the conversation.";
-            var now = JSON.stringify(new Date());
-            var val = { "lastMessage" : lastMessage, "timestamp" : now };
-            firebase.database().ref('/chats/' + chatId).update(val);
-            callback(chatId);
-        }).catch(error => {
-            callback(null);
+    private createChatWithUser(uid): Promise<any> {
+        console.log("Creating chat with user...");
+        return new Promise((resolve, reject) => {
+            this.userS.fetchUser(uid).then(user => {
+                var chatId = this.chatIdWith(uid);
+                var lastMessage = "Tap to say hello!";
+                var now = (new Date).getTime();
+                var val = { "lastMessage" : lastMessage, "timestamp" : now, "id" : chatId };
+                let ref = firebase.database().ref('/chats/' + chatId);
+                ref.update(val).then(data => {
+                    console.log("DB saved chat data!");
+                    return ref.once('value');
+                }).then(snapshot => {
+                    console.log("DB returned chat snapshot");
+                    let val = snapshot.val();
+                    resolve(val);
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        });
+    }
+
+    observeMessagesIn(chat) {
+        console.log("Observing messages...");
+        return new Observable(observer => {
+            let ref = firebase.database().ref('messages/' + chat.id);
+            ref.on('value', (snapshot) => {
+                console.log(snapshot.val());
+                observer.next(snapshot.val());
+            });
+        });
+    }
+
+    sendMessageTo(message, user): Promise<any> {
+        console.log("Sending message...");
+        return new Promise((resolve, reject) => {
+            var chatId = this.chatIdWith(user.id);
+            var now = (new Date).getTime();
+            var val = { "message" : message, "timestamp" : now, "sender" : this.userS.user.id };
+            var data = {};
+            data[now] = val;
+            let ref = firebase.database().ref('/messages/' + chatId);
+                ref.update(data).then(data => {
+                    console.log("DB saved message data!");
+                    return ref.once('value');
+                }).then(snapshot => {
+                    console.log("DB returned message snapshot");
+                    var chatVal = { "lastMessage" : message, "timestamp" : now, "id" : chatId };
+                    let chatRef = firebase.database().ref('/chats/' + chatId);
+                    chatRef.update(chatVal).then(chatData => {
+                        console.log("DB saved chat data!");
+                        return chatRef.once('value');
+                    }).then(chatSnap => {
+                        console.log("DB returned chat snapshot");
+                        resolve(snapshot.val());
+                    }).catch(error => {
+                        console.log(error);
+                        reject(error);
+                    });
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
         });
     }
     
-    private addUserToChat(uid, chatId) {
-        console.log("Adding user with id: " + uid + "to chat with id: " + chatId);
-        firebase.database().ref('/chats/' + chatId + '/users/' + uid).set(true);
-    }
-    
-    private removeUserFromChat(uid, chatId) {
-        console.log("Removing user with id: " + uid + "from chat with id: " + chatId);
-        firebase.database().ref('/chats/' + chatId + '/users/' + uid).set(false);
-    }
+}
     
     /*
     static func userForChat(_ chat: Chat, completion: @escaping (_ user: User?) -> Void ) {
@@ -146,45 +190,6 @@ export class ChatService {
     static func stopObservingChats(_ chats: [Chat]) {
         for chat in chats {
             FirebaseController.base.child("chats/\(chat.identifier!)").removeAllObservers()
-        }
-    }
-    static func observeMessagesIn(_ chat: Chat, completion: @escaping (_ messages: [Message]?) -> Void) {
-        FirebaseController.observeDataAtEndpoint("messages/\(chat.identifier!)") { (json) in
-            if let json = json as? [String: AnyObject] {
-                var messages = [Message]()
-                var messageCount = 0
-                for key in json.keys {
-                    if let messageDict = json[key] {
-                        let text = messageDict["text"] as! String
-                        let sender = messageDict["sender"] as! String
-                        let timestamp = messageDict["timestamp"] as! NSNumber
-                        var readBool = Bool()
-                        if let read = messageDict["read"] as? Bool {
-                            readBool = read
-                        } else {
-                            readBool = false
-                        }
-                        let message = Message(text: text, sender: sender, timestamp: timestamp, read: readBool, identifier: key)
-                        self.readMessageInChat(message, chat: chat, completion: { (readMessage) in
-                            if let readMessage = readMessage {
-                                messages.append(readMessage)
-                            } else {
-                                messages.append(message)
-                            }
-                            messageCount += 1
-                            if messageCount == json.count {
-                                if messages.count > 0 {
-                                    completion(messages)
-                                } else {
-                                    completion(nil)
-                                }
-                            }
-                        })
-                    }
-                }
-            } else {
-                completion(nil)
-            }
         }
     }
     
@@ -242,34 +247,6 @@ export class ChatService {
         userIsTypingRef.onDisconnectRemoveValue()
     }
     
-    static func sendMessageToUser(_ text: String, chat: Chat, user: User, completion: @escaping (_ message: Message?) -> Void) {
-        let timestamp = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
-        if let currentUser = UserController.shared.currentUser {
-            UserController.pushToken(for: user, completion: { (token) in
-                if let token = token {
-                    print("Sending notification to \(currentUser.firstName())")
-                    OneSignalController.notify(user: user, text: text, player_id: token)
-                }
-            })
-            let message = Message(text: text, sender: currentUser.identifier!, timestamp: timestamp, read: false, identifier: nil)
-            FirebaseController.base.child("messages/\(chat.identifier!)").childByAutoId().setValue(message.jsonValue) { (error, ref) in
-                if error == nil {
-                    let lastMessage = text
-                    if let unreadCount = chat.unread?[user.identifier!] as? Int {
-                        var chat = Chat(lastMessage: lastMessage, timestamp: timestamp, typing: nil, unread: [user.identifier! : unreadCount + 1], identifier: chat.identifier!)
-                        chat.save()
-                    } else {
-                        var chat = Chat(lastMessage: lastMessage, timestamp: timestamp, typing: nil, unread: [user.identifier! : 1], identifier: chat.identifier!)
-                        chat.save()
-                    }
-                    completion(message)
-                } else {
-                    completion(nil)
-                }
-            }
-        }
-    }
-    
     static func sendMessageToCourse(_ text: String, chat: Chat, course: Course, completion: @escaping (_ message: Message?) -> Void) {
         let timestamp = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
         if let currentUser = UserController.shared.currentUser {
@@ -324,5 +301,4 @@ export class ChatService {
         return chats.sorted(by: {TimeInterval($0.0.timestamp) > TimeInterval($0.1.timestamp)})
     }
     */
-}
 

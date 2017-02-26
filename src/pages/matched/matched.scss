@@ -1,0 +1,38 @@
+page-matched {
+    .matched-image {
+        padding: 20px;
+        width: 300px;
+    }
+    .images {
+        position: relative;
+        top: 30px;
+        width: 100%;
+        text-align: center;
+        .avatar {
+            display: inline-block;
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 10px;
+            img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                min-height: 100%;
+                min-width: 100%;
+                border-radius: 50%;
+                border: 0.5px solid #999999;
+                margin: auto;
+            }
+        }
+    }
+    button {
+        position: relative;
+        top: 80px;
+        display: block;
+        margin: auto;
+        margin-bottom: 10px !important;
+        width: 200px;
+        height: 50px !important;
+    }
+}

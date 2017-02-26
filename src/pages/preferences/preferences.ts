@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 
 import { UserService } from '../../providers/user-service';
+import { DiscoverService } from '../../providers/discover-service';
 
 import { NavController } from 'ionic-angular';
 
@@ -13,57 +14,51 @@ export class PreferencesPage {
     showAge: true,
     lfm: null,
     lff: null,
-    distance: null
+    distance: 'global'
   };
-  relationship = 'women';
   
-  constructor(public navCtrl: NavController, private userS: UserService) {
+  constructor(public navCtrl: NavController, private userS: UserService, private discoverS: DiscoverService) {
 
   }
 
-  selectedMen() {
-    this.relationship = "men";
-    this.userS.updateUser({ 
-      id: this.userS.user.id,
-      lfm: true,
-      lff: false
-    }).then(data => {
-      this.user.lfm = true;
-      this.user.lff = false;
-    }).catch(error => { alert(error); });
+  ionViewWillEnter() {
+    this.user = this.userS.user;
+  }
+
+  toggledMen() {
+    console.log("Men toggled!");
+    console.log(this.user.lfm);
+    this.userS.updateUser(this.user).catch(error => { alert(error); });
   }
   
-  selectedWomen() {
-    this.relationship = "women";
-    this.userS.updateUser({ 
-      id: this.userS.user.id,
-      lfm: false,
-      lff: true
-    }).then(data => {
-      this.user.lfm = false;
-      this.user.lff = true;
-    }).catch(error => { alert(error); });
+  toggledWomen() {
+    console.log("Women toggled!");
+    console.log(this.user.lff);
+    this.userS.updateUser(this.user).catch(error => { alert(error); });
   }
 
   selectedDistance(distance) {
+    console.log("Distance selected!");
+    console.log(this.user.distance);
     this.user.distance = distance;
-    this.userS.updateUser({ 
-      id: this.userS.user.id,
-      distance: distance
-    }).catch(error => { alert(error); });
+    console.log(this.user.distance);
+    this.userS.updateUser(this.user).catch(error => { alert(error); });
   }
 
   toggledShowAge() {
-    this.user.showAge = !this.user.showAge
-    this.userS.updateUser({
-      id: this.userS.user.id,
-      showAge: this.user.showAge
-    }).catch(error => { alert(error); });
+    console.log("Show age toggled!");
+    console.log(this.user.showAge);
+    this.userS.updateUser(this.user).catch(error => { alert(error); });
   }
 
-  ngAfterViewInit() {
-    this.user = this.userS.user;
-    this.relationship = (this.user.lff ? 'women' : 'men');
+  resetDiscoverableUsers() {
+    console.log("Users reset pressed!");
+    this.discoverS.resetSeenFor(this.userS.user.id);
+  }
+
+  resetLikes() {
+    console.log("Like reset pressed!");
+    this.discoverS.resetLikesFor(this.userS.user.id);
   }
   
 }

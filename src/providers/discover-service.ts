@@ -31,7 +31,20 @@ export class DiscoverService {
       return new Promise((resolve, reject) => {
         firebase.database().ref('/user_saw/' + this.userS.user.id).once('value').
         then(snapshot => {
-          console.log('fetched Seen UIDs:');
+          console.log('Fetched Seen UIDs:');
+          console.log(snapshot.val());
+          resolve(snapshot.val());
+        }).catch(error => {
+          reject(error);
+        })
+      });
+    }
+
+    fetchLikedUIDS(): Promise<any> {
+      return new Promise((resolve, reject) => {
+        firebase.database().ref('/user_liked/' + this.userS.user.id).once('value').
+        then(snapshot => {
+          console.log('Fetched Liked UIDs:');
           console.log(snapshot.val());
           resolve(snapshot.val());
         }).catch(error => {
@@ -65,19 +78,67 @@ export class DiscoverService {
       });
     }
 
+    fetchMatchedUsers(): Promise<any> {
+      console.log("Fetching matched users...");
+      let user = this.userS.user;
+      let env = this;
+      return new Promise((resolve, reject) => {
+        this.fetchLikedUIDS().then(likedUIDs => {
+          if (likedUIDs) {
+            let matchedUsers = [];
+            let dictCount = Object.keys(likedUIDs).length;
+            console.log(dictCount);
+            let likedCount = 0;
+            for (var uid in likedUIDs) {
+              this.checkForMatchWith(uid).then(matched => {
+                if (matched) {
+                  console.log("Found a match!")
+                  this.userS.fetchUser(uid).then(user => {
+                    console.log("Returned matched user!")
+                    matchedUsers.push(user);
+                    likedCount++;
+                    if (likedCount == dictCount) {
+                      resolve(matchedUsers);
+                    }
+                  }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                  });
+                } else {
+                  console.log("Not a match!")
+                  likedCount++;
+                  if (likedCount == dictCount) {
+                    resolve(matchedUsers);
+                  }
+                }
+              }).catch(error => {
+                console.log(error);
+                reject(error);
+              });
+            }
+          } else {
+            console.log("No liked users found!");
+            resolve([]);
+          }
+        }).catch(error => {
+          reject(error);
+        })
+      });
+    }
+
     saw(uid): Promise<any> {
-        console.log("saw user");
+        console.log("Seeing user...");
         return new Promise((resolve, reject) => {
           var data = {};
           data[uid] = (new Date).getTime();
           let ref = firebase.database().ref('/user_saw/' + this.userS.user.id);
           ref.update(data).then( data => {
-              console.log("user saw saved to db");
+              console.log("User saw saved to DB!");
               return ref.once('value');
           }).then( snapshot => {
-              console.log("user saw returned from db");
+              console.log("User saw returned from DB!");
               let val = snapshot.val();
-              console.log("snapshot val: " + JSON.stringify(val));
+              console.log("Snapshot val: " + JSON.stringify(val));
               resolve(val);
           }).catch(error => {
               console.log(error);
@@ -86,20 +147,23 @@ export class DiscoverService {
         });
     }
     
-    liked(uid): Promise<any> {
-        console.log("liking user");
+    liked(uid): Promise<boolean> {
+        console.log("Liking user...");
         return new Promise((resolve, reject) => {
           var data = {};
           data[uid] = (new Date).getTime();
           let ref = firebase.database().ref('/user_liked/' + this.userS.user.id);
-          ref.update(data).then( data => {
-              console.log("user liked saved to db");
+          ref.update(data).then(data => {
+              console.log("User liked saved to DB!");
               return ref.once('value');
-          }).then( snapshot => {
-              console.log("user liked returned from db");
-              let val = snapshot.val();
-              console.log("snapshot val: " + JSON.stringify(val));
-              resolve(val);
+          }).then(snapshot => {
+              console.log("User liked returned from DB!");
+              this.checkForMatchWith(uid).then(matched => {
+                resolve(matched);
+              }).catch(error => {
+                console.log(error);
+                reject(error);
+              });
           }).catch(error => {
               console.log(error);
               reject(error);
@@ -107,19 +171,79 @@ export class DiscoverService {
         });
     }
     
-    doubleLiked(uid): Promise<any> {
-        console.log("double liking user");
+    doubleLiked(uid): Promise<boolean> {
+        console.log("Double liking user...");
         return new Promise((resolve, reject) => {
           var data = {};
           data[uid] = (new Date).getTime();
           let ref = firebase.database().ref('/user_liked/' + this.userS.user.id);
           ref.update(data).then( data => {
-              console.log("user double like saved to db");
+              console.log("User double like saved to DB");
               return ref.once('value');
           }).then( snapshot => {
-              console.log("user double like returned from db");
+              console.log("User double like returned from DB!");
+              this.checkForMatchWith(uid).then(matched => {
+                resolve(matched);
+              }).catch(error => {
+                console.log(error);
+                reject(error);
+              });
+          }).catch(error => {
+              console.log(error);
+              reject(error);
+          });
+        });
+    }
+
+    checkForMatchWith(uid): Promise<boolean> {
+      console.log("Checking for match...");
+      return new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/user_liked/' + uid + '/' + this.userS.user.id);
+          ref.once('value').then(snap => {
+            if (snap) {
+              console.log("User likes current user!");
+              resolve(true);
+            } else {
+              console.log("User has not liked current user!");
+              resolve(false);
+            }
+          }).catch(error => {
+              console.log(error);
+              reject(error);
+          });
+        });
+    }
+
+    resetSeenFor(uid): Promise<any> {
+        console.log("Resetting seen data...");
+        return new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/user_saw/' + this.userS.user.id);
+          ref.set({}).then(data => {
+              console.log("Seen data reset DB!");
+              return ref.once('value');
+          }).then(snapshot => {
+              console.log("Seen data returned from DB!");
               let val = snapshot.val();
-              console.log("snapshot val: " + JSON.stringify(val));
+              console.log("Snapshot val: " + JSON.stringify(val));
+              resolve(val);
+          }).catch(error => {
+              console.log(error);
+              reject(error);
+          });
+        });
+    }
+
+    resetLikesFor(uid): Promise<any> {
+        console.log("Resetting likes data...");
+        return new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/user_liked/' + this.userS.user.id);
+          ref.set({}).then(data => {
+              console.log("Likes data reset DB!");
+              return ref.once('value');
+          }).then(snapshot => {
+              console.log("Likes data returned from DB!");
+              let val = snapshot.val();
+              console.log("Snapshot val: " + JSON.stringify(val));
               resolve(val);
           }).catch(error => {
               console.log(error);

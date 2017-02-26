@@ -24,7 +24,47 @@ export class AuthService {
     constructor(public platform: Platform, private userS: UserService, private fb: FacebookService) {
         Facebook.browserInit(this.FB_APP_ID, "v2.8");
     }
-    
+
+    beginAuth(): Promise<any> {
+      console.log("Starting auth...");
+      var env = this;
+      return new Promise((resolve, reject) => {
+        this.facebookLogin().then(response => {
+          return this.firebaseAuth(response);
+        }).then(() => {
+          resolve(true);
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
+      });
+    }
+
+    facebookLogin(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            // Check If Cordova/Mobile
+            if (this.platform.is('cordova')) {
+                console.log("Starting Mobile Facebook login...");
+                Facebook.login(this.permissions).then(response => {
+                    console.log("Mobile Facebook login returned response.");
+                    resolve(response);
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+            } else {
+                console.log("Starting Core Facebook login...");
+                this.fb.login(this.permissions).then(response => {
+                    console.log("Core Facebook login returned response.");
+                    resolve(response);
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+            }
+        });
+    }
 
     firebaseAuth(response): Promise<any> {
       let env = this;
@@ -88,47 +128,6 @@ export class AuthService {
           });
         }
       });
-    }
-
-    beginAuth(): Promise<any> {
-      console.log("Starting auth...");
-      var env = this;
-      return new Promise((resolve, reject) => {
-        this.facebookLogin().then(response => {
-          return this.firebaseAuth(response);
-        }).then(() => {
-          resolve(true);
-        })
-        .catch(error => {
-          console.log(error);
-          reject(error);
-        });
-      });
-    }
-
-    facebookLogin(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            // Check If Cordova/Mobile
-            if (this.platform.is('cordova')) {
-                console.log("Starting Mobile Facebook login...");
-                Facebook.login(this.permissions).then(response => {
-                    console.log("Mobile Facebook login returned response.");
-                    resolve(response);
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                });
-            } else {
-                console.log("Starting Core Facebook login...");
-                this.fb.login(this.permissions).then(response => {
-                    console.log("Core Facebook login returned response.");
-                    resolve(response);
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                });
-            }
-        });
     }
     
     isUserEqual (facebookAuthResponse, firebaseUser) {
@@ -254,10 +253,13 @@ export class AuthService {
             ref.update(user).then(data => {
                 console.log("DB saved user data");
                 return ref.once('value');
-            }).then( snapshot => {
+            }).then(snapshot => {
                 console.log("DB returned user snapshot");
                 let val = snapshot.val();
                 resolve(val);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
             });
         });
     }

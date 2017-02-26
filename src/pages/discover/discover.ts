@@ -1,8 +1,13 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { NavController, NavParams, ToastController } from 'ionic-angular';
 import { DiscoverService } from '../../providers/discover-service';
+
 import { UserService } from '../../providers/user-service';
+import { LoadingService } from '../../providers/loading-service';
+
 import { ChatsPage } from '../chats/chats';
+import { LoadingPage } from '../loading/loading';
+import { MatchedPage } from '../matched/matched';
 
 import {
   StackConfig,
@@ -26,7 +31,12 @@ export class DiscoverPage {
   undoHistory: Array<any>;
   stackConfig: StackConfig;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public toastCtrl: ToastController, private discoverS: DiscoverService, private userS: UserService) {
+  constructor(public navCtrl: NavController,
+              public navParams: NavParams,
+              public toastCtrl: ToastController,
+              private discoverS: DiscoverService,
+              private userS: UserService,
+              private loadingS: LoadingService) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
         return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -69,10 +79,17 @@ export class DiscoverPage {
 
   fetchUsers() {
     console.log("fetching discoverable users");
-    this.discoverS.fetchDiscoverableUsers().then(data => {
+    this.loadingS.user = this.userS.user;
+    this.loadingS.message = "Finding people nearby...";
+    if (!this.loadingS.isActive) {
+      this.loadingS.create(LoadingPage);
+      this.loadingS.present();
+    }
+    this.discoverS.fetchDiscoverableUsers().then(users => {
       console.log("fetch returned visible users");
-      console.log(data);
-      this.users = data;
+      console.log(users);
+      this.users = users;
+      this.loadingS.dismiss()
     }).catch(error => {
       alert(error);
     });
@@ -86,9 +103,10 @@ export class DiscoverPage {
       this.undoHistory.push(currentCard);
       console.log(currentCard);
       this.discoverS.saw(currentCard.id).then(success => {
-        this.presentToast('You did not like: ' + currentCard.firstName);
+        this.presentToast('You did not like ' + currentCard.firstName);
       }).catch(error => {
         this.presentToast('Error saving swipe');
+        this.undo();
       });
     }
   }
@@ -101,20 +119,50 @@ export class DiscoverPage {
       this.undoHistory.push(currentCard);
       console.log(currentCard);
       this.discoverS.saw(currentCard.id).then(success => {
-        this.discoverS.liked(currentCard.id).then(success => {
-          this.presentToast('You liked: ' + currentCard.firstName);
+        this.discoverS.liked(currentCard.id).then(matched => {
+          this.presentToast('You liked ' + currentCard.firstName);
+          if (matched) {
+            this.loadingS.user = this.userS.user;
+            this.loadingS.otherUser = currentCard;
+            this.loadingS.create(MatchedPage);
+            this.loadingS.present();
+          }
         }).catch(error => {
           this.presentToast('Error saving swipe');
+          this.undo();
         });
       }).catch(error => {
         this.presentToast('Error saving swipe');
+        this.undo();
       });
     }
   }
 
   doubleLike() {
-    this.presentToast("You double liked " + this.users[0].firstName );
-
+    console.log("Double liking...");
+    console.log(this.users.length);
+    if (this.users.length > 0) {
+      let currentCard = this.users.pop();
+      this.undoHistory.push(currentCard);
+      console.log(currentCard);
+      this.discoverS.saw(currentCard.id).then(success => {
+        this.discoverS.doubleLiked(currentCard.id).then(matched => {
+          this.presentToast('You double liked ' + currentCard.firstName);
+          if (matched) {
+            this.loadingS.user = this.userS.user;
+            this.loadingS.otherUser = currentCard;
+            this.loadingS.create(MatchedPage);
+            this.loadingS.present();
+          }
+        }).catch(error => {
+          this.presentToast('Error saving swipe');
+          this.undo();
+        });
+      }).catch(error => {
+        this.presentToast('Error saving swipe');
+        this.undo();
+      });
+    }
   }
 
   undo() {

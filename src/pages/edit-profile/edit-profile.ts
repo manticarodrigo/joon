@@ -36,7 +36,7 @@ export class EditProfilePage {
     }
 
     editProfileSubmit() {
-        this.userS.updateCurrentUser(this.user);
+        console.log("Save pressed!");
         this.userS.updateUser(this.user);
     }
     
