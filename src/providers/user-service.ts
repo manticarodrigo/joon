@@ -40,21 +40,39 @@ export class UserService {
     }
     
     fetchUser(uid): Promise<any> {
-        console.log("Getting user with id: " + uid);
-        return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/users/' + uid);
-            ref.once('value').then((snap) => {
-                console.log("Fetch returned user!");
-                let val = snap.val();
-                if (!val["photoURL"]) {
-                    val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
-                }
-                resolve(val);
-            }).catch(error => {
-                console.log(error);
-                reject(error);
-            });
+      console.log("Getting user with id: " + uid);
+      return new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/users/' + uid);
+          ref.once('value').then((snap) => {
+              console.log("Fetch returned user!");
+              let val = snap.val();
+              if (!val["photoURL"]) {
+                  val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
+              }
+              resolve(val);
+          }).catch(error => {
+              console.log(error);
+              reject(error);
+          });
+      });
+    }
+
+    fetchUsers(uids): Promise<any> {
+      console.log("Getting users with ids: " + JSON.stringify(uids));
+
+      var promises = [];
+
+      uids.forEach(uid => {
+        let promise = new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/users/' + uid);
+          ref.once('value').then(snapshot => {
+            resolve(snapshot.val());
+          });
         });
+        promises.push(promise);
+      });
+
+      return Promise.all(promises);
     }
 
     updateUser(user): Promise<any> {
