@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-import { Http } from '@angular/http';
-import 'rxjs/Rx';
+import { NavController, NavParams } from 'ionic-angular';
+
+import { UserService } from '../../providers/user-service';
+import { DiscoverService } from '../../providers/discover-service';
+
+import { ProfilePage } from '../profile/profile';
 
 @Component({
   selector: 'page-top-users',
@@ -9,46 +12,42 @@ import 'rxjs/Rx';
 })
 export class TopUsersPage {
     
-    user: '';
-    numbers: Array<any>;
+  topUsersLimit: number = 10;
+  topUsers: Array<any>;
 
-    constructor(public navCtrl: NavController, private http: Http) {
-        this.user = '';
-        this.numbers = [0];
-        for (var i=0; i<25; i++) {
-            this.numbers.push(i + 1);
-        }
-    }
-    
-    ngAfterViewInit() {
-        this.generateRandomUser();
-    }
-    
-    generateRandomUser() {
-        this.http.get('https://randomuser.me/api/?results=' + 1)
-            .map(data => data.json().results)
-            .subscribe(result => {
-                for (let val of result) {
-                    if (val["dob"]) {
-                        var age = val["dob"].split(" ")[0];
-                        var year = age.split('-')[0];
-                        var month = age.split('-')[1];
-                        var day = age.split('-')[2];
-                        
-                        var today = new Date();
-                        age = today.getFullYear() - year;
-                        if ( today.getMonth() < (month - 1)) {
-                            age--;
-                        }
-                        if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
-                            age--;
-                        }
-                        val["age"] = age;
-                    }
-                    console.log(val.name);
-                    this.user = val;
-                }
-        })
-    }
+  constructor(private navCtrl: NavController,
+              private navParams: NavParams,
+              private userS: UserService,
+              private discoverS: DiscoverService) {
+  }
+
+  ionViewWillEnter() {
+    this.fetchTopUsers(this.topUsersLimit);
+  }
+  
+  fetchTopUsers(count) {
+    console.log("fetching global users");
+
+    this.discoverS.getRankedUsersIDs().then(sortedIds => {
+      let topIds = sortedIds.slice(0, this.topUsersLimit);
+      return this.userS.fetchUsers(topIds);
+    }).then(users => {
+      // since each query is passed seperately to Promise.all,
+      // and the results array contains the result in the same order,
+      // there should be no need to re-sort
+      console.log("fetch returned top users");
+      console.log(users);
+      this.topUsers = users;
+    }).catch(error => {
+      alert(error);
+    });
+
+  }
+
+  userTapped(event, user) {
+    this.navCtrl.push(ProfilePage, {
+        user: user
+    });
+  }
 
 }

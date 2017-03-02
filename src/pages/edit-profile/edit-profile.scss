@@ -65,7 +65,14 @@ page-edit-profile {
         ion-col {
             position: relative;
         }
+        div {
+            position: relative;
+            padding-top: 100%;
+        }
         img {
+            position: absolute;
+            top: 0;
+            left: 0;
             min-width: 100%;
             min-height: 100%;
             border-radius: 1px;
@@ -80,28 +87,13 @@ page-edit-profile {
             min-height: 30px;
             border: none;
         }
-        .large {
-            height: 75vw;
-        }
         .right {
-            div {
-                position: relative;
-                //width: 25vw;
-                height: 21vw;
-                margin-bottom: 22%;
-            }
-            div:last-of-type {
-                margin-bottom: 0px;
-            }
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
             .edit {
                 top: 5px;
                 right: 5px; 
-            }
-        }
-        
-        .bottom {
-            ion-col {
-                height: 25vw;
             }
         }
     }

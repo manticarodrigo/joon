@@ -14,29 +14,44 @@
 
 <ion-content padding>
     <ion-label>I am interested in:</ion-label>
-    <ion-item class="borderless">
-        <ion-segment [(ngModel)]="relationship" color="primary">
-            <ion-segment-button value="men" (ionSelect)="selectedMen()">
-                Men
-            </ion-segment-button>
-            <ion-segment-button value="women" (ionSelect)="selectedWomen()">
-                Women
-            </ion-segment-button>
-        </ion-segment>
-    </ion-item>
+    <ion-grid>
+        <ion-row>
+            <ion-col width-50 class="relationship men">
+                <ion-label [style.color] = "user.lfm ? '#fff' : '#58595B'">Men</ion-label>
+                <ion-checkbox [(ngModel)]="user.lfm" (ionChange)="toggledMen()"></ion-checkbox>
+            </ion-col>
+            <ion-col width-50 class="relationship women">
+                <ion-label [style.color] = "user.lff ? '#fff' : '#58595B'">Women</ion-label>
+                <ion-checkbox [(ngModel)]="user.lff" (ionChange)="toggledWomen()"></ion-checkbox>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
     
     <ion-label>Search Distance</ion-label>
     <ion-item class="borderless">
-        <ion-select [(ngModel)]="distance">
-            <ion-option value="local" selected="true">Local</ion-option>
-            <ion-option value="national">National</ion-option>
-            <ion-option value="global">Global</ion-option>
+        <ion-select [(ngModel)]="user.distance">
+            <!-- see about replacing this verbose way of binding selectedDistance -->
+            <ion-option value="local" selected="true" (ionSelect)="selectedDistance('local')">Local</ion-option>
+            <ion-option value="national" (ionSelect)="selectedDistance('national')">National</ion-option>
+            <ion-option value="global" (ionSelect)="selectedDistance('global')">Global</ion-option>
         </ion-select>
     </ion-item>
     
     <ion-item class="borderless">
-        <ion-checkbox [(ngModel)]="showAge"></ion-checkbox>
+        <ion-checkbox class="age" [(ngModel)]="user.showAge" (ionChange)="toggledShowAge()"></ion-checkbox>
         <ion-label>Show Age</ion-label>
     </ion-item>
-    
+
+    <ion-item class="borderless">
+        <button ion-button block outline (click)="resetDiscoverableUsers()">
+            Reset Discoverable Users
+        </button>
+    </ion-item>
+
+    <ion-item class="borderless">
+        <button ion-button block outline (click)="resetLikes()">
+            Reset Likes
+        </button>
+    </ion-item>
+
 </ion-content>

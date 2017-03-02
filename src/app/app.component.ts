@@ -1,9 +1,10 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Nav, Platform, MenuController } from 'ionic-angular';
+import { Nav, NavParams, Platform, MenuController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { Storage } from '@ionic/storage';
 
 import { LoginPage } from '../pages/login/login';
+import { LoadingPage } from '../pages/loading/loading';
 import { DiscoverPage } from '../pages/discover/discover';
 import { ProfilePage } from '../pages/profile/profile';
 import { EditProfilePage } from '../pages/edit-profile/edit-profile';
@@ -19,6 +20,7 @@ import { ChatPage } from '../pages/chat/chat';
 
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
+import { LoadingService } from '../providers/loading-service';
 
 import firebase from 'firebase';
 import { FacebookService, FacebookInitParams } from 'ng2-facebook-sdk';
@@ -37,6 +39,7 @@ export class Joon {
                 private el: ElementRef,
                 private authS: AuthService,
                 private userS: UserService,
+                private loadingS: LoadingService,
                 private fb: FacebookService,
                 private storage: Storage) {
 
@@ -93,29 +96,50 @@ export class Joon {
     }
 
     fetchCurrentUser() {
-        var storedUser: any;
-        this.storage.get('user').then((val) => {
-            if (val) {
-                if (firebase.auth().currentUser.uid) {
-                    storedUser = val;
-                    console.log('Stored user found: ', val);
-                    if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
-                        this.userS.user = storedUser;
-                        // User is logged in
-                        console.log("Current user: " + this.userS.user);
-                        this.nav.setRoot(DiscoverPage);
-                    } else {
-                        // No current user
-                        console.log("Stored user does not match authenticated firebase user.");
-                        this.logoutApp();
-                    }
-                } else {
-                    console.log("No Firebase user found!");
-                }
-            } else {
-                console.log('No stored user found!');
-            }
+      // console.log('erasing storage for login debugging');
+      // this.storage.clear().then(() => { // clear cache for login debugging
+        this.storage.get('user').then((storedUser) => {
+          if (!storedUser) {
+            console.log('No stored user found!')
+          } else if (storedUser.accessToken) {
+            this.loadingS.user = storedUser;
+            this.loadingS.message = "Reauthenticating current user...";
+            this.loadingS.create(LoadingPage);
+            this.loadingS.present();
+            console.log('Stored user found: ', storedUser);
+            let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
+            this.authS.authenticateWith(facebookCredential).then(success => {
+              if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
+                // Current user signed into firebase
+                console.log("Current user: " + storedUser);
+                this.loadingS.message = "Retreiving latest user data...";
+                this.userS.fetchUser(storedUser.id).then(user => {
+                  // Current user updated
+                  this.userS.user = user;
+                  this.userS.updateCurrentUser(user);
+                  this.nav.setRoot(DiscoverPage);
+                }).catch(error => {
+                  console.log(error);
+                  this.logoutApp();
+                  this.loadingS.dismiss();
+                });
+              } else {
+                // No current user
+                console.log("Stored user does not match authenticated firebase user.");
+                this.logoutApp();
+                this.loadingS.dismiss();
+              }
+            }).catch(error => {
+              console.log(error);
+              this.logoutApp();
+              this.loadingS.dismiss();
+            });
+          } else {
+            console.log('No stored user found!');
+          }
         });
+
+      // }); // clear cache for login debug
     }
     
     logoutApp() {

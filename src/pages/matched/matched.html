@@ -1,0 +1,17 @@
+<ion-header>
+</ion-header>
+
+<ion-content text-center padding>
+  <img class="matched-image" src="assets/matched.png">
+  <p *ngIf="this.loadingS.otherUser">{{ this.loadingS.otherUser.firstName }} liked you too ;)</p>
+  <div class="images">
+    <div class="avatar" *ngIf="this.loadingS.user.photoURL">
+      <img [src]="this.loadingS.user.photoURL">
+    </div>
+    <div class="avatar" *ngIf="this.loadingS.otherUser.photoURL">
+      <img [src]="this.loadingS.otherUser.photoURL">
+    </div>
+  </div>
+  <button ion-button (click)="chat()">Send a Message</button>
+  <button ion-button (click)="dismiss()">Keep Playing</button>
+</ion-content>

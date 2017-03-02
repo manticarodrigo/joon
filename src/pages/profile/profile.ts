@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, NavParams } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { StorageService } from '../../providers/storage-service';
@@ -12,25 +12,30 @@ import { EditProfilePage } from '../edit-profile/edit-profile';
 })
 
 export class ProfilePage {
-    user = {};
+    user: any;
     images: Array<any>;
     mutual: Array<any>;
     
     constructor(public navCtrl: NavController,
+                private navParams: NavParams,
                 private userS: UserService,
                 private storageS: StorageService) {
+        let user = this.navParams.get('user');
+        if (user) {
+            console.log("Found passed user:", user);
+            this.user = user;
+        } else {
+            console.log("Set current user for profile page!", this.userS.user)
+            this.user = this.userS.user;
+        }
     }
-    
-    ionViewDidLoad() {
-        this.user = this.userS.user;
-	}
     
     ionViewWillEnter() {
         this.fetchUserImages();
     }
     
     fetchUserImages() {
-        this.storageS.fetchImagesFor(this.userS.user.uid).then(urlList => {
+        this.storageS.fetchImagesFor(this.user.id).then(urlList => {
             this.images = urlList;
         });
     }

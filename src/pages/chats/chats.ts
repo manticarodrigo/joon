@@ -1,8 +1,12 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
-import { Http } from '@angular/http';
-import 'rxjs/Rx';
 
+import { DiscoverService } from '../../providers/discover-service';
+import { UserService } from '../../providers/user-service';
+import { LoadingService } from '../../providers/loading-service';
+import { ChatService } from '../../providers/chat-service';
+
+import { LoadingPage } from '../loading/loading';
 import { ChatPage } from '../chat/chat';
 
 @Component({
@@ -12,48 +16,47 @@ import { ChatPage } from '../chat/chat';
 export class ChatsPage {
     
     selectedUser: any;
-    user: '';
-    users: Array<any>;
+    matchedUsers: Array<any>;
+    chats: Array<any>;
 
-    constructor(private nav: NavController, navParams: NavParams, private http: Http) {
-    
-        this.generateRandomUser();
-        this.users = [];
+    constructor(private navCtrl: NavController,
+                private navParams: NavParams,
+                private discoverS: DiscoverService,
+                private userS: UserService,
+                private loadingS: LoadingService,
+                private chatS: ChatService) {
+        this.matchedUsers = [];
+        this.fetchMatchedUsers();
     }
     
-    generateRandomUser() {
-        this.http.get('https://randomuser.me/api/?results=' + 1)
-            .map(data => data.json().results)
-            .subscribe(result => {
-                for (let val of result) {
-                    if (val["dob"]) {
-                        var age = val["dob"].split(" ")[0];
-                        var year = age.split('-')[0];
-                        var month = age.split('-')[1];
-                        var day = age.split('-')[2];
-                        
-                        var today = new Date();
-                        age = today.getFullYear() - year;
-                        if ( today.getMonth() < (month - 1)) {
-                            age--;
-                        }
-                        if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
-                            age--;
-                        }
-                        val["age"] = age;
-                    }
-                    this.user = val;
-                    for (var i=0; i<3; i++) {
-                        this.users.push(this.user);
-                    }
-                }
-        })
+    fetchMatchedUsers() {
+        this.loadingS.user = this.userS.user;
+        this.loadingS.message = "Fetching your matches...";
+        if (!this.loadingS.isActive) {
+            this.loadingS.create(LoadingPage);
+            this.loadingS.present();
+        }
+        this.discoverS.fetchMatchedUsers().then(matchedUsers => {
+            console.log(matchedUsers);
+            this.matchedUsers = matchedUsers;
+            this.loadingS.dismiss();
+        }).catch(error => {
+            console.log(error);
+        });
     }
 
     userTapped(event, user) {
-        // That's right, we're pushing to ourselves!
-        this.nav.push(ChatPage, {
-            user: user
+        this.chatS.chatWith(user).then(chat => {
+            if (chat) {
+                this.navCtrl.push(ChatPage, {
+                    user: user,
+                    chat: chat
+                });
+            } else {
+                console.log("No chat returned!");
+            }
+        }).catch(error => {
+            console.log(error);
         });
     }
 

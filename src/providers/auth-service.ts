@@ -24,66 +24,28 @@ export class AuthService {
     constructor(public platform: Platform, private userS: UserService, private fb: FacebookService) {
         Facebook.browserInit(this.FB_APP_ID, "v2.8");
     }
-    
+
     beginAuth(): Promise<any> {
-        console.log("Starting auth...");
-        var env = this;
-        return new Promise((resolve, reject) => {
-            this.facebookLogin().then(response => {
-                if (response.authResponse) {
-                    let uid = response.authResponse.userID;
-                    // User is signed-in Facebook.
-                    var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
-                        unsubscribe();
-                        // Check if we are already signed-in Firebase with the correct user.
-                        if (!env.isUserEqual(response, firebaseUser)) {
-                            let facebookCredential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
-                            firebase.auth().signInWithCredential(facebookCredential).then((userData) => {
-                                console.log("Firebase returned user object: ");
-                                console.log(userData);
-                                env.setupUser(userData).then(user => {
-                                    if (user) {
-                                        console.log("Set current user: ");
-                                        console.log(user);
-                                        env.userS.updateCurrentUser(user);
-                                        resolve(user);
-                                    } else {
-                                        reject('No user object returned');
-                                    }
-                                }).catch(error => {
-                                    console.log(error);
-                                    reject(error);
-                                });
-                            }).catch((error) => {
-                                console.log(error);
-                                reject(error);
-                            });
-                        } else {
-                            // User is already signed-in Firebase with the correct user.
-                            console.log("User is already signed-in Firebase with the correct user.")
-                            resolve(uid);
-                        }
-                    });
-                } else {
-                    // User is signed-out of Facebook.
-                    firebase.auth().signOut().then(() => {
-                        reject('disconnected');
-                    }).catch(error => {
-                        reject(error);
-                    });
-                }
-            }).catch(error => {
-                console.log(error);
-                reject(error);
-            });
+      console.log("Starting auth...");
+      var env = this;
+      return new Promise((resolve, reject) => {
+        this.facebookLogin().then(response => {
+          return this.firebaseAuth(response);
+        }).then(() => {
+          resolve(true);
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
         });
+      });
     }
 
     facebookLogin(): Promise<any> {
-        console.log("Starting Facebook login...");
         return new Promise((resolve, reject) => {
             // Check If Cordova/Mobile
             if (this.platform.is('cordova')) {
+                console.log("Starting Mobile Facebook login...");
                 Facebook.login(this.permissions).then(response => {
                     console.log("Mobile Facebook login returned response.");
                     resolve(response);
@@ -92,6 +54,7 @@ export class AuthService {
                     reject(error);
                 });
             } else {
+                console.log("Starting Core Facebook login...");
                 this.fb.login(this.permissions).then(response => {
                     console.log("Core Facebook login returned response.");
                     resolve(response);
@@ -101,6 +64,70 @@ export class AuthService {
                 });
             }
         });
+    }
+
+    firebaseAuth(response): Promise<any> {
+      let env = this;
+      return new Promise((resolve, reject) => {
+        if (response.authResponse) {
+          let uid = response.authResponse.userID;
+          // User is signed-in Facebook.
+          var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
+            unsubscribe();
+            // Check if we are already signed-in Firebase with the correct user.
+            if (!env.isUserEqual(response, firebaseUser)) {
+              let facebookCredential = firebase.auth.FacebookAuthProvider.credential(response.authResponse.accessToken);
+              firebase.auth().signInWithCredential(facebookCredential).then((userData) => {
+                console.log("Firebase returned user object: ");
+                console.log(userData);
+
+                let facebookUID = userData.providerData[0].uid;
+                let firebaseUID = userData.uid;
+                if (facebookUID != uid) {
+                  console.log("Error: mismatch in facebook auth UID and firebase provider facebook UID");
+                }
+
+                env.setupUser(facebookUID, firebaseUID).then(user => {
+                  if (user) {
+                    user["accessToken"] = response.authResponse.accessToken;
+                    env.userS.updateCurrentUser(user);
+                    console.log("Set current user: ");
+                    console.log(user);
+
+                    // also ensure search exists before resolving
+                    // ensureSearch must be run after updateCurrentUser
+                    env.ensureSearch().then(() => {
+                      resolve(user);
+                    }).catch(error => {
+                      reject(error);
+                    })
+
+                  } else {
+                    reject('No user object returned');
+                  }
+                }).catch(error => {
+                  console.log(error);
+                  reject(error);
+                });
+              }).catch((error) => {
+                console.log(error);
+                reject(error);
+              });
+            } else {
+              // User is already signed-in Firebase with the correct user.
+              console.log("User is already signed-in Firebase with the correct user.")
+              resolve(uid);
+            }
+          });
+        } else {
+          // User is signed-out of Facebook.
+          firebase.auth().signOut().then(() => {
+            reject('disconnected');
+          }).catch(error => {
+            reject(error);
+          });
+        }
+      });
     }
     
     isUserEqual (facebookAuthResponse, firebaseUser) {
@@ -116,28 +143,73 @@ export class AuthService {
         }
         return false;
     }
+
+
+    hasSearch(): Promise<boolean> {
+      let uid = this.userS.user.id;
+      let ref = firebase.database().ref('/users/' + uid);
+      return new Promise((resolve, reject) => {
+        ref.once('value')
+        .then(snapshot => {
+          resolve(snapshot.hasChild('lff') && snapshot.hasChild('lfm'));
+        }).catch(error => { reject(error); });
+      });
+    }
+
+    createSearch(): firebase.Promise<any> {
+      let user = this.userS.user;
+      return firebase.database().ref('/users/' + user.id).update({
+        distance: 'global',
+        lff: (user.gender == 'male'),
+        lfm: (user.gender == 'female')
+      });
+    }
+
+    ensureSearch(): Promise<boolean> {
+      console.log('ensuring presence of search');
+      let uid = this.userS.user.id;
+      return new Promise((resolve, reject) => {
+        this.hasSearch()
+        .then(hasSearch => {
+          if (hasSearch) {
+            console.log('user search already exists');
+            resolve(true);
+          } else {
+            console.log('user search does not exist, creating')
+            this.createSearch()
+            .then(() => { 
+              console.log('user search created')
+              resolve(true); 
+            }).catch(error => { reject(error); });
+          }
+        })
+        .catch(error => {
+          reject(error);
+        });
+      });
+    }
     
-    setupUser(user): Promise<any> {
+
+    setupUser(facebookUID, firebaseUID): Promise<any> {
         console.log("Setting up current user...");
         return new Promise((resolve, reject) => {
-            this.callFacebookAPI().then(data => {
-                // Add Facebook user snapshot data to API data
-                let uid = user.providerData[0].uid;
-                data["id"] = uid;
-                data["photoURL"] = "https://graph.facebook.com/" + uid + "/picture?type=large";
-                console.log(data);
-                this.updateUserInDB(data).then(returnedUser => {
-                    console.log("DB update returned data");
-                    returnedUser["firebaseId"] = user.uid;
-                    resolve(returnedUser);
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                }); 
+          // Get Facebook API data for initial field population
+          this.callFacebookAPI().then(data => {
+            data["id"] = facebookUID;
+            data["photoURL"] = "https://graph.facebook.com/" + facebookUID + "/picture?type=large";
+            console.log(data);
+            this.updateUserInDB(data).then(returnedUser => {
+              console.log("DB update returned data");
+              returnedUser["firebaseId"] = firebaseUID;
+              resolve(returnedUser);
             }).catch(error => {
-                console.log(error);
-                reject(error);
-            });
+              console.log(error);
+              reject(error);
+            }); 
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
         });
     }
     
@@ -181,10 +253,13 @@ export class AuthService {
             ref.update(user).then(data => {
                 console.log("DB saved user data");
                 return ref.once('value');
-            }).then( snapshot => {
+            }).then(snapshot => {
                 console.log("DB returned user snapshot");
                 let val = snapshot.val();
                 resolve(val);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
             });
         });
     }
@@ -260,6 +335,20 @@ export class AuthService {
         
         console.log(rv);
         return rv;
+    }
+
+    authenticateWith(credential): Promise<any> {
+        return new Promise((resolve, reject) => {
+            firebase.auth().signInWithCredential(credential).then(() => {
+                // User re-authenticated.
+                console.log("Current user authenticated!");
+                resolve('success');
+            }).catch(error => {
+                // An error happened.
+                console.log(error);
+                reject(error);
+            });
+        });
     }
     
     signOut() {

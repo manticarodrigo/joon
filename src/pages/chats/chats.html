@@ -14,12 +14,16 @@
 
 <ion-content>
     <ion-list>
-        <button ion-item *ngFor="let user of users" (click)="userTapped($event, user)">
-            <div class="avatar" *ngIf="user.picture" item-left>
-                <img [src]="user.picture.large">
+        <div class="chats-message" *ngIf="matchedUsers.length < 1">
+            <h3>No matches yet...</h3>
+            <h5>Please continue playing to find a match!</h5>
+        </div>
+        <button ion-item *ngFor="let user of matchedUsers" (click)="userTapped($event, user)">
+            <div class="avatar" *ngIf="user.photoURL" item-left>
+                <img [src]="user.photoURL">
             </div>
-            <div *ngIf="user.name">
-                <h2>{{user.name.first}}</h2>
+            <div *ngIf="user.firstName">
+                <h2>{{ user.firstName }}</h2>
                 <p>Nice to meet you!</p>
             </div>
             <div class="time" item-right>

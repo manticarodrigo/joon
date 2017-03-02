@@ -15,12 +15,16 @@
 </ion-header>
 <ion-content class="discover no-scroll">
     <div swing-stack #swingContainer [stackConfig]="stackConfig" (throwoutleft)="swipeLeft()" (throwoutright)="swipeRight()" id="card-stack">
+        <div class="swing-message">
+            <h3>No more users to show...</h3>
+            <h5>Please update your preferences!</h5>
+        </div>
         <ion-card #cardsContainer swing-card *ngFor="let user of users">
             <ion-card-content class="crop" *ngIf="user">
                 <img *ngIf="user.photoURL"[src]="user.photoURL">
                 <ion-item id="cardsDock" *ngIf="user.firstName">
-                    <h2>{{ user.firstName }}, {{user.age}}</h2>
-                    <p>{{ user.school }}</p>
+                    <h2>{{ user.firstName }}<span *ngIf="user.showAge !== false">, {{user.age}}</span></h2>
+                    <p *ngIf="user.job">{{ user.job }}<span *ngIf="user.company"> at {{ user.company }}</span></p>
                     <p class="mutual">
                         <img src="assets/mutual.png"/>
                         7
