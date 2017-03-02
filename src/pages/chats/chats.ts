@@ -121,8 +121,6 @@ export class ChatsPage {
         });
     }
 
-
-
     userTapped(event, user) {
         this.chatS.chatWith(user).then(chat => {
             if (chat) {
@@ -140,33 +138,35 @@ export class ChatsPage {
 
     getTimeStringFrom(timestamp) {
         let date = new Date(timestamp);
-        date.setDate(date.getDate() - 1);
+        date.setDate(date.getDate());
         var string = date.toString();
         var stringArr = string.split(" ");
-        var day = stringArr[1];
+        var day = stringArr[0];
         var time = this.tConvert(stringArr[4]);
 
-        return day + ' ' + time;
-
-        /*let now = new Date().getTime();
-        var seconds = Math.floor((now - timestamp) / 1000);
+        let now = new Date();
+        var seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
         var interval = Math.floor(seconds / 31536000);
 
         if (interval > 1) {
             return interval + " years ago";
+        } else if (interval == 1) {
+            return interval + " year ago";
         }
         interval = Math.floor(seconds / 2592000);
         if (interval > 1) {
             return interval + " months ago";
+        } else if (interval == 1) {
+            return interval + " month ago";
         }
         interval = Math.floor(seconds / 86400);
-        if (interval > 1) {
+        if (interval >= 1) {
             if (interval < 5) {
                 let daysAgo = new Date(now);
-                daysAgo.setDate(date.getDate() - interval);
+                daysAgo.setDate(daysAgo.getDate() - interval);
                 var string = daysAgo.toString();
                 var stringArr = string.split(" ");
-                var day = stringArr[1];
+                var day = stringArr[0];
                 var time = this.tConvert(stringArr[4]);
                 return day + ' ' + time;
             } else {
@@ -179,9 +179,9 @@ export class ChatsPage {
         }
         interval = Math.floor(seconds / 60);
         if (interval > 1) {
-            return time;
+            return interval + " minutes ago";
         }
-        return time;*/
+        return Math.floor(seconds) + " seconds ago";
     }
 
     tConvert(time) {

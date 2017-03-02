@@ -28,7 +28,7 @@ export class ChatPage {
             var messages = [];
             for (var key in snapshot) {
                 var data = snapshot[key];
-                if (data.sender == this.user) {
+                if (data.sender == this.user.id) {
                     data['position'] = 'left';
                 } else {
                     data['position'] = 'right';

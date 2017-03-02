@@ -18,6 +18,8 @@ export class ChatService {
             let chatId = this.chatIdWith(user.id);
             this.fetchChat(chatId).then(chat => {
                 if (chat) {
+                    firebase.database().ref('/chats/' + chatId + '/users/' + this.userS.user.id)
+                    .set(new Date().getTime());
                     resolve(chat);
                 } else {
                     this.createChatWithUser(user.id).then(chat => {
