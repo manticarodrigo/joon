@@ -116,11 +116,10 @@ export class ChatService {
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/messages/'+ chat.id).orderByChild('timestamp').startAt(chat.timestamp);
             ref.once('value').then(snap => {
-                let val = snap.val();
-                if (val) {
+                if (snap.exists()) {
                     console.log("Found unread count!");
-                    console.log(val);
-                    resolve(val);
+                    console.log(snap.numChildren());
+                    resolve(snap.numChildren());
                 } else {
                     console.log("No unread count found!");
                     resolve(null);
