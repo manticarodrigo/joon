@@ -74,8 +74,11 @@ export class ChatService {
             this.userS.fetchUser(uid).then(user => {
                 var chatId = this.chatIdWith(uid);
                 var lastMessage = "Tap to say hello!";
-                var now = (new Date).getTime();
-                var val = { "lastMessage" : lastMessage, "timestamp" : now, "id" : chatId };
+                var now = new Date().getTime();
+                var users = {};
+                users[uid] = new Date().getTime();
+                users[this.userS.user.id] = new Date().getTime();
+                var val = { "lastMessage" : lastMessage, "timestamp" : now, "users" : users, 'id' : chatId };
                 let ref = firebase.database().ref('/chats/' + chatId);
                 ref.update(val).then(data => {
                     console.log("DB saved chat data!");
@@ -95,6 +98,22 @@ export class ChatService {
         });
     }
 
+    observeChats() {
+        console.log("Observing chats...");
+        return new Observable(observer => {
+            let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id).equalTo(this.userS.user.id);
+            ref.on('value', (snapshot) => {
+                console.log(snapshot.val());
+                observer.next(snapshot.val());
+            });
+        });
+    }
+    
+    stopObservingChats() {
+        console.log("Stopped observing chats...");
+        firebase.database().ref('/chats/').off()
+    }
+
     observeMessagesIn(chat) {
         console.log("Observing messages...");
         return new Observable(observer => {
@@ -104,6 +123,11 @@ export class ChatService {
                 observer.next(snapshot.val());
             });
         });
+    }
+
+    stopObservingMessagesIn(chat) {
+        console.log("Stopped observing messages...");
+        firebase.database().ref('/messages/' + chat.id).off()
     }
 
     sendMessageTo(message, user): Promise<any> {
@@ -159,37 +183,6 @@ export class ChatService {
             } else {
                 completion(nil)
             }
-        }
-    }
-    
-    static func observeChatsForUser(_ user: User, completion: @escaping (_ chats: [Chat]?, _ users: [User?]?) -> Void) {
-        FirebaseController.base.child("chats").queryOrdered(byChild: "users/\(user.identifier!)").queryEqual(toValue: true).observe(.value, with: { snapshot in
-            if let chatDictionaries = snapshot.value as? [String: AnyObject] {
-                let chats = orderChats(chatDictionaries.flatMap({Chat(json: $0.1 as! [String : AnyObject], identifier: $0.0)}))
-                var users = [User?]()
-                var chatCount = 0
-                for chat in chats {
-                    ChatController.userForChat(chat) { (user) in
-                        if let user = user {
-                            users.append(user)
-                        } else {
-                            users.append(nil)
-                        }
-                        chatCount += 1
-                        if chatCount == chats.count {
-                            completion(chats, users)
-                        }
-                    }
-                }
-            } else {
-                completion(nil, nil)
-            }
-        })
-    }
-    
-    static func stopObservingChats(_ chats: [Chat]) {
-        for chat in chats {
-            FirebaseController.base.child("chats/\(chat.identifier!)").removeAllObservers()
         }
     }
     

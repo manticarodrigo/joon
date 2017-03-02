@@ -17,8 +17,8 @@ export class UserService {
         this.storage.set('user', user);
     }
   
-    fetchUser(uid): Promise<any> {
-        console.log("Getting user with id: " + uid);
+    fetchGlobalUsers(): Promise<any> {
+        console.log("Fetching global users...");
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/users/');
             ref.once('value').then((snap) => {

@@ -38,6 +38,10 @@ export class ChatPage {
             this.messages = messages;
         });
     }
+
+    ionViewWillUnload() {
+        this.chatS.stopObservingMessagesIn(this.chat);
+    }
     
     attach() {
         console.log('attach');

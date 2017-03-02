@@ -18,16 +18,16 @@
             <h3>No matches yet...</h3>
             <h5>Please continue playing to find a match!</h5>
         </div>
-        <button ion-item *ngFor="let user of matchedUsers" (click)="userTapped($event, user)">
-            <div class="avatar" *ngIf="user.photoURL" item-left>
-                <img [src]="user.photoURL">
+        <button ion-item *ngFor="let chat of chats" (click)="userTapped($event, chat.user)">
+            <div class="avatar" *ngIf="chat.user.photoURL" item-left>
+                <img [src]="chat.user.photoURL">
             </div>
-            <div *ngIf="user.firstName">
-                <h2>{{ user.firstName }}</h2>
-                <p>Nice to meet you!</p>
+            <div *ngIf="chat.user.firstName">
+                <h2>{{ chat.user.firstName }}</h2>
+                <p>{{ chat.lastMessage }}</p>
             </div>
             <div class="time" item-right>
-                <p>12:00</p>
+                <p>{{ chat.time }}</p>
             </div>
         </button>
     </ion-list>

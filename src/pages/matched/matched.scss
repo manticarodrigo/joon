@@ -6,13 +6,14 @@ page-matched {
     .images {
         position: relative;
         top: 30px;
-        width: 100%;
+        max-width: 350px;
+        margin: auto;
         text-align: center;
         .avatar {
             display: inline-block;
             position: relative;
-            width: 150px;
-            height: 150px;
+            width: 40%;
+            // height: 150px;
             margin: 10px;
             img {
                 position: absolute;
@@ -26,13 +27,17 @@ page-matched {
             }
         }
     }
-    button {
+    .buttons {
         position: relative;
-        top: 80px;
-        display: block;
+        max-width: 350px;
         margin: auto;
-        margin-bottom: 10px !important;
-        width: 200px;
-        height: 50px !important;
+        top: 45%;
+        button {
+            display: block;
+            margin: auto;
+            margin-bottom: 10px !important;
+            width: 200px;
+            height: 50px !important;
+        }
     }
 }
