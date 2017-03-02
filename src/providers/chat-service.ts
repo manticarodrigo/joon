@@ -110,6 +110,27 @@ export class ChatService {
             });
         });
     }
+
+    fetchUnreadCountIn(chat): Promise<number> {
+        console.log("Fetching unread count...");
+        return new Promise((resolve, reject) => {
+            let ref = firebase.database().ref('/messages/'+ chat.id).orderByChild('timestamp').startAt(chat.timestamp);
+            ref.once('value').then(snap => {
+                let val = snap.val();
+                if (val) {
+                    console.log("Found unread count!");
+                    console.log(val);
+                    resolve(val);
+                } else {
+                    console.log("No unread count found!");
+                    resolve(null);
+                }
+            }).catch(error => {
+                console.log(error);
+                reject(null);
+            });
+        });
+    }
     
     stopObservingChats() {
         console.log("Stopped observing chats...");

@@ -99,17 +99,26 @@ export class ChatsPage {
             var chats = [];
             var chatCount = 0;
             for (var key in snapshot) {
-                var data = snapshot[key];
-                data['time'] = this.getTimeStringFrom(data.timestamp);
-                delete data.users[this.userS.user.id];
-                let uid = data.users[0]; 
-                this.userS.fetchUser(uid).then(user => {
-                    data['user'] = user;
-                    chats.push(data);
-                    chatCount++;
-                    if (chatCount == new Array(snapshot).length) {
-                        this.chats = chats;
-                    }
+                var chat = snapshot[key];
+                this.chatS.fetchUnreadCountIn(chat).then(unreadCount => {
+                    chat['unreadCount'] = unreadCount;
+                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
+                    delete chat.users[this.userS.user.id];
+                    let uid = chat.users[0];
+                    this.userS.fetchUser(uid).then(user => {
+                        chat['user'] = user;
+                        chats.push(chat);
+                        chatCount++;
+                        if (chatCount == new Array(snapshot).length) {
+                            this.chats = chats;
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                        chatCount++;
+                        if (chatCount == new Array(snapshot).length) {
+                            this.chats = chats;
+                        }
+                    });
                 }).catch(error => {
                     console.log(error);
                     chatCount++;
