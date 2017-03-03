@@ -29,13 +29,13 @@
     </ion-item>
     <div class="chat-area">
         <h5 id="bg-text" *ngIf="!messages">Say Hi to start the conversation.</h5>
-        <ion-list no-lines>
-            <ion-item *ngFor="let message of messages">
+        <ion-list no-lines [virtualScroll]="messages" approxItemWidth="200px" approxItemHeight="200px">
+            <ion-item *virtualItem="let message">
                 <div *ngIf="message.message" class="chat-bubble {{ message.position }} ">
                     {{ message.message }}
                 </div>
                 <div *ngIf="message.url" class="img-bubble {{ message.position }}">
-                    <img src="{{ message.url }}">
+                    <ion-img [src]="message.url" width="200" height="200" cache="true"></ion-img>
                 </div>
             </ion-item>
         </ion-list>

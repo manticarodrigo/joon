@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import 'rxjs/Rx';
 import { Observable } from "rxjs/Observable";
 import firebase from 'firebase';
@@ -11,7 +11,8 @@ export class ChatService {
     chats: Array<any>;
     unreadCount = 0;
 
-    constructor(private userS: UserService) {
+    constructor(private zone: NgZone,
+                private userS: UserService) {
 
     }
   
@@ -150,7 +151,9 @@ export class ChatService {
                         chats.sort(function(a, b){
                             return a.timestamp-b.timestamp;
                         });
-                        this.chats = chats;
+                        this.zone.run(() => {
+                            this.chats = chats;
+                        });
                         console.log(chats);
                         this.fetchUnreadCount();
                     }
@@ -161,7 +164,9 @@ export class ChatService {
                         chats.sort(function(a, b){
                             return a.timestamp-b.timestamp;
                         });
-                        this.chats = chats;
+                        this.zone.run(() => {
+                            this.chats = chats;
+                        });
                         console.log(chats);
                         this.fetchUnreadCount();
                     }
@@ -191,7 +196,9 @@ export class ChatService {
                         chats.sort(function(a, b){
                             return a.timestamp-b.timestamp;
                         });
-                        this.chats = chats;
+                        this.zone.run(() => {
+                            this.chats = chats;
+                        });
                         this.unreadCount = totalUnreadCount;
                     }
                 }).catch(error => {
@@ -202,7 +209,9 @@ export class ChatService {
                         chats.sort(function(a, b){
                             return a.timestamp-b.timestamp;
                         });
-                        this.chats = chats;
+                        this.zone.run(() => {
+                            this.chats = chats;
+                        });
                         this.unreadCount = totalUnreadCount;
                     }
                 });
@@ -248,7 +257,9 @@ export class ChatService {
             let ref = firebase.database().ref('messages/' + chat.id);
             ref.on('value', (snapshot) => {
                 console.log(snapshot.val());
-                observer.next(snapshot.val());
+                this.zone.run(() => {
+                    observer.next(snapshot.val());
+                });
             });
         });
     }

@@ -52,6 +52,7 @@ page-chat {
             transform: translate(-50%, -50%);
         }
         ion-item {
+            position: relative;
             .item {
                 border-bottom: 0px;
             }
@@ -123,6 +124,7 @@ page-chat {
             color: #000;
             font-weight: bold;
         }
+        
         .img-bubble {
             border: 0.5px solid color($colors, secondary);
             border-radius: 5px;
@@ -130,14 +132,16 @@ page-chat {
             padding: 0px;
             position: relative;
             margin: 10px;
-            max-width: 80%;
+            min-height: 200px;
+            min-width: 200px;
             overflow: hidden;
         }
-        .img-bubble img {
+        .img-bubble ion-img {
+            margin-bottom: -5px;
+        }
+        .img-bubble ion-img img {
             min-width: 100%;
             min-height: 100%;
-            object-fit: cover;
-            margin-bottom: -5px;
         }
         .img-bubble.left {
             background-color: #FAF4FF;
