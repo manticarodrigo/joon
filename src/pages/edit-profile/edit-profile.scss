@@ -73,6 +73,7 @@ page-edit-profile {
             position: absolute;
             top: 0;
             left: 0;
+            object-fit: cover;
             min-width: 100%;
             min-height: 100%;
             border-radius: 1px;
@@ -80,20 +81,20 @@ page-edit-profile {
         }
         .edit {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 5px;
+            left: 87%;
             width: 30px !important;
             min-width: 30px;
             min-height: 30px;
             border: none;
+            z-index: 1;
         }
         .right {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             .edit {
-                top: 5px;
-                right: 5px; 
+                left: 57.5%;
             }
         }
     }

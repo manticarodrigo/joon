@@ -10,6 +10,7 @@ page-chat {
             height: 30px;
             border-radius: 50%;
             border: 0.5px solid color($colors, secondary);
+            object-fit: cover;
         }
     }
     .borderless {
@@ -168,5 +169,11 @@ page-chat {
         .send:hover {
             background: transparent;
         }
+    }
+}
+
+.action-sheet {
+    .button-inner {
+        color: color($colors, primary);
     }
 }

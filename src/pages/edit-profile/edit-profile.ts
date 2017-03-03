@@ -9,21 +9,13 @@ import { StorageService } from '../../providers/storage-service';
   templateUrl: 'edit-profile.html'
 })
 export class EditProfilePage {
-    user = {};
-    userPatch: any;
     images: Array<any>;
-    mutual: Array<any>;
-    snapshotTaken = false;
-
+    user: any;
     constructor(public navCtrl: NavController,
                 private userS: UserService,
                 private storageS: StorageService) {
-        this.mutual = [];
-    }
-    
-    ionViewDidLoad() {
         this.user = this.userS.user;
-	}
+    }
     
     ionViewWillEnter() {
         this.fetchUserImages();
@@ -37,20 +29,24 @@ export class EditProfilePage {
 
     editProfileSubmit() {
         console.log("Save pressed!");
-        this.userS.updateUser(this.user);
+        this.userS.updateUser(this.userS.user);
     }
     
     uploadProfileImage(event) {
         var file = event.srcElement.files[0];
-        this.storageS.uploadProfileImageFor(this.userS.user.id, file);
-        // Refetch user data
-        // this.userS.setCurrentUserSnapshot(data => {this.user = data});
+        this.storageS.uploadProfileImageFor(this.userS.user.id, file).then(url => {
+            this.user['photoURL'] = url;
+            this.userS.updateCurrentUser(this.user);
+        }).catch(error => {
+            console.log(error);
+        });
     }
     
     uploadImage(event, index) {
         var file = event.srcElement.files[0];
-        this.storageS.uploadImageFor(this.userS.user.id, file, index);
-        this.fetchUserImages();
+        this.storageS.uploadImageFor(this.userS.user.id, file, index).then(url => {
+            this.images[index] = url;
+        });
     }
 
 }

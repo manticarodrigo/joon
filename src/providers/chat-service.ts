@@ -12,17 +12,17 @@ export class ChatService {
         
     }
   
-    chatWith(user): Promise<any> {
+    chatWith(uid): Promise<any> {
         console.log("Chatting with user...");
         return new Promise((resolve, reject) => {
-            let chatId = this.chatIdWith(user.id);
+            let chatId = this.chatIdWith(uid);
             this.fetchChat(chatId).then(chat => {
                 if (chat) {
                     firebase.database().ref('/chats/' + chatId + '/users/' + this.userS.user.id)
                     .set(new Date().getTime());
                     resolve(chat);
                 } else {
-                    this.createChatWithUser(user.id).then(chat => {
+                    this.createChatWithUser(uid).then(chat => {
                         if (chat) {
                             resolve(chat);
                         } else {
@@ -100,11 +100,28 @@ export class ChatService {
         });
     }
 
+    removeChatWithUser(uid): Promise<any> {
+        console.log("Creating chat with user...");
+        return new Promise((resolve, reject) => {
+            var chatId = this.chatIdWith(uid);
+            let ref = firebase.database().ref('/chats/' + chatId);
+                ref.remove().then(success => {
+                    console.log("DB removed chat data!");
+                    resolve(success);
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+        });
+        
+    }
+
     observeChats() {
         console.log("Observing chats...");
         return new Observable(observer => {
-            let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id).equalTo(this.userS.user.id);
+            let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id);
             ref.on('value', (snapshot) => {
+                console.log("Chats returned by DB:");
                 console.log(snapshot.val());
                 observer.next(snapshot.val());
             });
@@ -114,11 +131,18 @@ export class ChatService {
     fetchUnreadCountIn(chat): Promise<number> {
         console.log("Fetching unread count...");
         return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/messages/'+ chat.id).orderByChild('timestamp').startAt(chat.timestamp);
+            let userStamp: any;
+            for (var uid in chat.users) {
+                if (uid == this.userS.user.id) {
+                    userStamp = chat.users[uid];
+                }
+            }
+            let ref = firebase.database().ref('/messages/'+ chat.id).orderByChild('timestamp').startAt(userStamp);
             ref.once('value').then(snap => {
                 if (snap.exists()) {
                     console.log("Found unread count!");
                     console.log(snap.numChildren());
+                    console.log(snap.val());
                     resolve(snap.numChildren());
                 } else {
                     console.log("No unread count found!");

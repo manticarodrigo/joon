@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { UserService } from './user-service';
+import { ChatService } from './chat-service';
 import firebase from 'firebase';
 
 @Injectable()
 export class DiscoverService {
 
-  constructor(private userS: UserService) {
+  constructor(private userS: UserService,
+              private chatS: ChatService) {
 
   }
 
@@ -196,7 +198,35 @@ export class DiscoverService {
         let otherData = {};
         otherData[this.userS.user.id] = new Date().getTime();
         otherRef.update(otherData).then(data => {
+          // Create new chat object on match for chat observation purposes
+          this.chatS.chatWith(uid);
           resolve('success!');
+        }).catch(error => {
+          console.log(error);
+          reject(error);
+        });
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+  unsetMatchWith(uid): Promise<boolean> {
+    console.log("Unsetting match...");
+    return new Promise((resolve, reject) => {
+      let ref = firebase.database().ref('/user_matches/' + this.userS.user.id);
+      ref.remove().then(success => {
+        console.log("Match data removed from DB!");
+        let otherRef = firebase.database().ref('/user_matches/' + uid);
+        otherRef.remove().then(success => {
+          // Remove chat object for chat observation purposes
+          this.chatS.removeChatWithUser(uid).then(success => {
+            resolve(success);
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
         }).catch(error => {
           console.log(error);
           reject(error);

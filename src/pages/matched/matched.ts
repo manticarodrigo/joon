@@ -29,18 +29,16 @@ export class MatchedPage {
   chat() {
     console.log("Chat pressed");
     let user = this.loadingS.otherUser;
-    this.viewCtrl.dismiss();
-    this.chatS.chatWith(user).then(chat => {
+    this.chatS.chatWith(user.id).then(chat => {
         if (chat) {
-            this.navCtrl.push(ChatPage, {
-                user: user,
-                chat: chat
-            });
+          this.viewCtrl.dismiss([user, chat]);
         } else {
             console.log("No chat returned!");
+            this.dismiss;
         }
     }).catch(error => {
         console.log(error);
+        this.dismiss;
     });
 
   }

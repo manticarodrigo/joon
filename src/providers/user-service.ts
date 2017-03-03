@@ -11,6 +11,15 @@ export class UserService {
         
     }
 
+    reportUserWith(uid, message) {
+        console.log("Reporting user...");
+        let ref = firebase.database().ref('user_reported/' + this.user.id + '/' + uid);
+        var data = {};
+        let timestamp = new Date().getTime();
+        data[timestamp] = message;
+        ref.update(data);
+    }
+
     updateCurrentUser(user) {
         console.log("Updating user data in local storage and user service...");
         this.user = user;

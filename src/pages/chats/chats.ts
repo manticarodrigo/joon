@@ -26,72 +26,14 @@ export class ChatsPage {
                 private loadingS: LoadingService,
                 private chatS: ChatService) {
         this.matchedUsers = [];
-        this.fetchMatchedUsers();
+    }
+
+    ionViewWillLoad() {
+        this.observeChats();
     }
 
     ionViewWillUnload() {
         this.chatS.stopObservingChats();
-    }
-    
-    fetchMatchedUsers() {
-        this.loadingS.user = this.userS.user;
-        this.loadingS.message = "Fetching your matches...";
-        if (!this.loadingS.isActive) {
-            this.loadingS.create(LoadingPage);
-            this.loadingS.present();
-        }
-        this.discoverS.fetchUserMatches().then(matchedIds => {
-            console.log(matchedIds);
-            let users = [];
-            let matchCount = 0;
-            let dictCount = Object.keys(matchedIds).length;
-            for (var uid in matchedIds) {
-                this.userS.fetchUser(uid).then(user => {
-                    users.push(user);
-                    matchCount++;
-                    if (matchCount == dictCount) {
-                        this.matchedUsers = users;
-                        this.fetchChats();
-                        this.loadingS.dismiss();
-                    }
-                }).catch(error => {
-                    console.log(error);
-                    matchCount++;
-                    if (matchCount == dictCount) {
-                        this.matchedUsers = users;
-                        this.fetchChats();
-                        this.loadingS.dismiss();
-                    }
-                });
-            }
-        }).catch(error => {
-            console.log(error);
-        });
-    }
-
-    fetchChats() {
-        let chats = [];
-        for (var i=0; i < this.matchedUsers.length; i++) {
-            let user = this.matchedUsers[i];
-            this.chatS.chatWith(user).then(chat => {
-                chat['time'] = this.getTimeStringFrom(chat.timestamp);
-                chat['user'] = user;
-                chats.push(chat);
-                if (i == this.matchedUsers.length) {
-                    console.log(chats);
-                    this.chats = chats;
-                    this.observeChats();
-
-                }
-            }).catch(error => {
-                console.log('uh oh!');
-                console.log(error);
-                if (i == this.matchedUsers.length) {
-                    this.chats = chats;
-                    this.observeChats();
-                }
-            });
-        }
     }
 
     observeChats() {
@@ -100,38 +42,61 @@ export class ChatsPage {
             var chatCount = 0;
             for (var key in snapshot) {
                 var chat = snapshot[key];
-                this.chatS.fetchUnreadCountIn(chat).then(unreadCount => {
-                    chat['unreadCount'] = unreadCount;
+                let uid = '';
+                for (var userId in chat.users) {
+                    if (userId != this.userS.user.id) {
+                        uid = userId;
+                    }
+                }
+                this.userS.fetchUser(uid).then(user => {
+                    console.log("Adding user and time properties to chat object...");
+                    chat['user'] = user;
                     chat['time'] = this.getTimeStringFrom(chat.timestamp);
-                    delete chat.users[this.userS.user.id];
-                    let uid = chat.users[0];
-                    this.userS.fetchUser(uid).then(user => {
-                        chat['user'] = user;
-                        chats.push(chat);
-                        chatCount++;
-                        if (chatCount == new Array(snapshot).length) {
-                            this.chats = chats;
-                        }
-                    }).catch(error => {
-                        console.log(error);
-                        chatCount++;
-                        if (chatCount == new Array(snapshot).length) {
-                            this.chats = chats;
-                        }
-                    });
+                    chats.push(chat);
+                    chatCount++;
+                    if (chatCount == new Array(snapshot).length) {
+                        this.chats = chats;
+                        this.fetchUnreadCount();
+                    }
                 }).catch(error => {
                     console.log(error);
                     chatCount++;
                     if (chatCount == new Array(snapshot).length) {
                         this.chats = chats;
+                        this.fetchUnreadCount();
                     }
                 });
             }
         });
     }
 
+    fetchUnreadCount() {
+        var chats = [];
+        var chatCount = 0;
+        for (var key in this.chats) {
+            let chat = this.chats[key];
+            this.chatS.fetchUnreadCountIn(chat).then(unreadCount => {
+                if (unreadCount) {
+                    chat['unreadCount'] = unreadCount;
+                }
+                chats.push(chat);
+                chatCount++;
+                if (chatCount == this.chats.length) {
+                    this.chats = chats;
+                }
+            }).catch(error => {
+                console.log(error);
+                chats.push(chat);
+                chatCount++;
+                if (chatCount == this.chats.length) {
+                    this.chats = chats;
+                }
+            });
+        }
+    }
+
     userTapped(event, user) {
-        this.chatS.chatWith(user).then(chat => {
+        this.chatS.chatWith(user.id).then(chat => {
             if (chat) {
                 this.navCtrl.push(ChatPage, {
                     user: user,

@@ -9,7 +9,7 @@
             {{ user.firstName }}
         </ion-title>
         <ion-buttons end>
-            <button ion-button>
+            <button ion-button (click)="showOptions()">
                 <img height="25" src="assets/dots.png"/>
             </button>
         </ion-buttons>
@@ -28,7 +28,7 @@
         </ion-segment>
     </ion-item>
     <div class="chat-area">
-        <h5 id="bg-text">Say Hi to start the conversation.</h5>
+        <h5 id="bg-text" *ngIf="!messages">Say Hi to start the conversation.</h5>
         <ion-list no-lines>
             <ion-item *ngFor="let message of messages">
                 <div class="chat-bubble {{ message.position }} ">{{ message.message }}</div>

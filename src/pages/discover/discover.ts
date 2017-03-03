@@ -6,6 +6,7 @@ import { UserService } from '../../providers/user-service';
 import { LoadingService } from '../../providers/loading-service';
 
 import { ChatsPage } from '../chats/chats';
+import { ChatPage } from '../chat/chat';
 import { LoadingPage } from '../loading/loading';
 import { MatchedPage } from '../matched/matched';
 
@@ -105,6 +106,7 @@ export class DiscoverPage {
       this.discoverS.saw(currentCard.id).then(success => {
         this.presentToast('You did not like ' + currentCard.firstName);
       }).catch(error => {
+        console.log(error);
         this.presentToast('Error saving swipe');
         this.undo();
       });
@@ -125,13 +127,23 @@ export class DiscoverPage {
             this.loadingS.user = this.userS.user;
             this.loadingS.otherUser = currentCard;
             this.loadingS.create(MatchedPage);
+            this.loadingS.modal.onDidDismiss(data => {
+              if (data) {
+                this.navCtrl.push(ChatPage, {
+                    user: data[0],
+                    chat: data[1]
+                });
+              }
+            });
             this.loadingS.present();
           }
         }).catch(error => {
+          console.log(error);
           this.presentToast('Error saving swipe');
           this.undo();
         });
       }).catch(error => {
+        console.log(error);
         this.presentToast('Error saving swipe');
         this.undo();
       });
@@ -155,10 +167,12 @@ export class DiscoverPage {
             this.loadingS.present();
           }
         }).catch(error => {
+          console.log(error);
           this.presentToast('Error saving swipe');
           this.undo();
         });
       }).catch(error => {
+        console.log(error);
         this.presentToast('Error saving swipe');
         this.undo();
       });

@@ -10,13 +10,35 @@ page-chats {
             height: 50px;
             width: 50px;
             border-radius: 50%;
+            object-fit: cover;
         }
         .avatar {
             margin: 5px 10px 0px 0px; 
         }
+        .badge {
+            width: 17.5px;
+            height: 17.5px;
+            line-height: 17.5px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 5px;
+            left: 50px;
+            color: #fff;
+            background-color: #DE5445;
+            text-align: center;
+        }
     }
 
     .chats-message {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        margin: auto;
+        transform: translateY(-50%);
         color: color($colors, primary);
         text-align: center;
     }

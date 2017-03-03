@@ -8,16 +8,32 @@ export class StorageService {
     constructor() {
     }
     
-    updateImageFor(uid, url, index) {
-        console.log("Uploading image to storage...");
+    updateImageFor(uid, url, index): Promise<any> {
+      console.log("Uploading image to storage...");
+      return new Promise((resolve, reject) => {
         var updates = {};
         updates[index] = url;
-        firebase.database().ref('/user-images/' + uid).update(updates)
+        firebase.database().ref('/user-images/' + uid).update(updates).then(success => {
+            console.log("DB saved image url!");
+            resolve(url);
+        }).catch(error => {
+            console.log(error);
+            reject(error);
+        });
+      });
     }
     
-    setProfileImageFor(uid, url) {
-        console.log("Setting profile image url in DB...");
-        firebase.database().ref('/users/' + uid + '/photoURL/').set(url);
+    setProfileImageFor(uid, url): Promise<any> {
+      console.log("Setting profile image url in DB...");
+      return new Promise((resolve, reject) => {
+          firebase.database().ref('/users/' + uid + '/photoURL/').set(url).then(success => {
+            console.log("DB set new profile image url!");
+            resolve(url);
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
+      });
     }
     
     fetchImagesFor(uid): Promise<any> {
@@ -38,13 +54,40 @@ export class StorageService {
         });
     }
     
-    uploadImageFor(uid, data, index) {
+    uploadImageFor(uid, data, index): Promise<any> {
+      console.log("Uploading profile image...");
+      return new Promise((resolve, reject) => {
         var now = JSON.stringify(new Date());
-        this.storageRef.child(uid + '/images/' + now + '.png').put(data).then(snapshot => this.updateImageFor(uid, snapshot.downloadURL, index));
+        this.storageRef.child(uid + '/images/' + now + '.png').put(data).then(snapshot => {
+            console.log("Image uploaded to storage!");
+            this.updateImageFor(uid, snapshot.downloadURL, index).then(url => {
+                resolve(url);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        }).catch(error => {
+            console.log(error);
+            reject(error);
+        });
+      });
     }
     
-    uploadProfileImageFor(uid, data) {
-        this.storageRef.child(uid + '/image.png').put(data).then(snapshot => this.setProfileImageFor(uid, snapshot.downloadURL));
+    uploadProfileImageFor(uid, data): Promise<any> {
+      console.log("Uploading profile image...");
+      return new Promise((resolve, reject) => {
+        this.storageRef.child(uid + '/image.png').put(data).then(snapshot => {
+            this.setProfileImageFor(uid, snapshot.downloadURL).then(url => {
+                resolve(url);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        }).catch(error => {
+            console.log(error);
+            reject(error);
+        });
+      });
     }
 
 }
