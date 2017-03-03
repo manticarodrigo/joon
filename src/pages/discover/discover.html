@@ -7,8 +7,9 @@
         <img alt="Logo" height="30" src="assets/joon.png">
     </ion-title>
     <ion-buttons end>
-      <button ion-button icon-only (click)="openChats()">
+      <button class="chats" ion-button icon-only (click)="openChats()">
         <img height="25" src="assets/chats.png"/>
+        <div class="badge-top" *ngIf="this.chatS.unreadCount > 0"> {{ this.chatS.unreadCount }} </div>
       </button>
     </ion-buttons>
   </ion-navbar>

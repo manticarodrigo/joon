@@ -3,6 +3,7 @@ import { NavController, NavParams, ActionSheetController, AlertController } from
 
 import { ChatService } from '../../providers/chat-service';
 import { UserService } from '../../providers/user-service';
+import { StorageService } from '../../providers/storage-service';
 
 import { ProfilePage } from '../profile/profile';
 
@@ -23,7 +24,8 @@ export class ChatPage {
                 public actionSheetCtrl: ActionSheetController,
                 private alertCtrl: AlertController,
                 private chatS: ChatService,
-                private userS: UserService) {
+                private userS: UserService,
+                private storageS: StorageService) {
         this.user = navParams.get('user');
         this.chat = navParams.get('chat');
         this.viewState = "messages";
@@ -140,8 +142,12 @@ export class ChatPage {
     attach(event, user) {
         console.log('Attach pressed');
         var file = event.srcElement.files[0];
-        this.chatS.sendAttachmentTo(user, file).then(url => {
-            console.log(url);
+        this.storageS.uploadAttachmentIn(this.chat.id, file).then(url => {
+            this.chatS.sendAttachmentTo(user, file).then(url => {
+                console.log(url);
+            }).catch(error => {
+                console.log(error);
+            });
         }).catch(error => {
             console.log(error);
         });
@@ -154,7 +160,7 @@ export class ChatPage {
             // text has real content
             let input = this.chatInput;
             this.chatInput = "";
-            this.chatS.sendMessageTo(this.chatInput, this.user).then(message => {
+            this.chatS.sendMessageTo(input, this.user).then(message => {
                 console.log('Message sent successfully!');
             }).catch(error => {
                 console.log(error);

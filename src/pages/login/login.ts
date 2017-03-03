@@ -3,6 +3,7 @@ import { NavController } from 'ionic-angular';
 
 import { AuthService } from '../../providers/auth-service';
 import { LoadingService } from '../../providers/loading-service';
+import { ChatService } from '../../providers/chat-service';
 
 import { DiscoverPage } from '../discover/discover';
 import { LoadingPage } from '../loading/loading';
@@ -15,7 +16,8 @@ export class LoginPage {
 
     constructor(public navCtrl: NavController,
                 private authS: AuthService,
-                private loadingS: LoadingService) {
+                private loadingS: LoadingService,
+                private chatS: ChatService) {
 
     }
     
@@ -32,6 +34,7 @@ export class LoginPage {
             if (user) {
                 console.log("Auth succeeded!");
                 this.navCtrl.setRoot(DiscoverPage);
+                this.chatS.observeChats();
                 this.loadingS.dismiss();
             } else {
                 console.log("No user returned");

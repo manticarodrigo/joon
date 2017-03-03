@@ -1,8 +1,9 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { NavController, NavParams, ToastController } from 'ionic-angular';
-import { DiscoverService } from '../../providers/discover-service';
 
+import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
+import { ChatService } from '../../providers/chat-service';
 import { LoadingService } from '../../providers/loading-service';
 
 import { ChatsPage } from '../chats/chats';
@@ -37,6 +38,7 @@ export class DiscoverPage {
               public toastCtrl: ToastController,
               private discoverS: DiscoverService,
               private userS: UserService,
+              private chatS: ChatService,
               private loadingS: LoadingService) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
