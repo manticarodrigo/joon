@@ -55,6 +55,9 @@ export class ChatsPage {
                     chats.push(chat);
                     chatCount++;
                     if (chatCount == new Array(snapshot).length) {
+                        chats.sort(function(a, b){
+                            return a.timestamp-b.timestamp;
+                        });
                         this.chats = chats;
                         this.fetchUnreadCount();
                     }
@@ -62,6 +65,9 @@ export class ChatsPage {
                     console.log(error);
                     chatCount++;
                     if (chatCount == new Array(snapshot).length) {
+                        chats.sort(function(a, b){
+                            return a.timestamp-b.timestamp;
+                        });
                         this.chats = chats;
                         this.fetchUnreadCount();
                     }
@@ -82,6 +88,9 @@ export class ChatsPage {
                 chats.push(chat);
                 chatCount++;
                 if (chatCount == this.chats.length) {
+                    chats.sort(function(a, b){
+                        return a.timestamp-b.timestamp;
+                    });
                     this.chats = chats;
                 }
             }).catch(error => {
@@ -89,6 +98,9 @@ export class ChatsPage {
                 chats.push(chat);
                 chatCount++;
                 if (chatCount == this.chats.length) {
+                    chats.sort(function(a, b){
+                        return a.timestamp-b.timestamp;
+                    });
                     this.chats = chats;
                 }
             });

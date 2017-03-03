@@ -41,12 +41,16 @@ export class ChatPage {
                 }
                 messages.push(data);
             }
+            messages.sort(function(a, b){
+                return a.timestamp-b.timestamp;
+            });
             this.messages = messages;
         });
     }
 
     ionViewWillUnload() {
         this.chatS.stopObservingMessagesIn(this.chat);
+        this.chatS.updateUserActivityIn(this.chat);
     }
 
     showOptions() {
@@ -133,19 +137,29 @@ export class ChatPage {
         alert.present();
     }
     
-    attach() {
-        console.log('attach');
+    attach(event, user) {
+        console.log('Attach pressed');
+        var file = event.srcElement.files[0];
+        this.chatS.sendAttachmentTo(user, file).then(url => {
+            console.log(url);
+        }).catch(error => {
+            console.log(error);
+        });
     }
     
     send() {
-        console.log(this.chatInput);
+        console.log('Send pressed with input: ', this.chatInput);
         let text = this.chatInput.replace(/^\s+/, '').replace(/\s+$/, '');
-        if (text === '') {
-            // text was all whitespace
-        } else {
+        if (text !== '') {
             // text has real content
-            this.chatS.sendMessageTo(this.chatInput, this.user);
+            let input = this.chatInput;
             this.chatInput = "";
+            this.chatS.sendMessageTo(this.chatInput, this.user).then(message => {
+                console.log('Message sent successfully!');
+            }).catch(error => {
+                console.log(error);
+                this.chatInput = input;
+            });
         }
     }
 

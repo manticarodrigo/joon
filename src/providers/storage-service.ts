@@ -90,4 +90,17 @@ export class StorageService {
       });
     }
 
+    uploadAttachmentIn(chatId, data): Promise<any> {
+        console.log("Uploading attachment image...");
+        return new Promise((resolve, reject) => {
+            var now = JSON.stringify(new Date());
+            this.storageRef.child(chatId + '/images/' + now + '.png').put(data).then(snapshot => {
+                resolve(snapshot.downloadURL);
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+      });
+    }
+
 }

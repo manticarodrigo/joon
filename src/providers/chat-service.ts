@@ -4,11 +4,13 @@ import { Observable } from "rxjs/Observable";
 import firebase from 'firebase';
 
 import { UserService } from './user-service';
+import { StorageService } from './storage-service';
 
 @Injectable()
 export class ChatService {
 
-    constructor(private userS: UserService) {
+    constructor(private userS: UserService,
+                private storageS: StorageService) {
         
     }
   
@@ -18,8 +20,7 @@ export class ChatService {
             let chatId = this.chatIdWith(uid);
             this.fetchChat(chatId).then(chat => {
                 if (chat) {
-                    firebase.database().ref('/chats/' + chatId + '/users/' + this.userS.user.id)
-                    .set(new Date().getTime());
+                    this.updateUserActivityIn(chat);
                     resolve(chat);
                 } else {
                     this.createChatWithUser(uid).then(chat => {
@@ -38,6 +39,11 @@ export class ChatService {
                 reject(error);
             });
         });
+    }
+
+    updateUserActivityIn(chat) {
+        firebase.database().ref('/chats/' + chat.id + '/users/' + this.userS.user.id)
+                    .set(new Date().getTime());
     }
     
     chatIdWith(uid) {
@@ -185,12 +191,46 @@ export class ChatService {
             var data = {};
             data[now] = val;
             let ref = firebase.database().ref('/messages/' + chatId);
+            ref.update(data).then(data => {
+                console.log("DB saved message data!");
+                return ref.once('value');
+            }).then(snapshot => {
+                console.log("DB returned message snapshot");
+                var chatVal = { "lastMessage" : message, "timestamp" : now, "id" : chatId };
+                let chatRef = firebase.database().ref('/chats/' + chatId);
+                chatRef.update(chatVal).then(chatData => {
+                    console.log("DB saved chat data!");
+                    return chatRef.once('value');
+                }).then(chatSnap => {
+                    console.log("DB returned chat snapshot");
+                    resolve(snapshot.val());
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        });
+    }
+
+    sendAttachmentTo(user, data): Promise<any> {
+        console.log("Uploading attachment...");
+        return new Promise((resolve, reject) => {
+            var chatId = this.chatIdWith(user.id);
+            this.storageS.uploadAttachmentIn(chatId, data).then(url => {
+                var now = new Date().getTime();
+                var val = { "url" : url, "timestamp" : now, "sender" : this.userS.user.id };
+                var data = {};
+                data[now] = val;
+                let ref = firebase.database().ref('/messages/' + chatId);
                 ref.update(data).then(data => {
-                    console.log("DB saved message data!");
+                    console.log("DB saved image url data!");
                     return ref.once('value');
                 }).then(snapshot => {
-                    console.log("DB returned message snapshot");
-                    var chatVal = { "lastMessage" : message, "timestamp" : now, "id" : chatId };
+                    console.log("DB returned image url snapshot");
+                    var chatVal = { "lastMessage" : user.firstName + ' sent an image.', "timestamp" : now, "id" : chatId };
                     let chatRef = firebase.database().ref('/chats/' + chatId);
                     chatRef.update(chatVal).then(chatData => {
                         console.log("DB saved chat data!");
@@ -206,6 +246,10 @@ export class ChatService {
                     console.log(error);
                     reject(error);
                 });
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
         });
     }
     
