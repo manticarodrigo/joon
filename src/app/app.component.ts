@@ -3,6 +3,9 @@ import { Nav, NavParams, Platform, MenuController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { Storage } from '@ionic/storage';
 
+import firebase from 'firebase';
+import { FacebookService, FacebookInitParams } from 'ng2-facebook-sdk';
+
 import { LoginPage } from '../pages/login/login';
 import { LoadingPage } from '../pages/loading/loading';
 import { DiscoverPage } from '../pages/discover/discover';
@@ -20,10 +23,8 @@ import { ChatPage } from '../pages/chat/chat';
 
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
+import { ChatService } from '../providers/chat-service';
 import { LoadingService } from '../providers/loading-service';
-
-import firebase from 'firebase';
-import { FacebookService, FacebookInitParams } from 'ng2-facebook-sdk';
 
 @Component({
   templateUrl: 'app.html'
@@ -39,23 +40,13 @@ export class Joon {
                 private el: ElementRef,
                 private authS: AuthService,
                 private userS: UserService,
+                private chatS: ChatService,
                 private loadingS: LoadingService,
                 private fb: FacebookService,
                 private storage: Storage) {
 
         this.initializeApp();
-        firebase.initializeApp({
-            apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
-            authDomain: "joon-702c0.firebaseapp.com",
-            databaseURL: "https://joon-702c0.firebaseio.com",
-            storageBucket: "joon-702c0.appspot.com",
-            messagingSenderId: '516717911226'
-        });
-        // Remove web facebook sdk for production mobile apps
-        fb.init({
-            appId: '713879188793156',
-            version: 'v2.8'
-        });
+
         // Sidemenu navigation
         this.pages = [
           { title: 'Discover', component: DiscoverPage },
@@ -66,12 +57,8 @@ export class Joon {
           { title: 'Help & Support', component: HelpPage },
           { title: 'Feedback', component: FeedbackPage },
           { title: 'Invite A Friend to Joon', component: InvitePage }
+
         ];
-        // Check current user auth state
-        storage.ready().then(() => {
-            console.log("Local storage ready. Fetching stored user...");
-            this.fetchCurrentUser();
-        });
     }
 
     initializeApp() {
@@ -82,6 +69,24 @@ export class Joon {
             Splashscreen.hide();
             // Disable sidemenu swipe gesture
             this.menu.swipeEnable(false, 'sidemenu');
+            // Initialize firebase sdk
+            firebase.initializeApp({
+                apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
+                authDomain: "joon-702c0.firebaseapp.com",
+                databaseURL: "https://joon-702c0.firebaseio.com",
+                storageBucket: "joon-702c0.appspot.com",
+                messagingSenderId: '516717911226'
+            });
+            // Remove web facebook sdk for production mobile apps
+            this.fb.init({
+                appId: '713879188793156',
+                version: 'v2.8'
+            });
+            // Check current user auth state
+            this.storage.ready().then(() => {
+                console.log("Local storage ready. Fetching stored user...");
+                this.fetchCurrentUser();
+            });
         });
     }
     
@@ -117,6 +122,7 @@ export class Joon {
                   // Current user updated
                   this.userS.user = user;
                   this.userS.updateCurrentUser(user);
+                  this.chatS.observeChats();
                   this.nav.setRoot(DiscoverPage);
                 }).catch(error => {
                   console.log(error);
@@ -144,6 +150,7 @@ export class Joon {
     
     logoutApp() {
         this.userS.updateCurrentUser(null);
+        this.chatS.stopObservingChats();
         this.authS.signOut();
         this.nav.setRoot(LoginPage);
         this.menu.close();

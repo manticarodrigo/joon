@@ -11,14 +11,23 @@ export class UserService {
         
     }
 
+    reportUserWith(uid, message) {
+        console.log("Reporting user...");
+        let ref = firebase.database().ref('user_reported/' + this.user.id + '/' + uid);
+        var data = {};
+        let timestamp = new Date().getTime();
+        data[timestamp] = message;
+        ref.update(data);
+    }
+
     updateCurrentUser(user) {
         console.log("Updating user data in local storage and user service...");
         this.user = user;
         this.storage.set('user', user);
     }
   
-    fetchUser(uid): Promise<any> {
-        console.log("Getting user with id: " + uid);
+    fetchGlobalUsers(): Promise<any> {
+        console.log("Fetching global users...");
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/users/');
             ref.once('value').then((snap) => {

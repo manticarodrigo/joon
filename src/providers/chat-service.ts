@@ -8,19 +8,23 @@ import { UserService } from './user-service';
 @Injectable()
 export class ChatService {
 
+    chats: Array<any>;
+    unreadCount = 0;
+
     constructor(private userS: UserService) {
-        
+
     }
   
-    chatWith(user): Promise<any> {
+    chatWith(uid): Promise<any> {
         console.log("Chatting with user...");
         return new Promise((resolve, reject) => {
-            let chatId = this.chatIdWith(user.id);
+            let chatId = this.chatIdWith(uid);
             this.fetchChat(chatId).then(chat => {
                 if (chat) {
+                    this.updateUserActivityIn(chat);
                     resolve(chat);
                 } else {
-                    this.createChatWithUser(user.id).then(chat => {
+                    this.createChatWithUser(uid).then(chat => {
                         if (chat) {
                             resolve(chat);
                         } else {
@@ -36,6 +40,11 @@ export class ChatService {
                 reject(error);
             });
         });
+    }
+
+    updateUserActivityIn(chat) {
+        firebase.database().ref('/chats/' + chat.id + '/users/' + this.userS.user.id)
+                    .set(new Date().getTime());
     }
     
     chatIdWith(uid) {
@@ -74,8 +83,11 @@ export class ChatService {
             this.userS.fetchUser(uid).then(user => {
                 var chatId = this.chatIdWith(uid);
                 var lastMessage = "Tap to say hello!";
-                var now = (new Date).getTime();
-                var val = { "lastMessage" : lastMessage, "timestamp" : now, "id" : chatId };
+                var now = new Date().getTime();
+                var users = {};
+                users[uid] = new Date().getTime();
+                users[this.userS.user.id] = new Date().getTime();
+                var val = { "lastMessage" : lastMessage, "timestamp" : now, "users" : users, 'id' : chatId };
                 let ref = firebase.database().ref('/chats/' + chatId);
                 ref.update(val).then(data => {
                     console.log("DB saved chat data!");
@@ -95,6 +107,141 @@ export class ChatService {
         });
     }
 
+    removeChatWithUser(uid): Promise<any> {
+        console.log("Creating chat with user...");
+        return new Promise((resolve, reject) => {
+            var chatId = this.chatIdWith(uid);
+            let ref = firebase.database().ref('/chats/' + chatId);
+                ref.remove().then(success => {
+                    console.log("DB removed chat data!");
+                    resolve(success);
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+        });
+        
+    }
+
+    observeChats() {
+        console.log("Observing chats...");
+        let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id);
+        ref.on('value', (snapshot) => {
+            snapshot = snapshot.val();
+            console.log("Chats returned by DB:");
+            console.log(snapshot);
+            var chats = [];
+            var chatCount = 0;
+            for (var key in snapshot) {
+                var chat = snapshot[key];
+                let uid = '';
+                for (var userId in chat.users) {
+                    if (userId != this.userS.user.id) {
+                        uid = userId;
+                    }
+                }
+                this.userS.fetchUser(uid).then(user => {
+                    console.log("Adding user and time properties to chat object...");
+                    chat['user'] = user;
+                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
+                    chats.push(chat);
+                    chatCount++;
+                    if (chatCount == new Array(snapshot).length) {
+                        chats.sort(function(a, b){
+                            return a.timestamp-b.timestamp;
+                        });
+                        this.chats = chats;
+                        console.log(chats);
+                        this.fetchUnreadCount();
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    chatCount++;
+                    if (chatCount == new Array(snapshot).length) {
+                        chats.sort(function(a, b){
+                            return a.timestamp-b.timestamp;
+                        });
+                        this.chats = chats;
+                        console.log(chats);
+                        this.fetchUnreadCount();
+                    }
+                });
+            }
+        });
+    }
+
+    fetchUnreadCount(): Promise<any> {
+        console.log("Fetching unread count for chats...");
+        return new Promise((resolve, reject) => {
+            var chats = [];
+            var chatCount = 0;
+            var totalUnreadCount = 0;
+            for (var key in this.chats) {
+                let chat = this.chats[key];
+                console.log(this.chats);
+                console.log(chat);
+                this.fetchUnreadCountIn(chat).then(unreadCount => {
+                    if (unreadCount) {
+                        chat['unreadCount'] = unreadCount;
+                        totalUnreadCount += unreadCount;
+                    }
+                    chats.push(chat);
+                    chatCount++;
+                    if (chatCount == chats.length) {
+                        chats.sort(function(a, b){
+                            return a.timestamp-b.timestamp;
+                        });
+                        this.chats = chats;
+                        this.unreadCount = totalUnreadCount;
+                    }
+                }).catch(error => {
+                    console.log(error);
+                    chats.push(chat);
+                    chatCount++;
+                    if (chatCount == this.chats.length) {
+                        chats.sort(function(a, b){
+                            return a.timestamp-b.timestamp;
+                        });
+                        this.chats = chats;
+                        this.unreadCount = totalUnreadCount;
+                    }
+                });
+            }
+        });
+    }
+
+    fetchUnreadCountIn(chat): Promise<number> {
+        console.log("Fetching unread count...");
+        return new Promise((resolve, reject) => {
+            let userStamp: any;
+            for (var uid in chat.users) {
+                if (uid == this.userS.user.id) {
+                    userStamp = chat.users[uid];
+                }
+            }
+            let ref = firebase.database().ref('/messages/'+ chat.id).orderByChild('timestamp').startAt(userStamp);
+            ref.once('value').then(snap => {
+                if (snap.exists()) {
+                    console.log("Found unread count!");
+                    console.log(snap.numChildren());
+                    console.log(snap.val());
+                    resolve(snap.numChildren());
+                } else {
+                    console.log("No unread count found!");
+                    resolve(null);
+                }
+            }).catch(error => {
+                console.log(error);
+                reject(null);
+            });
+        });
+    }
+    
+    stopObservingChats() {
+        console.log("Stopped observing chats...");
+        firebase.database().ref('/chats/').off()
+    }
+
     observeMessagesIn(chat) {
         console.log("Observing messages...");
         return new Observable(observer => {
@@ -106,6 +253,11 @@ export class ChatService {
         });
     }
 
+    stopObservingMessagesIn(chat) {
+        console.log("Stopped observing messages...");
+        firebase.database().ref('/messages/' + chat.id).off()
+    }
+
     sendMessageTo(message, user): Promise<any> {
         console.log("Sending message...");
         return new Promise((resolve, reject) => {
@@ -115,190 +267,121 @@ export class ChatService {
             var data = {};
             data[now] = val;
             let ref = firebase.database().ref('/messages/' + chatId);
-                ref.update(data).then(data => {
-                    console.log("DB saved message data!");
-                    return ref.once('value');
-                }).then(snapshot => {
-                    console.log("DB returned message snapshot");
-                    var chatVal = { "lastMessage" : message, "timestamp" : now, "id" : chatId };
-                    let chatRef = firebase.database().ref('/chats/' + chatId);
-                    chatRef.update(chatVal).then(chatData => {
-                        console.log("DB saved chat data!");
-                        return chatRef.once('value');
-                    }).then(chatSnap => {
-                        console.log("DB returned chat snapshot");
-                        resolve(snapshot.val());
-                    }).catch(error => {
-                        console.log(error);
-                        reject(error);
-                    });
+            ref.update(data).then(data => {
+                console.log("DB saved message data!");
+                return ref.once('value');
+            }).then(snapshot => {
+                console.log("DB returned message snapshot");
+                var chatVal = { "lastMessage" : message, "timestamp" : now, "id" : chatId };
+                let chatRef = firebase.database().ref('/chats/' + chatId);
+                chatRef.update(chatVal).then(chatData => {
+                    console.log("DB saved chat data!");
+                    return chatRef.once('value');
+                }).then(chatSnap => {
+                    console.log("DB returned chat snapshot");
+                    resolve(snapshot.val());
                 }).catch(error => {
                     console.log(error);
                     reject(error);
                 });
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
         });
+    }
+
+    sendAttachmentTo(user, url): Promise<any> {
+        console.log("Uploading attachment...");
+        return new Promise((resolve, reject) => {
+            var chatId = this.chatIdWith(user.id);
+            var now = new Date().getTime();
+            var val = { "url" : url, "timestamp" : now, "sender" : this.userS.user.id };
+            var data = {};
+            data[now] = val;
+            let ref = firebase.database().ref('/messages/' + chatId);
+            ref.update(data).then(data => {
+                console.log("DB saved image url data!");
+                return ref.once('value');
+            }).then(snapshot => {
+                console.log("DB returned image url snapshot");
+                var chatVal = { "lastMessage" : user.firstName + ' sent an image.', "timestamp" : now, "id" : chatId };
+                let chatRef = firebase.database().ref('/chats/' + chatId);
+                chatRef.update(chatVal).then(chatData => {
+                    console.log("DB saved chat data!");
+                    return chatRef.once('value');
+                }).then(chatSnap => {
+                    console.log("DB returned chat snapshot");
+                    resolve(snapshot.val());
+                }).catch(error => {
+                    console.log(error);
+                    reject(error);
+                });
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        });
+    }
+
+    getTimeStringFrom(timestamp) {
+        let date = new Date(timestamp);
+        date.setDate(date.getDate());
+        var string = date.toString();
+        var stringArr = string.split(" ");
+        var day = stringArr[0];
+        var time = this.tConvert(stringArr[4]);
+
+        let now = new Date();
+        var seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+        var interval = Math.floor(seconds / 31536000);
+
+        if (interval > 1) {
+            return interval + " years ago";
+        } else if (interval == 1) {
+            return interval + " year ago";
+        }
+        interval = Math.floor(seconds / 2592000);
+        if (interval > 1) {
+            return interval + " months ago";
+        } else if (interval == 1) {
+            return interval + " month ago";
+        }
+        interval = Math.floor(seconds / 86400);
+        if (interval >= 1) {
+            if (interval < 5) {
+                let daysAgo = new Date(now);
+                daysAgo.setDate(daysAgo.getDate() - interval);
+                var string = daysAgo.toString();
+                var stringArr = string.split(" ");
+                var day = stringArr[0];
+                var time = this.tConvert(stringArr[4]);
+                return day + ' ' + time;
+            } else {
+                return interval + " days ago";
+            }
+        }
+        interval = Math.floor(seconds / 3600);
+        if (interval > 1) {
+            return time;
+        }
+        interval = Math.floor(seconds / 60);
+        if (interval > 1) {
+            return interval + " minutes ago";
+        }
+        return Math.floor(seconds) + " seconds ago";
+    }
+
+    tConvert(time) {
+        // Check correct time format and split into components
+        time = time.toString().match(/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+        if (time.length > 1) { // If time format correct
+            time = time.slice (1);  // Remove full string match value
+            time[3] = +time[0] < 12 ? ' AM' : ' PM'; // Set AM/PM
+            time[0] = +time[0] % 12 || 12; // Adjust hours
+        }
+        return time.join (''); // return adjusted time or original string
     }
     
 }
-    
-    /*
-    static func userForChat(_ chat: Chat, completion: @escaping (_ user: User?) -> Void ) {
-        FirebaseController.dataAtEndpoint("/chats/\(chat.identifier!)/users/") { (data) -> Void in
-            if let json = data as? [String: AnyObject] {
-                for userJson in json {
-                    if userJson.0 != UserController.shared.currentUser.identifier! {
-                        UserController.userWithIdentifier(userJson.0, completion: { (user) -> Void in
-                            if let user = user {
-                                completion(user)
-                            } else {
-                                completion(nil)
-                            }
-                        })
-                    }
-                }
-            } else {
-                completion(nil)
-            }
-        }
-    }
-    
-    static func observeChatsForUser(_ user: User, completion: @escaping (_ chats: [Chat]?, _ users: [User?]?) -> Void) {
-        FirebaseController.base.child("chats").queryOrdered(byChild: "users/\(user.identifier!)").queryEqual(toValue: true).observe(.value, with: { snapshot in
-            if let chatDictionaries = snapshot.value as? [String: AnyObject] {
-                let chats = orderChats(chatDictionaries.flatMap({Chat(json: $0.1 as! [String : AnyObject], identifier: $0.0)}))
-                var users = [User?]()
-                var chatCount = 0
-                for chat in chats {
-                    ChatController.userForChat(chat) { (user) in
-                        if let user = user {
-                            users.append(user)
-                        } else {
-                            users.append(nil)
-                        }
-                        chatCount += 1
-                        if chatCount == chats.count {
-                            completion(chats, users)
-                        }
-                    }
-                }
-            } else {
-                completion(nil, nil)
-            }
-        })
-    }
-    
-    static func stopObservingChats(_ chats: [Chat]) {
-        for chat in chats {
-            FirebaseController.base.child("chats/\(chat.identifier!)").removeAllObservers()
-        }
-    }
-    
-    static func observeTypingIn(_ chat: Chat, completion: @escaping (_ users: [User]?) -> Void) {
-        FirebaseController.observeDataAtEndpoint("chats/\(chat.identifier!)/typing") { (data) in
-            if let json = data as? [String: AnyObject] {
-                var users = [User]()
-                var userCount = 0
-                for userDict in json {
-                    UserController.userWithIdentifier(userDict.0, completion: { (user) -> Void in
-                        if let user = user {
-                            if user != UserController.shared.currentUser! {
-                                users.append(user)
-                            }
-                            userCount += 1
-                            if userCount == data?.count {
-                                if users.count > 0 {
-                                    completion(users)
-                                } else {
-                                    completion(nil)
-                                }
-                            }
-                        } else {
-                            userCount += 1
-                            if userCount == data?.count {
-                                if users.count > 0 {
-                                    completion(users)
-                                } else {
-                                    completion(nil)
-                                }
-                            }
-                        }
-                    })
-                }
-            } else {
-                completion(nil)
-            }
-        }
-    }
-    
-    static func stopObservingChat(_ chat: Chat) {
-        FirebaseController.base.child("chats/\(chat.identifier!)").removeAllObservers()
-        FirebaseController.base.child("messages/\(chat.identifier!)").removeAllObservers()
-        FirebaseController.base.child("chats/\(chat.identifier!)/typing").removeAllObservers()
-    }
-    
-    static func userIsTypingInChat(_ typing: Bool, chat: Chat) {
-        let endpoint = "chats/\(chat.identifier!)/typing/\(UserController.shared.currentUser.identifier!)"
-        let userIsTypingRef = FirebaseController.base.child(endpoint)
-        if typing {
-            userIsTypingRef.setValue(true)
-        } else {
-            userIsTypingRef.removeValue()
-        }
-        userIsTypingRef.onDisconnectRemoveValue()
-    }
-    
-    static func sendMessageToCourse(_ text: String, chat: Chat, course: Course, completion: @escaping (_ message: Message?) -> Void) {
-        let timestamp = NSNumber(integerLiteral: Int(NSDate().timeIntervalSince1970))
-        if let currentUser = UserController.shared.currentUser {
-            let message = Message(text: text, sender: currentUser.identifier!, timestamp: timestamp, read: false, identifier: nil)
-            FirebaseController.base.child("messages/\(chat.identifier!)").childByAutoId().setValue(message.jsonValue) { (error, ref) in
-                if error == nil {
-                    let lastMessage = "\(currentUser.firstName()): \(message.text)"
-                    var chat = Chat(lastMessage: lastMessage, timestamp: timestamp, typing: chat.typing, unread: chat.unread, identifier: chat.identifier!)
-                    chat.save()
-                    self.updateCourseChat(course, chat: chat)
-                    completion(message)
-                } else {
-                    completion(nil)
-                }
-            }
-        }
-    }
-    
-    static func updateCourseChat(_ course: Course, chat: Chat) {
-        CourseController.usersForCourse(course) { (users) in
-            if let users = users {
-                for user in users {
-                    if let currentUser = UserController.shared.currentUser, user != currentUser {
-                        if let unreadCount = chat.unread?[user.identifier!] as? Int {
-                            FirebaseController.base.child("chats/\(chat.identifier!)/unread").updateChildValues([user.identifier! : unreadCount + 1])
-                        } else {
-                            FirebaseController.base.child("chats/\(chat.identifier!)/unread").updateChildValues([user.identifier! : 1])
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    static func readMessageInChat(_ message: Message, chat: Chat, completion: @escaping (_ message: Message?) -> Void) {
-        if let currentUser = UserController.shared.currentUser, message.sender != currentUser.identifier! {
-            FirebaseController.base.child("messages/\(chat.identifier!)/\(message.identifier!)").updateChildValues(["read" : true], withCompletionBlock: { (error, ref) in
-                if error == nil {
-                    var readMessage = message
-                    readMessage.read = true
-                    completion(readMessage)
-                } else {
-                    completion(nil)
-                }
-            })
-        } else {
-            completion(nil)
-        }
-    }
-    
-    static func orderChats(_ chats: [Chat]) -> [Chat] {
-        return chats.sorted(by: {TimeInterval($0.0.timestamp) > TimeInterval($0.1.timestamp)})
-    }
-    */
-

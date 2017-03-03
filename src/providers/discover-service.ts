@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
 import { UserService } from './user-service';
+import { ChatService } from './chat-service';
 import firebase from 'firebase';
 
 @Injectable()
 export class DiscoverService {
 
-  constructor(private userS: UserService) {
+  constructor(private userS: UserService,
+              private chatS: ChatService) {
 
   }
 
@@ -53,6 +55,20 @@ export class DiscoverService {
     });
   }
 
+  fetchUserMatches(): Promise<any> {
+    let user = this.userS.user;
+    return new Promise((resolve, reject) => {
+      let ref = firebase.database().ref('/user_matches/' + user.id);
+      ref.once('value').then(snapshot => {
+        console.log('Fetched user matches:');
+        console.log(snapshot.val());
+        resolve(snapshot.val());
+      }).catch(error => {
+        reject(error);
+      })
+    });
+  }
+
   fetchDiscoverableUsers(): Promise<any> {
     let user = this.userS.user;
     let env = this;
@@ -78,71 +94,11 @@ export class DiscoverService {
     });
   }
 
-  fetchNewMatches(): Promise<any> {
-    let user = this.userS.user;
-    return new Promise((resolve, reject) => {
-      let ref = firebase.database().ref('/new_matches/' + user.id);
-      ref.once('value').then(snapshot => {
-        resolve(snapshot.val());
-      }).catch(error => {
-        reject(error);
-      })
-    });
-  }
-
-  fetchMatchedUsers(): Promise<any> {
-    console.log("Fetching matched users...");
-    let user = this.userS.user;
-    let env = this;
-    return new Promise((resolve, reject) => {
-      this.fetchLikedUIDS().then(likedUIDs => {
-        if (likedUIDs) {
-          let matchedUsers = [];
-          let dictCount = Object.keys(likedUIDs).length;
-          console.log(dictCount);
-          let likedCount = 0;
-          for (var uid in likedUIDs) {
-            this.checkForMatchWith(uid).then(matched => {
-              if (matched) {
-                console.log("Found a match!")
-                this.userS.fetchUser(uid).then(user => {
-                  console.log("Returned matched user!")
-                  matchedUsers.push(user);
-                  likedCount++;
-                  if (likedCount == dictCount) {
-                    resolve(matchedUsers);
-                  }
-                }).catch(error => {
-                  console.log(error);
-                  reject(error);
-                });
-              } else {
-                console.log("Not a match!")
-                likedCount++;
-                if (likedCount == dictCount) {
-                  resolve(matchedUsers);
-                }
-              }
-            }).catch(error => {
-              console.log(error);
-              reject(error);
-            });
-          }
-        } else {
-          console.log("No liked users found!");
-          resolve([]);
-        }
-      }).catch(error => {
-        reject(error);
-      })
-    });
-  }
-
   saw(uid): Promise<any> {
     console.log("Seeing user...");
     return new Promise((resolve, reject) => {
       var data = {};
-      data[uid] = (new Date).getTime();
+      data[uid] = new Date().getTime();
       let ref = firebase.database().ref('/user_saw/' + this.userS.user.id);
       ref.update(data).then( data => {
         console.log("User saw saved to DB!");
@@ -163,7 +119,7 @@ export class DiscoverService {
     console.log("Liking user...");
     return new Promise((resolve, reject) => {
       var data = {};
-      data[uid] = (new Date).getTime();
+      data[uid] = new Date().getTime();
       let ref = firebase.database().ref('/user_liked/' + this.userS.user.id);
       ref.update(data).then(data => {
         console.log("User liked saved to DB!");
@@ -193,7 +149,7 @@ export class DiscoverService {
       let user = this.userS.user;
       this.liked(uid).then(matched => {
         var data = {};
-        data[user.id] = (new Date).getTime();
+        data[user.id] = new Date().getTime();
         let ref = firebase.database().ref('/double_liked_by/' + uid);
         ref.update(data).then(() => {
           resolve(matched); 
@@ -213,11 +169,68 @@ export class DiscoverService {
       ref.once('value').then(snap => {
         if (snap.exists()) {
           console.log("User likes current user!");
-          resolve(true);
+          this.setMatchWith(uid).then(success => {
+            resolve(true);
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
         } else {
           console.log("User has not liked current user!");
           resolve(false);
         }
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+  setMatchWith(uid): Promise<boolean> {
+    console.log("Setting match...");
+    return new Promise((resolve, reject) => {
+      let ref = firebase.database().ref('/user_matches/' + this.userS.user.id);
+      let data = {};
+      data[uid] = new Date().getTime();
+      ref.update(data).then(data => {
+        console.log("Match data saved in DB!");
+        let otherRef = firebase.database().ref('/user_matches/' + uid);
+        let otherData = {};
+        otherData[this.userS.user.id] = new Date().getTime();
+        otherRef.update(otherData).then(data => {
+          // Create new chat object on match for chat observation purposes
+          this.chatS.chatWith(uid);
+          resolve('success!');
+        }).catch(error => {
+          console.log(error);
+          reject(error);
+        });
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+  unsetMatchWith(uid): Promise<boolean> {
+    console.log("Unsetting match...");
+    return new Promise((resolve, reject) => {
+      let ref = firebase.database().ref('/user_matches/' + this.userS.user.id);
+      ref.remove().then(success => {
+        console.log("Match data removed from DB!");
+        let otherRef = firebase.database().ref('/user_matches/' + uid);
+        otherRef.remove().then(success => {
+          // Remove chat object for chat observation purposes
+          this.chatS.removeChatWithUser(uid).then(success => {
+            resolve(success);
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
+        }).catch(error => {
+          console.log(error);
+          reject(error);
+        });
       }).catch(error => {
         console.log(error);
         reject(error);

@@ -9,7 +9,7 @@
             {{ user.firstName }}
         </ion-title>
         <ion-buttons end>
-            <button ion-button>
+            <button ion-button (click)="showOptions()">
                 <img height="25" src="assets/dots.png"/>
             </button>
         </ion-buttons>
@@ -28,19 +28,27 @@
         </ion-segment>
     </ion-item>
     <div class="chat-area">
-        <h5 id="bg-text" *ngIf="messages == null">Say Hi to start the conversation.</h5>
+        <h5 id="bg-text" *ngIf="!messages">Say Hi to start the conversation.</h5>
         <ion-list no-lines>
             <ion-item *ngFor="let message of messages">
-                <div class="chat-bubble {{ message.position }} ">{{ message.message }}</div>
+                <div *ngIf="message.message" class="chat-bubble {{ message.position }} ">
+                    {{ message.message }}
+                </div>
+                <div *ngIf="message.url" class="img-bubble {{ message.position }}">
+                    <img src="{{ message.url }}">
+                </div>
             </ion-item>
         </ion-list>
     </div>
 </ion-content>
 <ion-footer class="chat-footer">
     <form (ngSubmit)="send()" name="chat-form">
-        <button class="attach" ion-button type="button" (click)="attach()">
-            <img src="assets/attach.png">
-        </button>
+        <div class="attach">
+            <label for="file-input">
+                <img src="assets/attach.png">
+            </label>
+            <input id="file-input" type="file" accept="image/*;capture=camera" (change)="attach($event, user)">
+        </div>
         <div class="message">
             <ion-textarea type="text" name="chat-message" [(ngModel)]="chatInput" placeholder="Type a Message"></ion-textarea>
         </div>

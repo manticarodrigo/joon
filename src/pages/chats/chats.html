@@ -7,6 +7,7 @@
         <ion-buttons end>
             <button ion-button>
                 <img height="25" src="assets/chats.png"/>
+                <div class="badge-top" *ngIf="this.chatS.unreadCount > 0">{{ this.chatS.unreadCount }}</div>
             </button>
         </ion-buttons>
     </ion-navbar>
@@ -14,20 +15,21 @@
 
 <ion-content>
     <ion-list>
-        <div class="chats-message" *ngIf="matchedUsers.length < 1">
+        <div class="chats-message" *ngIf="!this.chatS.chats">
             <h3>No matches yet...</h3>
             <h5>Please continue playing to find a match!</h5>
         </div>
-        <button ion-item *ngFor="let user of matchedUsers" (click)="userTapped($event, user)">
-            <div class="avatar" *ngIf="user.photoURL" item-left>
-                <img [src]="user.photoURL">
+        <button ion-item *ngFor="let chat of this.chatS.chats" (click)="userTapped($event, chat.user)" [ngClass]="{'unread': chat.unreadCount > 0 }">
+            <div class="avatar" *ngIf="chat.user.photoURL" item-left>
+                <img [src]="chat.user.photoURL">
+                <div class="badge" *ngIf="chat.unreadCount">{{ chat.unreadCount }}</div>
             </div>
-            <div *ngIf="user.firstName">
-                <h2>{{ user.firstName }}</h2>
-                <p>Nice to meet you!</p>
+            <div *ngIf="chat.user.firstName">
+                <h2>{{ chat.user.firstName }}</h2>
+                <p>{{ chat.lastMessage }}</p>
             </div>
             <div class="time" item-right>
-                <p>12:00</p>
+                <p>{{ chat.time }}</p>
             </div>
         </button>
     </ion-list>

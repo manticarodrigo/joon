@@ -9,9 +9,6 @@ page-edit-profile {
     }
     
     .checkbox-icon {
-        .checkbox-inner {
-            
-        }
         border-radius: 50% !important;
         border-width: 0.5px !important;
         
@@ -59,6 +56,17 @@ page-edit-profile {
     .images {
         background: #FFFDF8;
         padding-top: 1px;
+        img {
+            position: absolute;
+            top: 0;
+            right: 0;
+            object-fit: cover;
+            min-width: 100%;
+            min-height: 100%;
+            border-radius: 1px;
+            border: 0.5px solid color($colors, secondary);
+            overflow: hidden;
+        }
         input {
             display: none;
         }
@@ -69,35 +77,23 @@ page-edit-profile {
             position: relative;
             padding-top: 100%;
         }
-        img {
-            position: absolute;
-            top: 0;
-            left: 0;
-            min-width: 100%;
-            min-height: 100%;
-            border-radius: 1px;
-            border: 0.5px solid color($colors, secondary);
-        }
         .edit {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 3px;
+            right: 3px;
             width: 30px !important;
-            min-width: 30px;
-            min-height: 30px;
+            height: 30px !important;
+            min-width: 30px !important;
+            min-height: 30px !important;
             border: none;
+            z-index: 1;
         }
         .right {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            .edit {
-                top: 5px;
-                right: 5px; 
-            }
         }
     }
-    
     .input {
         border: 1px solid color($colors, secondary);
         border-bottom: none;

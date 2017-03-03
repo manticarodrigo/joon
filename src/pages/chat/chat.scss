@@ -10,6 +10,7 @@ page-chat {
             height: 30px;
             border-radius: 50%;
             border: 0.5px solid color($colors, secondary);
+            object-fit: cover;
         }
     }
     .borderless {
@@ -122,6 +123,30 @@ page-chat {
             color: #000;
             font-weight: bold;
         }
+        .img-bubble {
+            border: 0.5px solid color($colors, secondary);
+            border-radius: 5px;
+            display: inline-block;
+            padding: 0px;
+            position: relative;
+            margin: 10px;
+            max-width: 80%;
+            overflow: hidden;
+        }
+        .img-bubble img {
+            min-width: 100%;
+            min-height: 100%;
+            object-fit: cover;
+            margin-bottom: -5px;
+        }
+        .img-bubble.left {
+            background-color: #FAF4FF;
+            float: left;
+        }
+        .img-bubble.right {
+            background-color: #F8F8F8;
+            float: right;
+        }
     }
     .chat-footer {
         width:100%;
@@ -132,6 +157,7 @@ page-chat {
         .attach {
             float: left;
             height: 70px;
+            width: 70px;
             background: color($colors, primary);
             padding: 0px;
             margin: 0px;
@@ -168,5 +194,11 @@ page-chat {
         .send:hover {
             background: transparent;
         }
+    }
+}
+
+.action-sheet {
+    .button-inner {
+        color: color($colors, primary);
     }
 }

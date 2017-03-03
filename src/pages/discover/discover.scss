@@ -2,7 +2,24 @@ $discover_footer_height: 400px;
 
 page-discover {
     ion-title {
-        margin-left: -25px;
+        margin-left: -10px;
+    }
+    .chats {
+        margin-right: 6px;
+    }
+    .badge-top {
+        width: 17.5px;
+        height: 17.5px;
+        line-height: 17.5px;
+        font-size: 12px;
+        font-weight: bold;
+        border-radius: 50%;
+        position: absolute;
+        top: 3px;
+        right: -7px;
+        color: #fff;
+        background-color: #DE5445;
+        text-align: center;
     }
     .toolbar-content img {
         display:inline-block;
