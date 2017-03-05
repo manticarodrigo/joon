@@ -21,7 +21,9 @@ export class AuthService {
             ];
     
 
-    constructor(public platform: Platform, private userS: UserService, private fb: FacebookService) {
+    constructor(public platform: Platform,
+                private userS: UserService,
+                private fb: FacebookService) {
         Facebook.browserInit(this.FB_APP_ID, "v2.8");
     }
 

@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { UserService } from './user-service';
 import { ChatService } from './chat-service';
+import { PushService } from './push-service';
 import firebase from 'firebase';
 
 @Injectable()
 export class DiscoverService {
 
   constructor(private userS: UserService,
-              private chatS: ChatService) {
-
+              private chatS: ChatService,
+              private pushS: PushService) {
   }
 
   isDiscoverableTo(user1, user2, seenUIDs): boolean {
@@ -55,20 +56,6 @@ export class DiscoverService {
     });
   }
 
-  fetchUserMatches(): Promise<any> {
-    let user = this.userS.user;
-    return new Promise((resolve, reject) => {
-      let ref = firebase.database().ref('/user_matches/' + user.id);
-      ref.once('value').then(snapshot => {
-        console.log('Fetched user matches:');
-        console.log(snapshot.val());
-        resolve(snapshot.val());
-      }).catch(error => {
-        reject(error);
-      })
-    });
-  }
-
   fetchDiscoverableUsers(): Promise<any> {
     let user = this.userS.user;
     let env = this;
@@ -94,11 +81,11 @@ export class DiscoverService {
     });
   }
 
-  saw(uid): Promise<any> {
+  saw(user): Promise<any> {
     console.log("Seeing user...");
     return new Promise((resolve, reject) => {
       var data = {};
-      data[uid] = new Date().getTime();
+      data[user.id] = new Date().getTime();
       let ref = firebase.database().ref('/user_saw/' + this.userS.user.id);
       ref.update(data).then( data => {
         console.log("User saw saved to DB!");
@@ -115,18 +102,18 @@ export class DiscoverService {
     });
   }
 
-  liked(uid): Promise<boolean> {
+  liked(user): Promise<boolean> {
     console.log("Liking user...");
     return new Promise((resolve, reject) => {
       var data = {};
-      data[uid] = new Date().getTime();
+      data[user.id] = new Date().getTime();
       let ref = firebase.database().ref('/user_liked/' + this.userS.user.id);
       ref.update(data).then(data => {
         console.log("User liked saved to DB!");
         return ref.once('value');
       }).then(snapshot => {
         console.log("User liked returned from DB!");
-        this.checkForMatchWith(uid).then(matched => {
+        this.checkForMatchWith(user.id).then(matched => {
           resolve(matched);
         }).catch(error => {
           console.log(error);
@@ -139,7 +126,7 @@ export class DiscoverService {
     });
   }
 
-  doubleLiked(uid): Promise<boolean> {
+  doubleLiked(user): Promise<boolean> {
     console.log("Double liking user...");
 
     // The Liked table is always our reference for who likes who and so
@@ -147,11 +134,14 @@ export class DiscoverService {
 
     return new Promise((resolve, reject) => {
       let user = this.userS.user;
-      this.liked(uid).then(matched => {
+      this.liked(user.id).then(matched => {
         var data = {};
         data[user.id] = new Date().getTime();
-        let ref = firebase.database().ref('/double_liked_by/' + uid);
+        let ref = firebase.database().ref('/double_liked_by/' + user.id);
         ref.update(data).then(() => {
+          if (user.pushId) {
+            this.pushS.post("I double liked you!", user);
+          }
           resolve(matched); 
         }).catch(error => {
           reject(error);
@@ -162,14 +152,14 @@ export class DiscoverService {
     });
   }
 
-  checkForMatchWith(uid): Promise<boolean> {
+  checkForMatchWith(user): Promise<boolean> {
     console.log("Checking for match...");
     return new Promise((resolve, reject) => {
-      let ref = firebase.database().ref('/user_liked/' + uid + '/' + this.userS.user.id);
+      let ref = firebase.database().ref('/user_liked/' + user.id + '/' + this.userS.user.id);
       ref.once('value').then(snap => {
         if (snap.exists()) {
           console.log("User likes current user!");
-          this.setMatchWith(uid).then(success => {
+          this.setMatchWith(user.id).then(success => {
             resolve(true);
           }).catch(error => {
             console.log(error);
@@ -186,20 +176,23 @@ export class DiscoverService {
     });
   }
 
-  setMatchWith(uid): Promise<boolean> {
+  setMatchWith(user): Promise<boolean> {
     console.log("Setting match...");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/user_matches/' + this.userS.user.id);
       let data = {};
-      data[uid] = new Date().getTime();
+      data[user.id] = new Date().getTime();
       ref.update(data).then(data => {
         console.log("Match data saved in DB!");
-        let otherRef = firebase.database().ref('/user_matches/' + uid);
+        let otherRef = firebase.database().ref('/user_matches/' + user.id);
         let otherData = {};
         otherData[this.userS.user.id] = new Date().getTime();
         otherRef.update(otherData).then(data => {
           // Create new chat object on match for chat observation purposes
-          this.chatS.chatWith(uid);
+          this.chatS.chatWith(user.id);
+          if (user.pushId) {
+            this.pushS.post("You matched with me!", user);
+          }
           resolve('success!');
         }).catch(error => {
           console.log(error);

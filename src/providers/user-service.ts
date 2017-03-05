@@ -53,8 +53,8 @@ export class UserService {
       return new Promise((resolve, reject) => {
           let ref = firebase.database().ref('/users/' + uid);
           ref.once('value').then((snap) => {
-              console.log("Fetch returned user!");
               let val = snap.val();
+              console.log("Fetch returned user:", val);
               if (!val["photoURL"]) {
                   val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
               }

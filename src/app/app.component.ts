@@ -24,7 +24,9 @@ import { ChatPage } from '../pages/chat/chat';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
 import { ChatService } from '../providers/chat-service';
+import { DiscoverService } from '../providers/discover-service';
 import { LoadingService } from '../providers/loading-service';
+import { PushService } from '../providers/push-service';
 
 @Component({
   templateUrl: 'app.html'
@@ -41,7 +43,9 @@ export class Joon {
                 private authS: AuthService,
                 private userS: UserService,
                 private chatS: ChatService,
+                private discoverS: DiscoverService,
                 private loadingS: LoadingService,
+                private pushS: PushService,
                 private fb: FacebookService,
                 private storage: Storage) {
 
@@ -87,6 +91,11 @@ export class Joon {
                 console.log("Local storage ready. Fetching stored user...");
                 this.fetchCurrentUser();
             });
+            // Check If Cordova/Mobile
+            if (this.platform.is('cordova')) {
+              // OneSignal init
+              this.pushS.init();
+            }
         });
     }
     

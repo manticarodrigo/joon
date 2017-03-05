@@ -105,7 +105,7 @@ export class DiscoverPage {
       let currentCard = this.users.pop();
       this.undoHistory.push(currentCard);
       console.log(currentCard);
-      this.discoverS.saw(currentCard.id).then(success => {
+      this.discoverS.saw(currentCard).then(success => {
         this.presentToast('You did not like ' + currentCard.firstName);
       }).catch(error => {
         console.log(error);
@@ -122,8 +122,8 @@ export class DiscoverPage {
       let currentCard = this.users.pop();
       this.undoHistory.push(currentCard);
       console.log(currentCard);
-      this.discoverS.saw(currentCard.id).then(success => {
-        this.discoverS.liked(currentCard.id).then(matched => {
+      this.discoverS.saw(currentCard).then(success => {
+        this.discoverS.liked(currentCard).then(matched => {
           this.presentToast('You liked ' + currentCard.firstName);
           if (matched) {
             this.loadingS.user = this.userS.user;
@@ -159,8 +159,8 @@ export class DiscoverPage {
       let currentCard = this.users.pop();
       this.undoHistory.push(currentCard);
       console.log(currentCard);
-      this.discoverS.saw(currentCard.id).then(success => {
-        this.discoverS.doubleLiked(currentCard.id).then(matched => {
+      this.discoverS.saw(currentCard).then(success => {
+        this.discoverS.doubleLiked(currentCard).then(matched => {
           this.presentToast('You double liked ' + currentCard.firstName);
           if (matched) {
             this.loadingS.user = this.userS.user;

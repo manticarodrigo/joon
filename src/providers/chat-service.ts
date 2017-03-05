@@ -4,11 +4,13 @@ import { Observable } from "rxjs/Observable";
 import firebase from 'firebase';
 
 import { UserService } from './user-service';
+import { DiscoverService } from './discover-service';
 
 @Injectable()
 export class ChatService {
 
     chats: Array<any>;
+    matchedUsers: Array<any>;
     unreadCount = 0;
 
     constructor(private zone: NgZone,
@@ -124,99 +126,158 @@ export class ChatService {
         
     }
 
-    observeChats() {
-        console.log("Observing chats...");
-        let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id);
-        ref.on('value', (snapshot) => {
-            snapshot = snapshot.val();
-            console.log("Chats returned by DB:");
-            console.log(snapshot);
-            var chats = [];
-            var chatCount = 0;
-            for (var key in snapshot) {
-                var chat = snapshot[key];
-                let uid = '';
-                for (var userId in chat.users) {
-                    if (userId != this.userS.user.id) {
-                        uid = userId;
-                    }
+    fetchMatchedUsers(): Promise<any> {
+        console.log("Fetching matched users...");
+        return new Promise((resolve, reject) => {
+            let user = this.userS.user;
+            let ref = firebase.database().ref('/user_matches/' + user.id);
+            ref.once('value').then(snapshot => {
+                console.log('Fetched user matches:');
+                console.log(snapshot.val());
+                let val = snapshot.val();
+                var users = [];
+                var userCount = 0;
+                for (var uid in val) {
+                    this.userS.fetchUser(uid).then(user => {
+                        users.push(user);
+                        userCount++
+                        let numUsers = snapshot.numChildren();
+                        if (userCount == numUsers) {
+                            console.log("Fetch returned matched users:", users);
+                            resolve(users);
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                        let numUsers = snapshot.numChildren();
+                        if (userCount == numUsers) {
+                            console.log("Fetch returned matched users:", users);
+                            resolve(users);
+                        }
+                    });
                 }
-                this.userS.fetchUser(uid).then(user => {
-                    console.log("Adding user and time properties to chat object...");
-                    chat['user'] = user;
-                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
-                    chats.push(chat);
-                    chatCount++;
-                    if (chatCount == new Array(snapshot).length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.zone.run(() => {
-                            this.chats = chats;
-                        });
-                        console.log(chats);
-                        this.fetchUnreadCount();
-                    }
-                }).catch(error => {
-                    console.log(error);
-                    chatCount++;
-                    if (chatCount == new Array(snapshot).length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.zone.run(() => {
-                            this.chats = chats;
-                        });
-                        console.log(chats);
-                        this.fetchUnreadCount();
-                    }
-                });
-            }
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            })
         });
     }
 
-    fetchUnreadCount(): Promise<any> {
-        console.log("Fetching unread count for chats...");
-        return new Promise((resolve, reject) => {
-            var chats = [];
-            var chatCount = 0;
-            var totalUnreadCount = 0;
-            for (var key in this.chats) {
-                let chat = this.chats[key];
-                console.log(this.chats);
-                console.log(chat);
-                this.fetchUnreadCountIn(chat).then(unreadCount => {
-                    if (unreadCount) {
-                        chat['unreadCount'] = unreadCount;
-                        totalUnreadCount += unreadCount;
-                    }
-                    chats.push(chat);
-                    chatCount++;
-                    if (chatCount == chats.length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.zone.run(() => {
-                            this.chats = chats;
-                        });
-                        this.unreadCount = totalUnreadCount;
-                    }
+    userFor(chat) {
+        for (var uid in chat.users) {
+            if (uid != this.userS.user.id) {
+                for (var key in this.matchedUsers) {
+                var user = this.matchedUsers[key];
+                if (uid == user.id) {
+                    return user
+                }
+                }
+                return null
+            }
+        }
+    }
+
+    newUserFor(chat) {
+        for (var uid in chat.users) {
+            if (uid != this.userS.user.id) {
+                this.userS.fetchUser(uid).then(user => {
+                    chat['user'] = user;
+                    this.chats.push(chat);
+                    this.fetchUnreadCount();
                 }).catch(error => {
                     console.log(error);
-                    chats.push(chat);
-                    chatCount++;
-                    if (chatCount == this.chats.length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.zone.run(() => {
-                            this.chats = chats;
-                        });
-                        this.unreadCount = totalUnreadCount;
-                    }
                 });
             }
+         }
+    }
+
+    observeChats() {
+        console.log("Observing chats...");
+        this.fetchMatchedUsers().then(matchedUsers => {
+            this.matchedUsers = matchedUsers;
+            let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id).startAt(0);
+            ref.on('value', (snapshot) => {
+                let val = snapshot.val();
+                console.log("Chats returned from DB:", val);
+                var chats = [];
+                for (var key in val) {
+                    var chat = val[key];
+                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
+                    if (this.userFor(chat)) {
+                        chat['user'] = this.userFor(chat);
+                        chats.push(chat);
+                    } else {
+                        console.log("Didn't find user for chat:", chat);
+                        this.newUserFor(chat);
+                    }
+                }
+                this.zone.run(() => {
+                    this.chats = chats;
+                    console.log("Set chats: ", chats);
+                    this.chats.sort(function(a, b){
+                        return a.timestamp-b.timestamp;
+                    });
+                    this.fetchUnreadCount();
+                });
+            });
+        }).catch(error => {
+            console.log(error);
         });
+    }
+
+    getChatIndex(key) {
+        console.log("Getting chat index for:", key);
+        for (var i=0; i < this.chats.length; i++) {
+            var chat = this.chats[i];
+            console.log("Attempting match with:", chat.id);
+            if (chat.id == key) {
+                console.log("Match found!");
+                return i;
+            }
+        }
+        console.log("No match found!");
+        return 0;
+    }
+
+    fetchUnreadCount() {
+        console.log("Fetching unread count for chats...");
+        var chats = [];
+        var chatCount = 0;
+        var totalUnreadCount = 0;
+        for (var key in this.chats) {
+            let chat = this.chats[key];
+            console.log(this.chats);
+            console.log(chat);
+            this.fetchUnreadCountIn(chat).then(unreadCount => {
+                if (unreadCount) {
+                    chat['unreadCount'] = unreadCount;
+                    totalUnreadCount += unreadCount;
+                }
+                chats.push(chat);
+                chatCount++;
+                if (chatCount == chats.length) {
+                    chats.sort(function(a, b){
+                        return a.timestamp-b.timestamp;
+                    });
+                    this.zone.run(() => {
+                        this.chats = chats;
+                        this.unreadCount = totalUnreadCount;
+                    });
+                }
+            }).catch(error => {
+                console.log(error);
+                chats.push(chat);
+                chatCount++;
+                if (chatCount == this.chats.length) {
+                    chats.sort(function(a, b){
+                        return a.timestamp-b.timestamp;
+                    });
+                    this.zone.run(() => {
+                        this.chats = chats;
+                        this.unreadCount = totalUnreadCount;
+                    });
+                }
+            });
+        }
     }
 
     fetchUnreadCountIn(chat): Promise<number> {
@@ -248,7 +309,7 @@ export class ChatService {
     
     stopObservingChats() {
         console.log("Stopped observing chats...");
-        firebase.database().ref('/chats/').off()
+        firebase.database().ref('/chats/').off();
     }
 
     observeMessagesIn(chat) {

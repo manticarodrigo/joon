@@ -20,7 +20,7 @@ import { ChatPage } from '../pages/chat/chat';
 import { SwingModule } from 'angular2-swing';
 
 import { Storage } from '@ionic/storage';
-import { Facebook, NativeStorage } from 'ionic-native';
+import { Facebook, NativeStorage, OneSignal } from 'ionic-native';
 import { FacebookService } from 'ng2-facebook-sdk';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
@@ -28,6 +28,7 @@ import { LoadingService } from '../providers/loading-service';
 import { DiscoverService } from '../providers/discover-service';
 import { ChatService } from '../providers/chat-service';
 import { StorageService } from '../providers/storage-service';
+import { PushService } from '../providers/push-service';
 
 @NgModule({
   declarations: [
@@ -84,9 +85,11 @@ import { StorageService } from '../providers/storage-service';
     DiscoverService,
     ChatService,
     StorageService,
+    PushService,
     Facebook,
     FacebookService,
     NativeStorage,
+    OneSignal,
     Storage
    ]
 })

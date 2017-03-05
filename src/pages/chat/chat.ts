@@ -4,6 +4,7 @@ import { NavController, NavParams, ActionSheetController, AlertController } from
 import { ChatService } from '../../providers/chat-service';
 import { UserService } from '../../providers/user-service';
 import { StorageService } from '../../providers/storage-service';
+import { PushService } from '../../providers/push-service';
 
 import { ProfilePage } from '../profile/profile';
 
@@ -25,7 +26,8 @@ export class ChatPage {
                 private alertCtrl: AlertController,
                 private chatS: ChatService,
                 private userS: UserService,
-                private storageS: StorageService) {
+                private storageS: StorageService,
+                private pushS: PushService) {
         this.user = navParams.get('user');
         this.chat = navParams.get('chat');
         this.viewState = "messages";
@@ -145,6 +147,9 @@ export class ChatPage {
         this.storageS.uploadAttachmentIn(this.chat.id, file).then(url => {
             this.chatS.sendAttachmentTo(user, file).then(url => {
                 console.log(url);
+                if (this.user.pushId) {
+                    this.pushS.post(this.userS.user.firstName + " sent an image.", this.user);
+                }
             }).catch(error => {
                 console.log(error);
             });
@@ -162,6 +167,9 @@ export class ChatPage {
             this.chatInput = "";
             this.chatS.sendMessageTo(input, this.user).then(message => {
                 console.log('Message sent successfully!');
+                if (this.user.pushId) {
+                    this.pushS.post(input, this.user);
+                }
             }).catch(error => {
                 console.log(error);
                 this.chatInput = input;
