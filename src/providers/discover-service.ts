@@ -113,7 +113,7 @@ export class DiscoverService {
         return ref.once('value');
       }).then(snapshot => {
         console.log("User liked returned from DB!");
-        this.checkForMatchWith(user.id).then(matched => {
+        this.checkForMatchWith(user).then(matched => {
           resolve(matched);
         }).catch(error => {
           console.log(error);
@@ -154,12 +154,14 @@ export class DiscoverService {
 
   checkForMatchWith(user): Promise<boolean> {
     console.log("Checking for match...");
+    console.log(user.id);
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/user_liked/' + user.id + '/' + this.userS.user.id);
       ref.once('value').then(snap => {
+        console.log(snap.val());
         if (snap.exists()) {
           console.log("User likes current user!");
-          this.setMatchWith(user.id).then(success => {
+          this.setMatchWith(user).then(success => {
             resolve(true);
           }).catch(error => {
             console.log(error);
@@ -189,11 +191,20 @@ export class DiscoverService {
         otherData[this.userS.user.id] = new Date().getTime();
         otherRef.update(otherData).then(data => {
           // Create new chat object on match for chat observation purposes
-          this.chatS.chatWith(user.id);
-          if (user.pushId) {
-            this.pushS.post("You matched with me!", user);
-          }
-          resolve('success!');
+          this.chatS.chatWith(user).then(chat => {
+            if (this.chatS.chats) {
+              this.chatS.chats.push(chat);
+            } else {
+              this.chatS.chats = [chat];
+            }
+            if (user.pushId) {
+              this.pushS.post("You matched with me!", user);
+            }
+            resolve(true);
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
         }).catch(error => {
           console.log(error);
           reject(error);
@@ -205,16 +216,16 @@ export class DiscoverService {
     });
   }
 
-  unsetMatchWith(uid): Promise<boolean> {
+  unsetMatchWith(user): Promise<boolean> {
     console.log("Unsetting match...");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/user_matches/' + this.userS.user.id);
       ref.remove().then(success => {
         console.log("Match data removed from DB!");
-        let otherRef = firebase.database().ref('/user_matches/' + uid);
+        let otherRef = firebase.database().ref('/user_matches/' + user.id);
         otherRef.remove().then(success => {
           // Remove chat object for chat observation purposes
-          this.chatS.removeChatWithUser(uid).then(success => {
+          this.chatS.removeChatWith(user).then(success => {
             resolve(success);
           }).catch(error => {
             console.log(error);
@@ -231,7 +242,7 @@ export class DiscoverService {
     });
   }
 
-  resetSeenFor(uid): Promise<any> {
+  resetSeen(): Promise<any> {
     console.log("Resetting seen data...");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/user_saw/' + this.userS.user.id);
@@ -250,7 +261,7 @@ export class DiscoverService {
     });
   }
 
-  resetLikesFor(uid): Promise<any> {
+  resetLikes(): Promise<any> {
     console.log("Resetting likes data...");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/user_liked/' + this.userS.user.id);

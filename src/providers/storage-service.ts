@@ -13,7 +13,7 @@ export class StorageService {
       return new Promise((resolve, reject) => {
         var updates = {};
         updates[index] = url;
-        firebase.database().ref('/user-images/' + uid).update(updates).then(success => {
+        firebase.database().ref('/user_images/' + uid).update(updates).then(success => {
             console.log("DB saved image url!");
             resolve(url);
         }).catch(error => {
@@ -39,7 +39,7 @@ export class StorageService {
     fetchImagesFor(uid): Promise<any> {
         console.log("Fetching image urls for: " + uid);
         return new Promise((resolve, reject) => {
-            let ref = firebase.database().ref('/user-images/' + uid);
+            let ref = firebase.database().ref('/user_images/' + uid);
             ref.once('value').then((snap) => {
                 console.log("fetch returned user images");
                 let snapArr = [];

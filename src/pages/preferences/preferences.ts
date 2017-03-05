@@ -53,12 +53,12 @@ export class PreferencesPage {
 
   resetDiscoverableUsers() {
     console.log("Users reset pressed!");
-    this.discoverS.resetSeenFor(this.userS.user.id);
+    this.discoverS.resetSeen();
   }
 
   resetLikes() {
     console.log("Like reset pressed!");
-    this.discoverS.resetLikesFor(this.userS.user.id);
+    this.discoverS.resetLikes();
   }
   
 }

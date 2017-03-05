@@ -158,11 +158,11 @@ export class Joon {
     }
     
     logoutApp() {
+        this.nav.setRoot(LoginPage);
+        this.menu.close();
         this.userS.updateCurrentUser(null);
         this.chatS.stopObservingChats();
         this.authS.signOut();
-        this.nav.setRoot(LoginPage);
-        this.menu.close();
     }
 
 }

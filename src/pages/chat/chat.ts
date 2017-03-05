@@ -3,6 +3,7 @@ import { NavController, NavParams, ActionSheetController, AlertController } from
 
 import { ChatService } from '../../providers/chat-service';
 import { UserService } from '../../providers/user-service';
+import { DiscoverService } from '../../providers/discover-service';
 import { StorageService } from '../../providers/storage-service';
 import { PushService } from '../../providers/push-service';
 
@@ -26,6 +27,7 @@ export class ChatPage {
                 private alertCtrl: AlertController,
                 private chatS: ChatService,
                 private userS: UserService,
+                private discoverS: DiscoverService,
                 private storageS: StorageService,
                 private pushS: PushService) {
         this.user = navParams.get('user');
@@ -101,7 +103,7 @@ export class ChatPage {
             {
                 text: 'Unmatch',
                 handler: data => {
-                    this.chatS.removeChatWithUser(this.user.id).then(success => {
+                    this.discoverS.unsetMatchWith(this.user).then(success => {
                         this.navCtrl.pop();
                     }).catch(error => {
                         console.log(error);

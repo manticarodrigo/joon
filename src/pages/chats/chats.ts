@@ -16,8 +16,12 @@ export class ChatsPage {
                 private chatS: ChatService) {
     }
 
+    ionViewWillEnter() {
+        this.chatS.updateTime();
+    }
+
     userTapped(event, user) {
-        this.chatS.chatWith(user.id).then(chat => {
+        this.chatS.chatWith(user).then(chat => {
             if (chat) {
                 this.navCtrl.push(ChatPage, {
                     user: user,

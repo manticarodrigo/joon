@@ -18,17 +18,21 @@ export class ChatService {
 
     }
   
-    chatWith(uid): Promise<any> {
+    chatWith(user): Promise<any> {
         console.log("Chatting with user...");
         return new Promise((resolve, reject) => {
-            let chatId = this.chatIdWith(uid);
+            let chatId = this.chatIdWith(user);
             this.fetchChat(chatId).then(chat => {
                 if (chat) {
+                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
+                    chat['user'] = user;
                     this.updateUserActivityIn(chat);
                     resolve(chat);
                 } else {
-                    this.createChatWithUser(uid).then(chat => {
+                    this.createChatWithUser(user).then(chat => {
                         if (chat) {
+                            chat['time'] = this.getTimeStringFrom(chat.timestamp);
+                            chat['user'] = user;
                             resolve(chat);
                         } else {
                             reject(null);
@@ -50,12 +54,12 @@ export class ChatService {
                     .set(new Date().getTime());
     }
     
-    chatIdWith(uid) {
+    chatIdWith(user) {
         var chatId = '';
-            if (this.userS.user.id < uid) {
-                chatId = this.userS.user.id + "_" + uid;
+            if (this.userS.user.id < user.id) {
+                chatId = this.userS.user.id + "_" + user.id;
             } else {
-                chatId = uid + "_" + this.userS.user.id;
+                chatId = user.id + "_" + this.userS.user.id;
             }
         return chatId;
     }
@@ -80,29 +84,24 @@ export class ChatService {
         });
     }
         
-    private createChatWithUser(uid): Promise<any> {
+    private createChatWithUser(user): Promise<any> {
         console.log("Creating chat with user...");
         return new Promise((resolve, reject) => {
-            this.userS.fetchUser(uid).then(user => {
-                var chatId = this.chatIdWith(uid);
-                var lastMessage = "Tap to say hello!";
-                var now = new Date().getTime();
-                var users = {};
-                users[uid] = new Date().getTime();
-                users[this.userS.user.id] = new Date().getTime();
-                var val = { "lastMessage" : lastMessage, "timestamp" : now, "users" : users, 'id' : chatId };
-                let ref = firebase.database().ref('/chats/' + chatId);
-                ref.update(val).then(data => {
-                    console.log("DB saved chat data!");
-                    return ref.once('value');
-                }).then(snapshot => {
-                    console.log("DB returned chat snapshot");
-                    let val = snapshot.val();
-                    resolve(val);
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                });
+            var chatId = this.chatIdWith(user);
+            var lastMessage = "Tap to say hello!";
+            var now = new Date().getTime();
+            var users = {};
+            users[user.id] = new Date().getTime();
+            users[this.userS.user.id] = new Date().getTime();
+            var val = { "lastMessage" : lastMessage, "timestamp" : now, "users" : users, 'id' : chatId };
+            let ref = firebase.database().ref('/chats/' + chatId);
+            ref.update(val).then(data => {
+                console.log("DB saved chat data!");
+                return ref.once('value');
+            }).then(snapshot => {
+                console.log("DB returned chat snapshot");
+                let val = snapshot.val();
+                resolve(val);
             }).catch(error => {
                 console.log(error);
                 reject(error);
@@ -110,10 +109,10 @@ export class ChatService {
         });
     }
 
-    removeChatWithUser(uid): Promise<any> {
+    removeChatWith(user): Promise<any> {
         console.log("Creating chat with user...");
         return new Promise((resolve, reject) => {
-            var chatId = this.chatIdWith(uid);
+            var chatId = this.chatIdWith(user);
             let ref = firebase.database().ref('/chats/' + chatId);
                 ref.remove().then(success => {
                     console.log("DB removed chat data!");
@@ -166,10 +165,10 @@ export class ChatService {
         for (var uid in chat.users) {
             if (uid != this.userS.user.id) {
                 for (var key in this.matchedUsers) {
-                var user = this.matchedUsers[key];
-                if (uid == user.id) {
-                    return user
-                }
+                    var user = this.matchedUsers[key];
+                    if (uid == user.id) {
+                        return user
+                    }
                 }
                 return null
             }
@@ -224,18 +223,26 @@ export class ChatService {
         });
     }
 
-    getChatIndex(key) {
-        console.log("Getting chat index for:", key);
-        for (var i=0; i < this.chats.length; i++) {
-            var chat = this.chats[i];
-            console.log("Attempting match with:", chat.id);
-            if (chat.id == key) {
-                console.log("Match found!");
-                return i;
+    updateTime() {
+        console.log("Updating time for chats...");
+        var chats = [];
+        var chatCount = 0;
+        for (var key in this.chats) {
+            let chat = this.chats[key];
+            console.log(this.chats);
+            console.log(chat);
+            chat['time'] = this.getTimeStringFrom(chat.timestamp);
+            chats.push(chat);
+            chatCount++;
+            if (chatCount == chats.length) {
+                chats.sort(function(a, b){
+                    return a.timestamp-b.timestamp;
+                });
+                this.zone.run(() => {
+                    this.chats = chats;
+                });
             }
         }
-        console.log("No match found!");
-        return 0;
     }
 
     fetchUnreadCount() {
@@ -333,7 +340,7 @@ export class ChatService {
     sendMessageTo(message, user): Promise<any> {
         console.log("Sending message...");
         return new Promise((resolve, reject) => {
-            var chatId = this.chatIdWith(user.id);
+            var chatId = this.chatIdWith(user);
             var now = (new Date).getTime();
             var val = { "message" : message, "timestamp" : now, "sender" : this.userS.user.id };
             var data = {};
@@ -366,7 +373,7 @@ export class ChatService {
     sendAttachmentTo(user, url): Promise<any> {
         console.log("Uploading attachment...");
         return new Promise((resolve, reject) => {
-            var chatId = this.chatIdWith(user.id);
+            var chatId = this.chatIdWith(user);
             var now = new Date().getTime();
             var val = { "url" : url, "timestamp" : now, "sender" : this.userS.user.id };
             var data = {};
