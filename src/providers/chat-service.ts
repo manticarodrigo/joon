@@ -24,14 +24,12 @@ export class ChatService {
             let chatId = this.chatIdWith(user);
             this.fetchChat(chatId).then(chat => {
                 if (chat) {
-                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
                     chat['user'] = user;
                     this.updateUserActivityIn(chat);
                     resolve(chat);
                 } else {
                     this.createChatWithUser(user).then(chat => {
                         if (chat) {
-                            chat['time'] = this.getTimeStringFrom(chat.timestamp);
                             chat['user'] = user;
                             resolve(chat);
                         } else {
@@ -200,7 +198,6 @@ export class ChatService {
                 var chats = [];
                 for (var key in val) {
                     var chat = val[key];
-                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
                     if (this.userFor(chat)) {
                         chat['user'] = this.userFor(chat);
                         chats.push(chat);
@@ -211,10 +208,8 @@ export class ChatService {
                 }
                 this.zone.run(() => {
                     this.chats = chats;
+                    this.updateTime();
                     console.log("Set chats: ", chats);
-                    this.chats.sort(function(a, b){
-                        return a.timestamp-b.timestamp;
-                    });
                     this.fetchUnreadCount();
                 });
             });
@@ -225,24 +220,12 @@ export class ChatService {
 
     updateTime() {
         console.log("Updating time for chats...");
-        var chats = [];
-        var chatCount = 0;
         for (var key in this.chats) {
-            let chat = this.chats[key];
-            console.log(this.chats);
-            console.log(chat);
-            chat['time'] = this.getTimeStringFrom(chat.timestamp);
-            chats.push(chat);
-            chatCount++;
-            if (chatCount == chats.length) {
-                chats.sort(function(a, b){
-                    return a.timestamp-b.timestamp;
-                });
-                this.zone.run(() => {
-                    this.chats = chats;
-                });
-            }
+            this.chats[key]['time'] = this.getTimeStringFrom(this.chats[key].timestamp);
         }
+        this.chats.sort(function(a, b){
+            return b.timestamp-a.timestamp;
+        });
     }
 
     fetchUnreadCount() {
@@ -262,12 +245,10 @@ export class ChatService {
                 chats.push(chat);
                 chatCount++;
                 if (chatCount == chats.length) {
-                    chats.sort(function(a, b){
-                        return a.timestamp-b.timestamp;
-                    });
                     this.zone.run(() => {
                         this.chats = chats;
                         this.unreadCount = totalUnreadCount;
+                        this.updateTime();
                     });
                 }
             }).catch(error => {
@@ -275,9 +256,6 @@ export class ChatService {
                 chats.push(chat);
                 chatCount++;
                 if (chatCount == this.chats.length) {
-                    chats.sort(function(a, b){
-                        return a.timestamp-b.timestamp;
-                    });
                     this.zone.run(() => {
                         this.chats = chats;
                         this.unreadCount = totalUnreadCount;
@@ -323,7 +301,7 @@ export class ChatService {
         console.log("Observing messages...");
         return new Observable(observer => {
             let ref = firebase.database().ref('messages/' + chat.id);
-            ref.on('value', (snapshot) => {
+            ref.on('child_added', (snapshot) => {
                 console.log(snapshot.val());
                 this.zone.run(() => {
                     observer.next(snapshot.val());
@@ -408,7 +386,6 @@ export class ChatService {
         date.setDate(date.getDate());
         var string = date.toString();
         var stringArr = string.split(" ");
-        var day = stringArr[0];
         var time = this.tConvert(stringArr[4]);
 
         let now = new Date();
@@ -441,11 +418,11 @@ export class ChatService {
             }
         }
         interval = Math.floor(seconds / 3600);
-        if (interval > 1) {
+        if (interval >= 1) {
             return time;
         }
         interval = Math.floor(seconds / 60);
-        if (interval > 1) {
+        if (interval >= 1) {
             return interval + " minutes ago";
         }
         return Math.floor(seconds) + " seconds ago";

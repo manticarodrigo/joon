@@ -35,7 +35,10 @@
                     {{ message.message }}
                 </div>
                 <div *ngIf="message.url" class="img-bubble {{ message.position }}">
-                    <ion-img [src]="message.url" width="200" height="200" cache="true"></ion-img>
+                    <ion-img [src]="message.url" width="200" height="200"></ion-img>
+                    <div class="spinner">
+                        <ion-spinner color="primary" name="dots"></ion-spinner>
+                    </div>
                 </div>
             </ion-item>
         </ion-list>

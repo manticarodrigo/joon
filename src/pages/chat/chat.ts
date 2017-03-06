@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { NavController, NavParams, ActionSheetController, AlertController } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { NavController, NavParams, ActionSheetController, AlertController, Content } from 'ionic-angular';
 
 import { ChatService } from '../../providers/chat-service';
 import { UserService } from '../../providers/user-service';
@@ -11,10 +11,10 @@ import { ProfilePage } from '../profile/profile';
 
 @Component({
   selector: 'page-chat',
-  templateUrl: 'chat.html'
+  templateUrl: 'chat.html',
 })
 export class ChatPage {
-    
+    @ViewChild(Content) content: Content;
     viewState = "";
     chatInput = "";
     user: any;
@@ -23,7 +23,7 @@ export class ChatPage {
 
     constructor(private navCtrl: NavController,
                 private navParams: NavParams,
-                public actionSheetCtrl: ActionSheetController,
+                private actionSheetCtrl: ActionSheetController,
                 private alertCtrl: AlertController,
                 private chatS: ChatService,
                 private userS: UserService,
@@ -35,22 +35,33 @@ export class ChatPage {
         this.viewState = "messages";
     }
 
+    ionViewDidEnter() {
+        this.scrollToBottom();
+    }
+
+    scrollToBottom() {
+        console.log("Scrolling to bottom!");
+        let dimensions = this.content.getContentDimensions();
+        // this.content.scrollToBottom(250);
+        this.content.scrollTo(0, dimensions.scrollHeight, 250); //x, y, ms animation speed
+    }
+
     ionViewWillLoad() {
-        this.chatS.observeMessagesIn(this.chat).subscribe(snapshot => {
-            var messages = [];
-            for (var key in snapshot) {
-                var data = snapshot[key];
-                if (data.sender == this.user.id) {
-                    data['position'] = 'left';
-                } else {
-                    data['position'] = 'right';
-                }
-                messages.push(data);
+        this.chatS.observeMessagesIn(this.chat).subscribe(message => {
+            if (message['sender'] == this.user.id) {
+                message['position'] = 'left';
+            } else {
+                message['position'] = 'right';
             }
-            messages.sort(function(a, b){
+            if (this.messages) {
+                this.messages.push(message);
+            } else {
+                this.messages = [message];
+            }
+            this.messages.sort(function(a, b){
                 return a.timestamp-b.timestamp;
             });
-            this.messages = messages;
+            this.scrollToBottom();
         });
     }
 

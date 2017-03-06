@@ -16,7 +16,7 @@ export class ChatsPage {
                 private chatS: ChatService) {
     }
 
-    ionViewWillEnter() {
+    ionViewDidEnter() {
         this.chatS.updateTime();
     }
 

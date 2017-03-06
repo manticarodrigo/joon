@@ -38,7 +38,7 @@ export class PushService {
   post(message, user) {
     var notificationObj = { 
                           app_id: "5eb5a37e-b458-11e3-ac11-000c2940e62c",
-                          headings: { en: user.firstName },
+                          headings: { en: this.userS.user.firstName },
                           contents: { en: message },
                           data: { uid: user.id },
                           include_player_ids: [user.pushId],
