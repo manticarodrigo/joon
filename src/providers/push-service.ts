@@ -13,7 +13,7 @@ export class PushService {
   init() {
     console.log("Initializing OneSignal...");
     // OneSignal initialization
-    OneSignal.startInit("ed946620-864f-40c3-9edb-bd3495a7e2b4", "android");
+    OneSignal.startInit("ed946620-864f-40c3-9edb-bd3495a7e2b4", "516717911226");
     OneSignal.inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification);
     OneSignal.setSubscription(true);
     // Enable to debug issues.

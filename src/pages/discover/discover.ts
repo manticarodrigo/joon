@@ -5,6 +5,7 @@ import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
 import { ChatService } from '../../providers/chat-service';
 import { LoadingService } from '../../providers/loading-service';
+import { LocationService } from '../../providers/location-service';
 
 import { ChatsPage } from '../chats/chats';
 import { ChatPage } from '../chat/chat';
@@ -39,7 +40,8 @@ export class DiscoverPage {
               private discoverS: DiscoverService,
               private userS: UserService,
               private chatS: ChatService,
-              private loadingS: LoadingService) {
+              private loadingS: LoadingService,
+              private locationS: LocationService) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
         return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -53,6 +55,7 @@ export class DiscoverPage {
     };
     this.users = [];
     this.undoHistory = [];
+    // this.locationS.getLocation();
   }
 
   ionViewDidLoad() {

@@ -230,35 +230,28 @@ export class ChatService {
 
     fetchUnreadCount() {
         console.log("Fetching unread count for chats...");
-        var chats = [];
         var chatCount = 0;
         var totalUnreadCount = 0;
         for (var key in this.chats) {
-            let chat = this.chats[key];
-            console.log(this.chats);
-            console.log(chat);
-            this.fetchUnreadCountIn(chat).then(unreadCount => {
+            this.fetchUnreadCountIn(this.chats[key]).then(unreadCount => {
                 if (unreadCount) {
-                    chat['unreadCount'] = unreadCount;
+                    this.chats[key]['unreadCount'] = unreadCount;
                     totalUnreadCount += unreadCount;
                 }
-                chats.push(chat);
                 chatCount++;
-                if (chatCount == chats.length) {
+                if (chatCount == this.chats.length) {
                     this.zone.run(() => {
-                        this.chats = chats;
                         this.unreadCount = totalUnreadCount;
                         this.updateTime();
                     });
                 }
             }).catch(error => {
                 console.log(error);
-                chats.push(chat);
                 chatCount++;
                 if (chatCount == this.chats.length) {
                     this.zone.run(() => {
-                        this.chats = chats;
                         this.unreadCount = totalUnreadCount;
+                        this.updateTime();
                     });
                 }
             });

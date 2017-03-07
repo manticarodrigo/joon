@@ -29,6 +29,7 @@ import { DiscoverService } from '../providers/discover-service';
 import { ChatService } from '../providers/chat-service';
 import { StorageService } from '../providers/storage-service';
 import { PushService } from '../providers/push-service';
+import { LocationService } from '../providers/location-service';
 
 @NgModule({
   declarations: [
@@ -86,6 +87,7 @@ import { PushService } from '../providers/push-service';
     ChatService,
     StorageService,
     PushService,
+    LocationService,
     Facebook,
     FacebookService,
     NativeStorage,

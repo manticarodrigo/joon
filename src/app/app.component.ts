@@ -37,7 +37,7 @@ export class Joon {
     rootPage: any = LoginPage;
     pages: Array<{title: string, component: any}>;
     
-    constructor(public platform: Platform,
+    constructor(private platform: Platform,
                 private menu: MenuController,
                 private el: ElementRef,
                 private authS: AuthService,
