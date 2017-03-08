@@ -9,29 +9,34 @@ import { UserService } from './user-service';
 @Injectable()
 export class LocationService {
 
-  ref = firebase.database().ref('user_located');
-  geoFire = new GeoFire(this.ref);
+  ref: any;
+  geoFire: any;
 
   constructor(private platform: Platform,
               private userS: UserService) {
     // Get the current user's location
+    this.ref = firebase.database().ref('user_located');
+    this.geoFire = new GeoFire(this.ref);
     this.getLocation();
   }
 
   getLocation() {
     // Check If Cordova/Mobile
+    var env = this;
     if (this.platform.is('cordova')) {
-      console.log("Asking user to get their location...");
+      console.log("Asking user to get their location (cordova)...");
+      // console.log("this.geoFire:")
+      // console.log(this.geoFire);
       Geolocation.getCurrentPosition().then(location => {
-        this.setLocation(location);
+        env.setLocation.bind(env)(location);
       }).catch(error => {
         this.errorHandler(error);
       });
     } else {
       // Uses the HTML5 geolocation API to get the current user's location
       if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
-        console.log("Asking user to get their location...");
-        navigator.geolocation.getCurrentPosition(this.setLocation, this.errorHandler);
+        console.log("Asking user to get their location (html5)...");
+        navigator.geolocation.getCurrentPosition(env.setLocation.bind(env), env.errorHandler);
       } else {
         console.log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
       }
