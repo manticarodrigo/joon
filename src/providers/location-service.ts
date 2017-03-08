@@ -9,11 +9,12 @@ import { UserService } from './user-service';
 @Injectable()
 export class LocationService {
 
-  ref = firebase.database().ref('user_located');
-  geoFire = new GeoFire(this.ref);
+  geoRef: any;
 
   constructor(private platform: Platform,
               private userS: UserService) {
+    let ref = firebase.database().ref('user_located');
+    this.geoRef = new GeoFire(ref);
     // Get the current user's location
     this.getLocation();
   }
@@ -43,7 +44,7 @@ export class LocationService {
     var longitude = location.coords.longitude;
     console.log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
 
-    this.geoFire.set(this.userS.user.id, [latitude, longitude]).then(() => {
+    this.geoRef.set(this.userS.user.id, [latitude, longitude]).then(() => {
       console.log("Current user " + this.userS.user.firstName + "'s location has been added to GeoFire");
     }).catch(error => {
       console.log("Error adding user " + this.userS.user.firstName + "'s location to GeoFire");

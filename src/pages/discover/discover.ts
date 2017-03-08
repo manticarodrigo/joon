@@ -55,7 +55,7 @@ export class DiscoverPage {
     };
     this.users = [];
     this.undoHistory = [];
-    // this.locationS.getLocation();
+    this.locationS.getLocation();
   }
 
   ionViewDidLoad() {
