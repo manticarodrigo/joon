@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Storage } from '@ionic/storage';
 import { Platform } from 'ionic-angular';
 import { Geolocation } from 'ionic-native';
 import firebase from 'firebase';
@@ -10,40 +11,52 @@ import { UserService } from './user-service';
 export class LocationService {
 
   geoRef: any;
+  currentLocation: any;
 
-  constructor(private platform: Platform,
+  constructor(private storage: Storage,
+              private platform: Platform,
               private userS: UserService) {
     let ref = firebase.database().ref('user_located');
     this.geoRef = new GeoFire(ref);
-    // Get the current user's location
-    this.getLocation();
   }
 
-  getLocation() {
-    // Check If Cordova/Mobile
-    if (this.platform.is('cordova')) {
-      console.log("Asking user to get their location...");
-      Geolocation.getCurrentPosition().then(location => {
-        this.setLocation(location);
-      }).catch(error => {
-        this.errorHandler(error);
-      });
-    } else {
-      // Uses the HTML5 geolocation API to get the current user's location
-      if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
-        console.log("Asking user to get their location...");
-        navigator.geolocation.getCurrentPosition(this.setLocation, this.errorHandler);
+  getLocation(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      // Check If Cordova/Mobile
+      var env = this;
+      if (this.platform.is('cordova')) {
+        console.log("Asking user to get their location (cordova)...");
+        Geolocation.getCurrentPosition().then(location => {
+          env.setLocation.bind(env)(location);
+          resolve('success');
+        }).catch(error => {
+          env.errorHandler(error);
+          reject(error);
+        });
       } else {
-        console.log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
+        // Uses the HTML5 geolocation API to get the current user's location
+        if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
+          console.log("Asking user to get their location (html5)...");
+          navigator.geolocation.getCurrentPosition(function(location) {
+              env.setLocation(location);
+              resolve('success');
+          }, function(error) {
+              console.log(error);
+              reject(error);
+          });
+        } else {
+          console.log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
+          reject('geolocation not supported');
+        }
       }
-    }
+    });
   }
 
   setLocation(location) {
+    this.currentLocation = location;
     var latitude = location.coords.latitude;
     var longitude = location.coords.longitude;
     console.log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
-
     this.geoRef.set(this.userS.user.id, [latitude, longitude]).then(() => {
       console.log("Current user " + this.userS.user.firstName + "'s location has been added to GeoFire");
     }).catch(error => {
@@ -64,4 +77,31 @@ export class LocationService {
     }
   };
 
+  fetchNearbyKeys(): Promise<any> {
+    console.log("Fetching nearby keys...");
+    return new Promise((resolve, reject) => {
+    var latitude = this.currentLocation.coords.latitude;
+    var longitude = this.currentLocation.coords.longitude;
+    var env = this;
+    var nearbyKeys = [];
+      var geoQuery = this.geoRef.query({
+        center: [latitude, longitude],
+        radius: 160.934 // kilometers
+      });
+
+      var keyEntered = geoQuery.on("key_entered", (key, location, distance) => {
+        console.log('Found ' + key + ', ' + distance + ' km away at coordinate:', location);
+        if (key != env.userS.user.id) {
+          nearbyKeys.push(key);
+        }
+      });
+
+      geoQuery.on("ready", function() {
+        // This will fire once the initial data is loaded, so now we can cancel the "key_entered" event listener
+        keyEntered.cancel();
+        console.log("GeoQuery ready!");
+        resolve(nearbyKeys);
+      });
+    });
+  }
 }

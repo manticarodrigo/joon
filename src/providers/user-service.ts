@@ -26,7 +26,7 @@ export class UserService {
         this.storage.set('user', user);
     }
   
-    fetchGlobalUsers(): Promise<any> {
+    fetchAllUsers(): Promise<any> {
         console.log("Fetching global users...");
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/users/');

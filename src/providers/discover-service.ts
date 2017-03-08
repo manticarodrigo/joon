@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
+import firebase from 'firebase';
+
 import { UserService } from './user-service';
 import { ChatService } from './chat-service';
 import { PushService } from './push-service';
-import firebase from 'firebase';
 
 @Injectable()
 export class DiscoverService {
@@ -25,7 +26,7 @@ export class DiscoverService {
       return false;
     if (user2.gender == 'female' && !user1.lff)
       return false;
-    if (user1.distance == 'country' && user1.country != user2.country)
+    if (user1.distance == 'national' && user1.country != user2.country)
       return false;
     return true;
   }
@@ -56,11 +57,11 @@ export class DiscoverService {
     });
   }
 
-  fetchDiscoverableUsers(): Promise<any> {
+  fetchGlobalUsers(): Promise<any> {
     let user = this.userS.user;
     let env = this;
     return new Promise((resolve, reject) => {
-      Promise.all([this.userS.fetchGlobalUsers(), this.fetchSeenUIDs()])
+      Promise.all([this.userS.fetchAllUsers(), this.fetchSeenUIDs()])
       .then(data => {
         let allUsers = data[0];
         let seenUIDs = data[1];
@@ -77,7 +78,25 @@ export class DiscoverService {
         resolve(visibleUsers);
       }).catch(error => {
         reject(error);
-      })
+      });
+    });
+  }
+
+  fetchLocalUsers(users): Promise<any> {
+    let user = this.userS.user;
+    let env = this;
+    return new Promise((resolve, reject) => {
+     this.fetchSeenUIDs().then(seenUIDs => {
+          let visibleUsers = [];
+          users.forEach(other => {
+            if (env.isDiscoverableTo(user, other, seenUIDs)) {
+              visibleUsers.push(other);
+            }
+          });
+          resolve(visibleUsers);
+        }).catch(error => {
+          reject(error);
+        });
     });
   }
 

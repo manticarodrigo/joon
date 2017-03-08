@@ -55,7 +55,6 @@ export class DiscoverPage {
     };
     this.users = [];
     this.undoHistory = [];
-    this.locationS.getLocation();
   }
 
   ionViewDidLoad() {
@@ -84,21 +83,61 @@ export class DiscoverPage {
   }
 
   fetchUsers() {
-    console.log("fetching discoverable users");
+    console.log("Fetching discoverable users");
+    let env = this;
+    let user = this.userS.user;
     this.loadingS.user = this.userS.user;
     this.loadingS.message = "Finding people nearby...";
     if (!this.loadingS.isActive) {
       this.loadingS.create(LoadingPage);
       this.loadingS.present();
     }
-    this.discoverS.fetchDiscoverableUsers().then(users => {
-      console.log("fetch returned visible users");
-      console.log(users);
-      this.users = users;
-      this.loadingS.dismiss()
-    }).catch(error => {
-      alert(error);
-    });
+    if (this.userS.user.distance == 'local') {
+      if (env.locationS.currentLocation) {
+        env.locationS.fetchNearbyKeys().then(keys => {
+          this.userS.fetchUsers(keys).then(users => {
+            this.discoverS.fetchLocalUsers(users).then(localUsers => {
+              this.users = localUsers;
+              this.loadingS.dismiss();
+            }).catch(error => {
+              console.log(error);
+            });
+          }).catch(error => {
+            console.log(error);
+          });
+        }).catch(error => {
+          console.log(error);
+        });
+      } else {
+        env.locationS.getLocation().then(() => {
+          env.locationS.fetchNearbyKeys().then(keys => {
+            this.userS.fetchUsers(keys).then(users => {
+              this.discoverS.fetchLocalUsers(users).then(localUsers => {
+                this.users = localUsers;
+                this.loadingS.dismiss();
+              }).catch(error => {
+                console.log(error);
+              });
+            }).catch(error => {
+              console.log(error);
+            });
+          }).catch(error => {
+            console.log(error);
+          });
+        }).catch(error => {
+          console.log(error);
+        });
+      }
+    } else {
+      this.discoverS.fetchGlobalUsers().then(users => {
+        console.log("fetch returned visible users");
+        console.log(users);
+        this.users = users;
+        this.loadingS.dismiss()
+      }).catch(error => {
+        console.log(error);
+      });
+    }
   }
 
   swipeLeft() {
