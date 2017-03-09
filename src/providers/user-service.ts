@@ -20,13 +20,22 @@ export class UserService {
         ref.update(data);
     }
 
+    sendFeedback(message) {
+        console.log("Sending feedback...");
+        let ref = firebase.database().ref('user_feedback/' + this.user.id);
+        var data = {};
+        let timestamp = new Date().getTime();
+        data[timestamp] = message;
+        ref.update(data);
+    }
+
     updateCurrentUser(user) {
         console.log("Updating user data in local storage and user service...");
         this.user = user;
         this.storage.set('user', user);
     }
   
-    fetchGlobalUsers(): Promise<any> {
+    fetchAllUsers(): Promise<any> {
         console.log("Fetching global users...");
         return new Promise((resolve, reject) => {
             let ref = firebase.database().ref('/users/');
@@ -53,8 +62,8 @@ export class UserService {
       return new Promise((resolve, reject) => {
           let ref = firebase.database().ref('/users/' + uid);
           ref.once('value').then((snap) => {
-              console.log("Fetch returned user!");
               let val = snap.val();
+              console.log("Fetch returned user:", val);
               if (!val["photoURL"]) {
                   val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
               }

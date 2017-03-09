@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, AlertController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
+import { LoadingService } from '../../providers/loading-service';
+import { LocationService } from '../../providers/location-service';
 
 import { ProfilePage } from '../profile/profile';
+import { LoadingPage } from '../loading/loading';
 
 @Component({
   selector: 'page-top-users',
@@ -12,22 +15,35 @@ import { ProfilePage } from '../profile/profile';
 })
 export class TopUsersPage {
     
-  topUsersLimit: number = 10;
-  topUsers: Array<any>;
+  topUsersLimit: number = 6;
+  globalUsers: Array<any>;
+  localUsers: Array<any>;
 
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
+              private alertCtrl: AlertController,
               private userS: UserService,
-              private discoverS: DiscoverService) {
+              private discoverS: DiscoverService,
+              private loadingS: LoadingService,
+              private locationS: LocationService) {
   }
 
   ionViewWillEnter() {
-    this.fetchTopUsers(this.topUsersLimit);
+    this.fetchGlobalTopUsers();
+    this.fetchLocalTopUsers();
   }
-  
-  fetchTopUsers(count) {
-    console.log("fetching global users");
 
+  presentInfo() {
+    let alert = this.alertCtrl.create({
+      title: 'Welcome to Top Users',
+      subTitle: 'This page features the top six people globally and locally (within 100 miles) based on likes and double likes.',
+      buttons: ['Dismiss']
+    });
+    alert.present();
+  }
+
+  fetchGlobalTopUsers() {
+    console.log("Fetching global top users");
     this.discoverS.getRankedUsersIDs().then(sortedIds => {
       let topIds = sortedIds.slice(0, this.topUsersLimit);
       return this.userS.fetchUsers(topIds);
@@ -37,11 +53,54 @@ export class TopUsersPage {
       // there should be no need to re-sort
       console.log("fetch returned top users");
       console.log(users);
-      this.topUsers = users;
+      this.globalUsers = users;
     }).catch(error => {
       alert(error);
     });
+  }
 
+  fetchLocalTopUsers() {
+    console.log("Fetching global top users");
+    let env = this;
+    let user = this.userS.user;
+    this.loadingS.user = this.userS.user;
+    this.loadingS.message = "Finding people nearby...";
+    if (!this.loadingS.isActive) {
+      this.loadingS.create(LoadingPage);
+      this.loadingS.present();
+    }
+    env.locationS.getLocation().then(() => {
+      env.locationS.fetchNearbyKeys().then(nearbyKeys => {
+        env.discoverS.getRankedUsersIDs().then(sortedIds => {
+          var localTopIds = [];
+          var count = 0;
+          sortedIds.forEach(uid => {
+            console.log(uid);
+            for (var key in nearbyKeys) {
+              let nearbyKey = nearbyKeys[key];
+              if (uid == nearbyKey && count <= this.topUsersLimit) {
+                console.log("uid exists nearby!", uid);
+                count++;
+                localTopIds.push(uid);
+              }
+            }
+          });
+          return this.userS.fetchUsers(localTopIds);
+        }).then(users => {
+          env.localUsers = users;
+          env.loadingS.dismiss();
+        }).catch(error => {
+          console.log(error);
+          env.loadingS.dismiss();
+        });
+      }).catch(error => {
+        console.log(error);
+        env.loadingS.dismiss();
+      });
+    }).catch(error => {
+      console.log(error);
+      env.loadingS.dismiss();
+    });
   }
 
   userTapped(event, user) {

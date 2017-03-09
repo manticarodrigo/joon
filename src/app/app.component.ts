@@ -24,7 +24,9 @@ import { ChatPage } from '../pages/chat/chat';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
 import { ChatService } from '../providers/chat-service';
+import { DiscoverService } from '../providers/discover-service';
 import { LoadingService } from '../providers/loading-service';
+import { PushService } from '../providers/push-service';
 
 @Component({
   templateUrl: 'app.html'
@@ -35,13 +37,15 @@ export class Joon {
     rootPage: any = LoginPage;
     pages: Array<{title: string, component: any}>;
     
-    constructor(public platform: Platform,
+    constructor(private platform: Platform,
                 private menu: MenuController,
                 private el: ElementRef,
                 private authS: AuthService,
                 private userS: UserService,
                 private chatS: ChatService,
+                private discoverS: DiscoverService,
                 private loadingS: LoadingService,
+                private pushS: PushService,
                 private fb: FacebookService,
                 private storage: Storage) {
 
@@ -54,9 +58,9 @@ export class Joon {
           { title: 'Top Users', component: TopUsersPage },
           { title: 'Discovery Preferences', component: PreferencesPage },
           { title: 'App Settings', component: SettingsPage },
-          { title: 'Help & Support', component: HelpPage },
+          //{ title: 'Help & Support', component: HelpPage },
           { title: 'Feedback', component: FeedbackPage },
-          { title: 'Invite A Friend to Joon', component: InvitePage }
+          //{ title: 'Invite A Friend to Joon', component: InvitePage }
 
         ];
     }
@@ -87,6 +91,11 @@ export class Joon {
                 console.log("Local storage ready. Fetching stored user...");
                 this.fetchCurrentUser();
             });
+            // Check If Cordova/Mobile
+            if (this.platform.is('cordova')) {
+              // OneSignal init
+              this.pushS.init();
+            }
         });
     }
     
@@ -149,11 +158,11 @@ export class Joon {
     }
     
     logoutApp() {
+        this.nav.setRoot(LoginPage);
+        this.menu.close();
         this.userS.updateCurrentUser(null);
         this.chatS.stopObservingChats();
         this.authS.signOut();
-        this.nav.setRoot(LoginPage);
-        this.menu.close();
     }
 
 }

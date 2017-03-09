@@ -29,7 +29,7 @@ export class MatchedPage {
   chat() {
     console.log("Chat pressed");
     let user = this.loadingS.otherUser;
-    this.chatS.chatWith(user.id).then(chat => {
+    this.chatS.chatWith(user).then(chat => {
         if (chat) {
           this.viewCtrl.dismiss([user, chat]);
         } else {

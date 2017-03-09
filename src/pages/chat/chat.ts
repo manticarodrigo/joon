@@ -1,18 +1,21 @@
-import { Component } from '@angular/core';
-import { NavController, NavParams, ActionSheetController, AlertController } from 'ionic-angular';
+import { Component, ViewChild } from '@angular/core';
+import { NavController, NavParams, ActionSheetController, AlertController, Content } from 'ionic-angular';
+import { Camera } from 'ionic-native';
 
 import { ChatService } from '../../providers/chat-service';
 import { UserService } from '../../providers/user-service';
+import { DiscoverService } from '../../providers/discover-service';
 import { StorageService } from '../../providers/storage-service';
+import { PushService } from '../../providers/push-service';
 
 import { ProfilePage } from '../profile/profile';
 
 @Component({
   selector: 'page-chat',
-  templateUrl: 'chat.html'
+  templateUrl: 'chat.html',
 })
 export class ChatPage {
-    
+    @ViewChild(Content) content: Content;
     viewState = "";
     chatInput = "";
     user: any;
@@ -21,38 +24,56 @@ export class ChatPage {
 
     constructor(private navCtrl: NavController,
                 private navParams: NavParams,
-                public actionSheetCtrl: ActionSheetController,
+                private actionSheetCtrl: ActionSheetController,
                 private alertCtrl: AlertController,
                 private chatS: ChatService,
                 private userS: UserService,
-                private storageS: StorageService) {
+                private discoverS: DiscoverService,
+                private storageS: StorageService,
+                private pushS: PushService) {
         this.user = navParams.get('user');
         this.chat = navParams.get('chat');
         this.viewState = "messages";
     }
 
+    ionViewDidEnter() {
+        this.scrollToBottom();
+    }
+
+    scrollToBottom() {
+        console.log("Scrolling to bottom!");
+        let dimensions = this.content.getContentDimensions();
+        // this.content.scrollToBottom(250);
+        this.content.scrollTo(0, dimensions.scrollHeight, 250); //x, y, ms animation speed
+    }
+
     ionViewWillLoad() {
-        this.chatS.observeMessagesIn(this.chat).subscribe(snapshot => {
-            var messages = [];
-            for (var key in snapshot) {
-                var data = snapshot[key];
-                if (data.sender == this.user.id) {
-                    data['position'] = 'left';
-                } else {
-                    data['position'] = 'right';
-                }
-                messages.push(data);
+        this.chatS.observeMessagesIn(this.chat).subscribe(message => {
+            if (message['sender'] == this.user.id) {
+                message['position'] = 'left';
+            } else {
+                message['position'] = 'right';
             }
-            messages.sort(function(a, b){
+            if (this.messages) {
+                this.messages.push(message);
+            } else {
+                this.messages = [message];
+            }
+            this.messages.sort(function(a, b){
                 return a.timestamp-b.timestamp;
             });
-            this.messages = messages;
+            this.scrollToBottom();
         });
     }
 
     ionViewWillUnload() {
         this.chatS.stopObservingMessagesIn(this.chat);
         this.chatS.updateUserActivityIn(this.chat);
+    }
+
+    changeState(state) {
+        console.log("State toggled:", state);
+        this.viewState = state;
     }
 
     showOptions() {
@@ -99,7 +120,7 @@ export class ChatPage {
             {
                 text: 'Unmatch',
                 handler: data => {
-                    this.chatS.removeChatWithUser(this.user.id).then(success => {
+                    this.discoverS.unsetMatchWith(this.user).then(success => {
                         this.navCtrl.pop();
                     }).catch(error => {
                         console.log(error);
@@ -139,12 +160,61 @@ export class ChatPage {
         alert.present();
     }
     
-    attach(event, user) {
+    presentActionSheet() {
+        let actionSheet = this.actionSheetCtrl.create({
+        title: 'Select Image Source',
+        cssClass: 'action-sheet',
+        buttons: [
+            {
+            text: 'Photo Library',
+            handler: () => {
+                this.takePicture(Camera.PictureSourceType.PHOTOLIBRARY);
+            }
+            },
+            {
+            text: 'Camera',
+            handler: () => {
+                this.takePicture(Camera.PictureSourceType.CAMERA);
+            }
+            },
+            {
+            text: 'Cancel',
+            role: 'cancel'
+            }
+        ]
+        });
+        actionSheet.present();
+    }
+
+    takePicture(sourceType) {
+        // Create options for the Camera Dialog
+        var options = {
+            quality: 100,
+            destinationType : Camera.DestinationType.DATA_URL,
+            sourceType: sourceType,
+            allowEdit : true,
+            encodingType: Camera.EncodingType.PNG,
+            targetWidth: 500,
+            targetHeight: 500,
+            saveToPhotoAlbum: true,
+            correctOrientation: true
+        };
+        
+        // Get the data of an image
+        Camera.getPicture(options).then((imageData) => {
+            this.uploadAttachment(imageData);
+        }, (error) => {
+            console.log(error);
+        });
+    }
+    uploadAttachment(imageData) {
         console.log('Attach pressed');
-        var file = event.srcElement.files[0];
-        this.storageS.uploadAttachmentIn(this.chat.id, file).then(url => {
-            this.chatS.sendAttachmentTo(user, file).then(url => {
+        this.storageS.uploadAttachmentIn(this.chat.id, imageData).then(url => {
+            this.chatS.sendAttachmentTo(this.user, url).then(url => {
                 console.log(url);
+                if (this.user.pushId) {
+                    this.pushS.push(this.userS.user.firstName + " sent an image.", this.user);
+                }
             }).catch(error => {
                 console.log(error);
             });
@@ -162,6 +232,9 @@ export class ChatPage {
             this.chatInput = "";
             this.chatS.sendMessageTo(input, this.user).then(message => {
                 console.log('Message sent successfully!');
+                if (this.user.pushId) {
+                    this.pushS.push(input, this.user);
+                }
             }).catch(error => {
                 console.log(error);
                 this.chatInput = input;

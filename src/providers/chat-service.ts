@@ -1,31 +1,36 @@
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import 'rxjs/Rx';
 import { Observable } from "rxjs/Observable";
 import firebase from 'firebase';
 
 import { UserService } from './user-service';
+import { DiscoverService } from './discover-service';
 
 @Injectable()
 export class ChatService {
 
     chats: Array<any>;
+    matchedUsers: Array<any>;
     unreadCount = 0;
 
-    constructor(private userS: UserService) {
+    constructor(private zone: NgZone,
+                private userS: UserService) {
 
     }
   
-    chatWith(uid): Promise<any> {
+    chatWith(user): Promise<any> {
         console.log("Chatting with user...");
         return new Promise((resolve, reject) => {
-            let chatId = this.chatIdWith(uid);
+            let chatId = this.chatIdWith(user);
             this.fetchChat(chatId).then(chat => {
                 if (chat) {
+                    chat['user'] = user;
                     this.updateUserActivityIn(chat);
                     resolve(chat);
                 } else {
-                    this.createChatWithUser(uid).then(chat => {
+                    this.createChatWithUser(user).then(chat => {
                         if (chat) {
+                            chat['user'] = user;
                             resolve(chat);
                         } else {
                             reject(null);
@@ -47,12 +52,12 @@ export class ChatService {
                     .set(new Date().getTime());
     }
     
-    chatIdWith(uid) {
+    chatIdWith(user) {
         var chatId = '';
-            if (this.userS.user.id < uid) {
-                chatId = this.userS.user.id + "_" + uid;
+            if (this.userS.user.id < user.id) {
+                chatId = this.userS.user.id + "_" + user.id;
             } else {
-                chatId = uid + "_" + this.userS.user.id;
+                chatId = user.id + "_" + this.userS.user.id;
             }
         return chatId;
     }
@@ -77,29 +82,24 @@ export class ChatService {
         });
     }
         
-    private createChatWithUser(uid): Promise<any> {
+    private createChatWithUser(user): Promise<any> {
         console.log("Creating chat with user...");
         return new Promise((resolve, reject) => {
-            this.userS.fetchUser(uid).then(user => {
-                var chatId = this.chatIdWith(uid);
-                var lastMessage = "Tap to say hello!";
-                var now = new Date().getTime();
-                var users = {};
-                users[uid] = new Date().getTime();
-                users[this.userS.user.id] = new Date().getTime();
-                var val = { "lastMessage" : lastMessage, "timestamp" : now, "users" : users, 'id' : chatId };
-                let ref = firebase.database().ref('/chats/' + chatId);
-                ref.update(val).then(data => {
-                    console.log("DB saved chat data!");
-                    return ref.once('value');
-                }).then(snapshot => {
-                    console.log("DB returned chat snapshot");
-                    let val = snapshot.val();
-                    resolve(val);
-                }).catch(error => {
-                    console.log(error);
-                    reject(error);
-                });
+            var chatId = this.chatIdWith(user);
+            var lastMessage = "Tap to say hello!";
+            var now = new Date().getTime();
+            var users = {};
+            users[user.id] = new Date().getTime();
+            users[this.userS.user.id] = new Date().getTime();
+            var val = { "lastMessage" : lastMessage, "timestamp" : now, "users" : users, 'id' : chatId };
+            let ref = firebase.database().ref('/chats/' + chatId);
+            ref.update(val).then(data => {
+                console.log("DB saved chat data!");
+                return ref.once('value');
+            }).then(snapshot => {
+                console.log("DB returned chat snapshot");
+                let val = snapshot.val();
+                resolve(val);
             }).catch(error => {
                 console.log(error);
                 reject(error);
@@ -107,10 +107,10 @@ export class ChatService {
         });
     }
 
-    removeChatWithUser(uid): Promise<any> {
+    removeChatWith(user): Promise<any> {
         console.log("Creating chat with user...");
         return new Promise((resolve, reject) => {
-            var chatId = this.chatIdWith(uid);
+            var chatId = this.chatIdWith(user);
             let ref = firebase.database().ref('/chats/' + chatId);
                 ref.remove().then(success => {
                     console.log("DB removed chat data!");
@@ -123,91 +123,140 @@ export class ChatService {
         
     }
 
-    observeChats() {
-        console.log("Observing chats...");
-        let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id);
-        ref.on('value', (snapshot) => {
-            snapshot = snapshot.val();
-            console.log("Chats returned by DB:");
-            console.log(snapshot);
-            var chats = [];
-            var chatCount = 0;
-            for (var key in snapshot) {
-                var chat = snapshot[key];
-                let uid = '';
-                for (var userId in chat.users) {
-                    if (userId != this.userS.user.id) {
-                        uid = userId;
-                    }
+    fetchMatchedUsers(): Promise<any> {
+        console.log("Fetching matched users...");
+        return new Promise((resolve, reject) => {
+            let user = this.userS.user;
+            let ref = firebase.database().ref('/user_matches/' + user.id);
+            ref.once('value').then(snapshot => {
+                console.log('Fetched user matches:');
+                console.log(snapshot.val());
+                let val = snapshot.val();
+                var users = [];
+                var userCount = 0;
+                for (var uid in val) {
+                    this.userS.fetchUser(uid).then(user => {
+                        users.push(user);
+                        userCount++
+                        let numUsers = snapshot.numChildren();
+                        if (userCount == numUsers) {
+                            console.log("Fetch returned matched users:", users);
+                            resolve(users);
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                        let numUsers = snapshot.numChildren();
+                        if (userCount == numUsers) {
+                            console.log("Fetch returned matched users:", users);
+                            resolve(users);
+                        }
+                    });
                 }
-                this.userS.fetchUser(uid).then(user => {
-                    console.log("Adding user and time properties to chat object...");
-                    chat['user'] = user;
-                    chat['time'] = this.getTimeStringFrom(chat.timestamp);
-                    chats.push(chat);
-                    chatCount++;
-                    if (chatCount == new Array(snapshot).length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.chats = chats;
-                        console.log(chats);
-                        this.fetchUnreadCount();
-                    }
-                }).catch(error => {
-                    console.log(error);
-                    chatCount++;
-                    if (chatCount == new Array(snapshot).length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.chats = chats;
-                        console.log(chats);
-                        this.fetchUnreadCount();
-                    }
-                });
-            }
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            })
         });
     }
 
-    fetchUnreadCount(): Promise<any> {
-        console.log("Fetching unread count for chats...");
-        return new Promise((resolve, reject) => {
-            var chats = [];
-            var chatCount = 0;
-            var totalUnreadCount = 0;
-            for (var key in this.chats) {
-                let chat = this.chats[key];
-                console.log(this.chats);
-                console.log(chat);
-                this.fetchUnreadCountIn(chat).then(unreadCount => {
-                    if (unreadCount) {
-                        chat['unreadCount'] = unreadCount;
-                        totalUnreadCount += unreadCount;
+    userFor(chat) {
+        for (var uid in chat.users) {
+            if (uid != this.userS.user.id) {
+                for (var key in this.matchedUsers) {
+                    var user = this.matchedUsers[key];
+                    if (uid == user.id) {
+                        return user
                     }
-                    chats.push(chat);
-                    chatCount++;
-                    if (chatCount == chats.length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.chats = chats;
-                        this.unreadCount = totalUnreadCount;
+                }
+                return null
+            }
+        }
+    }
+
+    newUserFor(chat) {
+        for (var uid in chat.users) {
+            if (uid != this.userS.user.id) {
+                this.userS.fetchUser(uid).then(user => {
+                    chat['user'] = user;
+                    if (this.chats) {
+                        this.chats.push(chat);
+                    } else {
+                        this.chats = [chat];
                     }
                 }).catch(error => {
                     console.log(error);
-                    chats.push(chat);
-                    chatCount++;
-                    if (chatCount == this.chats.length) {
-                        chats.sort(function(a, b){
-                            return a.timestamp-b.timestamp;
-                        });
-                        this.chats = chats;
-                        this.unreadCount = totalUnreadCount;
-                    }
                 });
             }
+         }
+    }
+
+    observeChats() {
+        console.log("Observing chats...");
+        this.fetchMatchedUsers().then(matchedUsers => {
+            this.matchedUsers = matchedUsers;
+            let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id).startAt(0);
+            ref.on('value', (snapshot) => {
+                let val = snapshot.val();
+                console.log("Chats returned from DB:", val);
+                var chats = [];
+                for (var key in val) {
+                    var chat = val[key];
+                    if (this.userFor(chat)) {
+                        chat['user'] = this.userFor(chat);
+                        chats.push(chat);
+                    } else {
+                        console.log("Didn't find user for chat:", chat);
+                        this.newUserFor(chat);
+                    }
+                }
+                this.zone.run(() => {
+                    this.chats = chats;
+                    this.updateTime();
+                    console.log("Set chats: ", chats);
+                });
+            });
+        }).catch(error => {
+            console.log(error);
         });
+    }
+
+    updateTime() {
+        console.log("Updating time for chats...");
+        for (var key in this.chats) {
+            this.chats[key]['time'] = this.getTimeStringFrom(this.chats[key].timestamp);
+        }
+        this.chats.sort(function(a, b){
+            return b.timestamp-a.timestamp;
+        });
+        this.fetchUnreadCount();
+    }
+
+    fetchUnreadCount() {
+        console.log("Fetching unread count for chats...");
+        var chatCount = 0;
+        var totalUnreadCount = 0;
+        for (var key in this.chats) {
+            this.fetchUnreadCountIn(this.chats[key]).then(unreadCount => {
+                if (unreadCount) {
+                    this.chats[key]['unreadCount'] = unreadCount;
+                    totalUnreadCount += unreadCount;
+                }
+                chatCount++;
+                if (chatCount == this.chats.length) {
+                    this.zone.run(() => {
+                        this.unreadCount = totalUnreadCount;
+                    });
+                }
+            }).catch(error => {
+                console.log(error);
+                chatCount++;
+                if (chatCount == this.chats.length) {
+                    this.zone.run(() => {
+                        this.unreadCount = totalUnreadCount;
+                    });
+                }
+            });
+        }
     }
 
     fetchUnreadCountIn(chat): Promise<number> {
@@ -239,16 +288,18 @@ export class ChatService {
     
     stopObservingChats() {
         console.log("Stopped observing chats...");
-        firebase.database().ref('/chats/').off()
+        firebase.database().ref('/chats/').off();
     }
 
     observeMessagesIn(chat) {
         console.log("Observing messages...");
         return new Observable(observer => {
             let ref = firebase.database().ref('messages/' + chat.id);
-            ref.on('value', (snapshot) => {
+            ref.on('child_added', (snapshot) => {
                 console.log(snapshot.val());
-                observer.next(snapshot.val());
+                this.zone.run(() => {
+                    observer.next(snapshot.val());
+                });
             });
         });
     }
@@ -261,7 +312,7 @@ export class ChatService {
     sendMessageTo(message, user): Promise<any> {
         console.log("Sending message...");
         return new Promise((resolve, reject) => {
-            var chatId = this.chatIdWith(user.id);
+            var chatId = this.chatIdWith(user);
             var now = (new Date).getTime();
             var val = { "message" : message, "timestamp" : now, "sender" : this.userS.user.id };
             var data = {};
@@ -294,7 +345,7 @@ export class ChatService {
     sendAttachmentTo(user, url): Promise<any> {
         console.log("Uploading attachment...");
         return new Promise((resolve, reject) => {
-            var chatId = this.chatIdWith(user.id);
+            var chatId = this.chatIdWith(user);
             var now = new Date().getTime();
             var val = { "url" : url, "timestamp" : now, "sender" : this.userS.user.id };
             var data = {};
@@ -305,7 +356,7 @@ export class ChatService {
                 return ref.once('value');
             }).then(snapshot => {
                 console.log("DB returned image url snapshot");
-                var chatVal = { "lastMessage" : user.firstName + ' sent an image.', "timestamp" : now, "id" : chatId };
+                var chatVal = { "lastMessage" : this.userS.user.firstName + ' sent an image.', "timestamp" : now, "id" : chatId };
                 let chatRef = firebase.database().ref('/chats/' + chatId);
                 chatRef.update(chatVal).then(chatData => {
                     console.log("DB saved chat data!");
@@ -329,7 +380,6 @@ export class ChatService {
         date.setDate(date.getDate());
         var string = date.toString();
         var stringArr = string.split(" ");
-        var day = stringArr[0];
         var time = this.tConvert(stringArr[4]);
 
         let now = new Date();
@@ -362,11 +412,11 @@ export class ChatService {
             }
         }
         interval = Math.floor(seconds / 3600);
-        if (interval > 1) {
+        if (interval >= 1) {
             return time;
         }
         interval = Math.floor(seconds / 60);
-        if (interval > 1) {
+        if (interval >= 1) {
             return interval + " minutes ago";
         }
         return Math.floor(seconds) + " seconds ago";

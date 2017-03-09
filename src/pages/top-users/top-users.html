@@ -5,8 +5,8 @@
         </button>
         <ion-title class="smaller">Most Popular Users In Your Area</ion-title>
         <ion-buttons end>
-          <button ion-button icon-only>
-            <img height="25" src="assets/empty.png"/>
+          <button ion-button icon-only (click)="presentInfo()">
+            <ion-icon color="primary" name="ios-information-circle-outline"></ion-icon>
           </button>
         </ion-buttons>
     </ion-navbar>
@@ -18,12 +18,27 @@
     </ion-item>
     <ion-grid>
         <ion-row wrap>
-            <ion-col width-33 *ngFor="let user of topUsers" (click)="userTapped($event, user)">
+            <ion-col width-33 *ngFor="let user of globalUsers" (click)="userTapped($event, user)">
                 <div class="avatar" *ngIf="user.photoURL">
                     <img [src]="user.photoURL">
                 </div>
                 <h6 *ngIf="user.firstName">
                     {{ user.firstName }}, {{ user.age }}
+                </h6>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+    <ion-item class="location">
+        <ion-label>Local</ion-label>
+    </ion-item>
+    <ion-grid>
+        <ion-row wrap>
+            <ion-col width-33 *ngFor="let user of localUsers" (click)="userTapped($event, user)">
+                <div class="avatar" *ngIf="user.photoURL">
+                    <img [src]="user.photoURL">
+                </div>
+                <h6 *ngIf="user.firstName">
+                    {{ user.firstName }}<span *ngIf="user.showAge !== false">, {{ user.age }}</span>
                 </h6>
             </ion-col>
         </ion-row>

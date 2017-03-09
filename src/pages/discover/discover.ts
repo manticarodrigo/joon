@@ -5,11 +5,13 @@ import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
 import { ChatService } from '../../providers/chat-service';
 import { LoadingService } from '../../providers/loading-service';
+import { LocationService } from '../../providers/location-service';
 
 import { ChatsPage } from '../chats/chats';
 import { ChatPage } from '../chat/chat';
 import { LoadingPage } from '../loading/loading';
 import { MatchedPage } from '../matched/matched';
+import { ProfilePage } from '../profile/profile';
 
 import {
   StackConfig,
@@ -39,7 +41,8 @@ export class DiscoverPage {
               private discoverS: DiscoverService,
               private userS: UserService,
               private chatS: ChatService,
-              private loadingS: LoadingService) {
+              private loadingS: LoadingService,
+              private locationS: LocationService) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
         return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -80,22 +83,77 @@ export class DiscoverPage {
     toast.present();
   }
 
+  userTapped(user) {
+    this.navCtrl.push(ProfilePage, {
+        user: user
+    });
+  }
+
   fetchUsers() {
-    console.log("fetching discoverable users");
+    console.log("Fetching discoverable users");
+    let env = this;
+    let user = this.userS.user;
     this.loadingS.user = this.userS.user;
     this.loadingS.message = "Finding people nearby...";
     if (!this.loadingS.isActive) {
       this.loadingS.create(LoadingPage);
       this.loadingS.present();
     }
-    this.discoverS.fetchDiscoverableUsers().then(users => {
-      console.log("fetch returned visible users");
-      console.log(users);
-      this.users = users;
-      this.loadingS.dismiss()
-    }).catch(error => {
-      alert(error);
-    });
+    if (this.userS.user.distance == 'local') {
+      env.locationS.getLocation().then(() => {
+          env.locationS.fetchNearbyKeys().then(keys => {
+            env.userS.fetchUsers(keys).then(users => {
+              env.discoverS.fetchLocalUsers(users).then(localUsers => {
+                for (var i in localUsers) {
+                  var mutual = [];
+                  for (var key in localUsers[i].friends) {
+                    if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
+                      mutual.push(localUsers[i].friends[key]);
+                    }
+                  }
+                  if (mutual.length > 0) {
+                    localUsers[i]['mutual'] = mutual.length;
+                  }
+                }
+                env.users = localUsers;
+                env.loadingS.dismiss();
+              }).catch(error => {
+                console.log(error);
+                env.loadingS.dismiss();
+              });
+            }).catch(error => {
+              console.log(error);
+              env.loadingS.dismiss();
+            });
+          }).catch(error => {
+            console.log(error);
+            env.loadingS.dismiss();
+          });
+        }).catch(error => {
+          console.log(error);
+          env.loadingS.dismiss();
+        });
+    } else {
+      this.discoverS.fetchGlobalUsers().then(users => {
+        console.log("fetch returned visible users");
+        console.log(users);
+        for (var i in users) {
+          var mutual = [];
+          for (var key in users[i].friends) {
+            if (this.userS.user.friends.includes(users[i].friends[key])) {
+              mutual.push(users[i].friends[key]);
+            }
+          }
+          if (mutual.length > 0) {
+            users[i]['mutual'] = mutual.length;
+          }
+        }
+        this.users = users;
+        this.loadingS.dismiss()
+      }).catch(error => {
+        console.log(error);
+      });
+    }
   }
 
   swipeLeft() {
@@ -105,7 +163,7 @@ export class DiscoverPage {
       let currentCard = this.users.pop();
       this.undoHistory.push(currentCard);
       console.log(currentCard);
-      this.discoverS.saw(currentCard.id).then(success => {
+      this.discoverS.saw(currentCard).then(success => {
         this.presentToast('You did not like ' + currentCard.firstName);
       }).catch(error => {
         console.log(error);
@@ -122,8 +180,8 @@ export class DiscoverPage {
       let currentCard = this.users.pop();
       this.undoHistory.push(currentCard);
       console.log(currentCard);
-      this.discoverS.saw(currentCard.id).then(success => {
-        this.discoverS.liked(currentCard.id).then(matched => {
+      this.discoverS.saw(currentCard).then(success => {
+        this.discoverS.liked(currentCard).then(matched => {
           this.presentToast('You liked ' + currentCard.firstName);
           if (matched) {
             this.loadingS.user = this.userS.user;
@@ -159,8 +217,8 @@ export class DiscoverPage {
       let currentCard = this.users.pop();
       this.undoHistory.push(currentCard);
       console.log(currentCard);
-      this.discoverS.saw(currentCard.id).then(success => {
-        this.discoverS.doubleLiked(currentCard.id).then(matched => {
+      this.discoverS.saw(currentCard).then(success => {
+        this.discoverS.doubleLiked(currentCard).then(matched => {
           this.presentToast('You double liked ' + currentCard.firstName);
           if (matched) {
             this.loadingS.user = this.userS.user;

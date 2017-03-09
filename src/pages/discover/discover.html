@@ -21,14 +21,14 @@
             <h5>Please update your preferences!</h5>
         </div>
         <ion-card #cardsContainer swing-card *ngFor="let user of users">
-            <ion-card-content class="crop" *ngIf="user">
+            <ion-card-content class="crop" *ngIf="user" (click)="userTapped(user)">
                 <img *ngIf="user.photoURL"[src]="user.photoURL">
                 <ion-item id="cardsDock" *ngIf="user.firstName">
-                    <h2>{{ user.firstName }}<span *ngIf="user.showAge !== false">, {{user.age}}</span></h2>
+                    <h2>{{ user.firstName }}<span *ngIf="user.showAge !== false">, {{ user.age }}</span></h2>
                     <p *ngIf="user.job">{{ user.job }}<span *ngIf="user.company"> at {{ user.company }}</span></p>
-                    <p class="mutual">
+                    <p class="mutual" *ngIf="user.mutual">
                         <img src="assets/mutual.png"/>
-                        7
+                        {{ user.mutual }}
                     </p>
                 </ion-item>
             </ion-card-content>

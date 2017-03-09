@@ -13,7 +13,7 @@
 </ion-header>
 
 <ion-content>
-    <ion-textarea placeholder="Please enter your feedback about the app here and press Submit. Thank you.">
+    <ion-textarea name="feedback-message" [(ngModel)]="input" placeholder="Please enter your feedback about the app here and press Submit. Thank you.">
     </ion-textarea>
-    <button ion-button>Submit</button>
+    <button ion-button (click)="send()">Submit</button>
 </ion-content>
