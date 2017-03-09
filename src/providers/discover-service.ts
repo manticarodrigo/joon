@@ -152,14 +152,13 @@ export class DiscoverService {
     // we first create a normal like, then a double like seperately.
 
     return new Promise((resolve, reject) => {
-      let user = this.userS.user;
       this.liked(user.id).then(matched => {
         var data = {};
         data[user.id] = new Date().getTime();
-        let ref = firebase.database().ref('/double_liked_by/' + user.id);
+        let ref = firebase.database().ref('/double_liked_by/' + this.userS.user.id);
         ref.update(data).then(() => {
           if (user.pushId) {
-            this.pushS.post("I double liked you!", user);
+            this.pushS.push("I double liked you!", user);
           }
           resolve(matched); 
         }).catch(error => {
@@ -217,7 +216,7 @@ export class DiscoverService {
               this.chatS.chats = [chat];
             }
             if (user.pushId) {
-              this.pushS.post("You matched with me!", user);
+              this.pushS.push("You matched with me!", user);
             }
             resolve(true);
           }).catch(error => {

@@ -35,7 +35,7 @@ export class PushService {
     OneSignal.setSubscription(enable);
   }
 
-  post(message, user) {
+  push(message, user) {
     var notificationObj = { 
                           app_id: "5eb5a37e-b458-11e3-ac11-000c2940e62c",
                           headings: { en: this.userS.user.firstName },
@@ -47,7 +47,9 @@ export class PushService {
                           payload: null,
                           displayType: null
                         };
-    OneSignal.postNotification(notificationObj);
+    if (this.userS.user.pushId) {
+      OneSignal.postNotification(notificationObj);
+    }
   }
 
   getPushId(): Promise<any> {

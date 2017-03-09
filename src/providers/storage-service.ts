@@ -54,11 +54,11 @@ export class StorageService {
         });
     }
     
-    uploadImageFor(uid, data, index): Promise<any> {
+    uploadImageFor(uid, imageString, index): Promise<any> {
       console.log("Uploading profile image...");
       return new Promise((resolve, reject) => {
         var now = JSON.stringify(new Date());
-        this.storageRef.child(uid + '/images/' + now + '.png').put(data).then(snapshot => {
+        this.storageRef.child(uid + '/images/' + now + '.png').putString(imageString, 'base64', {contentType: 'image/png'}).then((snapshot) => {
             console.log("Image uploaded to storage!");
             this.updateImageFor(uid, snapshot.downloadURL, index).then(url => {
                 resolve(url);
@@ -73,10 +73,10 @@ export class StorageService {
       });
     }
     
-    uploadProfileImageFor(uid, data): Promise<any> {
+    uploadProfileImageFor(uid, imageString): Promise<any> {
       console.log("Uploading profile image...");
       return new Promise((resolve, reject) => {
-        this.storageRef.child(uid + '/image.png').put(data).then(snapshot => {
+        this.storageRef.child(uid + '/image.png').putString(imageString, 'base64', {contentType: 'image/png'}).then((snapshot) => {
             this.setProfileImageFor(uid, snapshot.downloadURL).then(url => {
                 resolve(url);
             }).catch(error => {
@@ -90,11 +90,11 @@ export class StorageService {
       });
     }
 
-    uploadAttachmentIn(chatId, data): Promise<any> {
+    uploadAttachmentIn(chatId, imageString): Promise<any> {
         console.log("Uploading attachment image...");
         return new Promise((resolve, reject) => {
             var now = JSON.stringify(new Date());
-            this.storageRef.child(chatId + '/images/' + now + '.png').put(data).then(snapshot => {
+            this.storageRef.child(chatId + '/images/' + now + '.png').putString(imageString, 'base64', {contentType: 'image/png'}).then((snapshot) => {
                 resolve(snapshot.downloadURL);
             }).catch(error => {
                 console.log(error);

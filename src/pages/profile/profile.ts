@@ -32,6 +32,27 @@ export class ProfilePage {
     
     ionViewWillEnter() {
         this.fetchUserImages();
+        let env = this;
+        if (this.user.id != this.userS.user.id) {
+            for (var i in env.user.friends) {
+                let uid = env.user.friends[i];
+                if (env.userS.user.friends.includes(uid)) {
+                    if (env.mutual) {
+                        this.userS.fetchUser(uid).then(user => {
+                            env.mutual.push(user);
+                        }).catch(error => {
+                            console.log(error);
+                        });
+                    } else {
+                        this.userS.fetchUser(uid).then(user => {
+                            env.mutual = [user];
+                        }).catch(error => {
+                            console.log(error);
+                        });
+                    }
+                }
+            }
+        }
     }
     
     fetchUserImages() {

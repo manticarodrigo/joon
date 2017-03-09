@@ -58,9 +58,9 @@ export class Joon {
           { title: 'Top Users', component: TopUsersPage },
           { title: 'Discovery Preferences', component: PreferencesPage },
           { title: 'App Settings', component: SettingsPage },
-          { title: 'Help & Support', component: HelpPage },
+          //{ title: 'Help & Support', component: HelpPage },
           { title: 'Feedback', component: FeedbackPage },
-          { title: 'Invite A Friend to Joon', component: InvitePage }
+          //{ title: 'Invite A Friend to Joon', component: InvitePage }
 
         ];
     }

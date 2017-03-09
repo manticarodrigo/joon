@@ -20,6 +20,15 @@ export class UserService {
         ref.update(data);
     }
 
+    sendFeedback(message) {
+        console.log("Sending feedback...");
+        let ref = firebase.database().ref('user_feedback/' + this.user.id);
+        var data = {};
+        let timestamp = new Date().getTime();
+        data[timestamp] = message;
+        ref.update(data);
+    }
+
     updateCurrentUser(user) {
         console.log("Updating user data in local storage and user service...");
         this.user = user;

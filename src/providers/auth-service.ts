@@ -198,11 +198,13 @@ export class AuthService {
           // Get Facebook API data for initial field population
           this.callFacebookAPI().then(data => {
             data["id"] = facebookUID;
-            data["photoURL"] = "https://graph.facebook.com/" + facebookUID + "/picture?type=large";
             console.log(data);
             this.updateUserInDB(data).then(returnedUser => {
               console.log("DB update returned data");
               returnedUser["firebaseId"] = firebaseUID;
+              if (!returnedUser.photoURL) {
+                returnedUser["photoURL"] = "https://graph.facebook.com/" + facebookUID + "/picture?type=large";
+              }
               resolve(returnedUser);
             }).catch(error => {
               console.log(error);

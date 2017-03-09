@@ -178,8 +178,11 @@ export class ChatService {
             if (uid != this.userS.user.id) {
                 this.userS.fetchUser(uid).then(user => {
                     chat['user'] = user;
-                    this.chats.push(chat);
-                    this.fetchUnreadCount();
+                    if (this.chats) {
+                        this.chats.push(chat);
+                    } else {
+                        this.chats = [chat];
+                    }
                 }).catch(error => {
                     console.log(error);
                 });
@@ -210,7 +213,6 @@ export class ChatService {
                     this.chats = chats;
                     this.updateTime();
                     console.log("Set chats: ", chats);
-                    this.fetchUnreadCount();
                 });
             });
         }).catch(error => {
@@ -226,6 +228,7 @@ export class ChatService {
         this.chats.sort(function(a, b){
             return b.timestamp-a.timestamp;
         });
+        this.fetchUnreadCount();
     }
 
     fetchUnreadCount() {
@@ -242,7 +245,6 @@ export class ChatService {
                 if (chatCount == this.chats.length) {
                     this.zone.run(() => {
                         this.unreadCount = totalUnreadCount;
-                        this.updateTime();
                     });
                 }
             }).catch(error => {
@@ -251,7 +253,6 @@ export class ChatService {
                 if (chatCount == this.chats.length) {
                     this.zone.run(() => {
                         this.unreadCount = totalUnreadCount;
-                        this.updateTime();
                     });
                 }
             });
@@ -355,7 +356,7 @@ export class ChatService {
                 return ref.once('value');
             }).then(snapshot => {
                 console.log("DB returned image url snapshot");
-                var chatVal = { "lastMessage" : user.firstName + ' sent an image.', "timestamp" : now, "id" : chatId };
+                var chatVal = { "lastMessage" : this.userS.user.firstName + ' sent an image.', "timestamp" : now, "id" : chatId };
                 let chatRef = firebase.database().ref('/chats/' + chatId);
                 chatRef.update(chatVal).then(chatData => {
                     console.log("DB saved chat data!");

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, AlertController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
@@ -21,6 +21,7 @@ export class TopUsersPage {
 
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
+              private alertCtrl: AlertController,
               private userS: UserService,
               private discoverS: DiscoverService,
               private loadingS: LoadingService,
@@ -31,7 +32,16 @@ export class TopUsersPage {
     this.fetchGlobalTopUsers();
     this.fetchLocalTopUsers();
   }
-  
+
+  presentInfo() {
+    let alert = this.alertCtrl.create({
+      title: 'Welcome to Top Users',
+      subTitle: 'This page features the top six people globally and locally (within 100 miles) based on likes and double likes.',
+      buttons: ['Dismiss']
+    });
+    alert.present();
+  }
+
   fetchGlobalTopUsers() {
     console.log("Fetching global top users");
     this.discoverS.getRankedUsersIDs().then(sortedIds => {
@@ -50,6 +60,7 @@ export class TopUsersPage {
   }
 
   fetchLocalTopUsers() {
+    console.log("Fetching global top users");
     let env = this;
     let user = this.userS.user;
     this.loadingS.user = this.userS.user;
@@ -58,41 +69,38 @@ export class TopUsersPage {
       this.loadingS.create(LoadingPage);
       this.loadingS.present();
     }
-    if (env.locationS.currentLocation) {
-      env.locationS.fetchNearbyKeys().then(keys => {
-        this.userS.fetchUsers(keys).then(users => {
-          this.discoverS.fetchLocalUsers(users).then(localUsers => {
-            this.localUsers = localUsers;
-            this.loadingS.dismiss();
-          }).catch(error => {
-            console.log(error);
+    env.locationS.getLocation().then(() => {
+      env.locationS.fetchNearbyKeys().then(nearbyKeys => {
+        env.discoverS.getRankedUsersIDs().then(sortedIds => {
+          var localTopIds = [];
+          var count = 0;
+          sortedIds.forEach(uid => {
+            console.log(uid);
+            for (var key in nearbyKeys) {
+              let nearbyKey = nearbyKeys[key];
+              if (uid == nearbyKey && count <= this.topUsersLimit) {
+                console.log("uid exists nearby!", uid);
+                count++;
+                localTopIds.push(uid);
+              }
+            }
           });
+          return this.userS.fetchUsers(localTopIds);
+        }).then(users => {
+          env.localUsers = users;
+          env.loadingS.dismiss();
         }).catch(error => {
           console.log(error);
+          env.loadingS.dismiss();
         });
       }).catch(error => {
         console.log(error);
+        env.loadingS.dismiss();
       });
-    } else {
-      env.locationS.getLocation().then(() => {
-        env.locationS.fetchNearbyKeys().then(keys => {
-          this.userS.fetchUsers(keys).then(users => {
-            this.discoverS.fetchLocalUsers(users).then(localUsers => {
-              this.localUsers = localUsers;
-              this.loadingS.dismiss();
-            }).catch(error => {
-              console.log(error);
-            });
-          }).catch(error => {
-            console.log(error);
-          });
-        }).catch(error => {
-          console.log(error);
-        });
-      }).catch(error => {
-        console.log(error);
-      });
-    }
+    }).catch(error => {
+      console.log(error);
+      env.loadingS.dismiss();
+    });
   }
 
   userTapped(event, user) {

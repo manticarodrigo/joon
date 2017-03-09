@@ -22,31 +22,35 @@ export class LocationService {
 
   getLocation(): Promise<any> {
     return new Promise((resolve, reject) => {
-      // Check If Cordova/Mobile
       var env = this;
-      if (this.platform.is('cordova')) {
-        console.log("Asking user to get their location (cordova)...");
-        Geolocation.getCurrentPosition().then(location => {
-          env.setLocation.bind(env)(location);
-          resolve('success');
-        }).catch(error => {
-          env.errorHandler(error);
-          reject(error);
-        });
+      if (this.currentLocation) {
+        resolve('success');
       } else {
-        // Uses the HTML5 geolocation API to get the current user's location
-        if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
-          console.log("Asking user to get their location (html5)...");
-          navigator.geolocation.getCurrentPosition(function(location) {
-              env.setLocation(location);
-              resolve('success');
-          }, function(error) {
-              console.log(error);
-              reject(error);
+        // Check If Cordova/Mobile
+        if (env.platform.is('cordova')) {
+          console.log("Asking user to get their location (cordova)...");
+          Geolocation.getCurrentPosition().then(location => {
+            env.setLocation.bind(env)(location);
+            resolve('success');
+          }).catch(error => {
+            env.errorHandler(error);
+            reject(error);
           });
         } else {
-          console.log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
-          reject('geolocation not supported');
+          // Uses the HTML5 geolocation API to get the current user's location
+          if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
+            console.log("Asking user to get their location (html5)...");
+            navigator.geolocation.getCurrentPosition(function(location) {
+                env.setLocation(location);
+                resolve('success');
+            }, function(error) {
+                console.log(error);
+                reject(error);
+            });
+          } else {
+            console.log("Your browser does not support the HTML5 Geolocation API, so this demo will not work.")
+            reject('geolocation not supported');
+          }
         }
       }
     });

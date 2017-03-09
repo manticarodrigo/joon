@@ -11,6 +11,7 @@ import { ChatsPage } from '../chats/chats';
 import { ChatPage } from '../chat/chat';
 import { LoadingPage } from '../loading/loading';
 import { MatchedPage } from '../matched/matched';
+import { ProfilePage } from '../profile/profile';
 
 import {
   StackConfig,
@@ -82,6 +83,12 @@ export class DiscoverPage {
     toast.present();
   }
 
+  userTapped(user) {
+    this.navCtrl.push(ProfilePage, {
+        user: user
+    });
+  }
+
   fetchUsers() {
     console.log("Fetching discoverable users");
     let env = this;
@@ -93,45 +100,54 @@ export class DiscoverPage {
       this.loadingS.present();
     }
     if (this.userS.user.distance == 'local') {
-      if (env.locationS.currentLocation) {
-        env.locationS.fetchNearbyKeys().then(keys => {
-          this.userS.fetchUsers(keys).then(users => {
-            this.discoverS.fetchLocalUsers(users).then(localUsers => {
-              this.users = localUsers;
-              this.loadingS.dismiss();
-            }).catch(error => {
-              console.log(error);
-            });
-          }).catch(error => {
-            console.log(error);
-          });
-        }).catch(error => {
-          console.log(error);
-        });
-      } else {
-        env.locationS.getLocation().then(() => {
+      env.locationS.getLocation().then(() => {
           env.locationS.fetchNearbyKeys().then(keys => {
-            this.userS.fetchUsers(keys).then(users => {
-              this.discoverS.fetchLocalUsers(users).then(localUsers => {
-                this.users = localUsers;
-                this.loadingS.dismiss();
+            env.userS.fetchUsers(keys).then(users => {
+              env.discoverS.fetchLocalUsers(users).then(localUsers => {
+                for (var i in localUsers) {
+                  var mutual = [];
+                  for (var key in localUsers[i].friends) {
+                    if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
+                      mutual.push(localUsers[i].friends[key]);
+                    }
+                  }
+                  if (mutual.length > 0) {
+                    localUsers[i]['mutual'] = mutual.length;
+                  }
+                }
+                env.users = localUsers;
+                env.loadingS.dismiss();
               }).catch(error => {
                 console.log(error);
+                env.loadingS.dismiss();
               });
             }).catch(error => {
               console.log(error);
+              env.loadingS.dismiss();
             });
           }).catch(error => {
             console.log(error);
+            env.loadingS.dismiss();
           });
         }).catch(error => {
           console.log(error);
+          env.loadingS.dismiss();
         });
-      }
     } else {
       this.discoverS.fetchGlobalUsers().then(users => {
         console.log("fetch returned visible users");
         console.log(users);
+        for (var i in users) {
+          var mutual = [];
+          for (var key in users[i].friends) {
+            if (this.userS.user.friends.includes(users[i].friends[key])) {
+              mutual.push(users[i].friends[key]);
+            }
+          }
+          if (mutual.length > 0) {
+            users[i]['mutual'] = mutual.length;
+          }
+        }
         this.users = users;
         this.loadingS.dismiss()
       }).catch(error => {

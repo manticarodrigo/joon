@@ -5,8 +5,8 @@
         </button>
         <ion-title class="smaller">Most Popular Users In Your Area</ion-title>
         <ion-buttons end>
-          <button ion-button icon-only>
-            <img height="25" src="assets/empty.png"/>
+          <button ion-button icon-only (click)="presentInfo()">
+            <ion-icon color="primary" name="ios-information-circle-outline"></ion-icon>
           </button>
         </ion-buttons>
     </ion-navbar>
@@ -29,7 +29,7 @@
         </ion-row>
     </ion-grid>
     <ion-item class="location">
-        <ion-label class="location-label">Local</ion-label>
+        <ion-label>Local</ion-label>
     </ion-item>
     <ion-grid>
         <ion-row wrap>
@@ -38,7 +38,7 @@
                     <img [src]="user.photoURL">
                 </div>
                 <h6 *ngIf="user.firstName">
-                    {{ user.firstName }}, {{ user.age }}
+                    {{ user.firstName }}<span *ngIf="user.showAge !== false">, {{ user.age }}</span>
                 </h6>
             </ion-col>
         </ion-row>

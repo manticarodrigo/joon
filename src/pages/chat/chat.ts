@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, NavParams, ActionSheetController, AlertController, Content } from 'ionic-angular';
+import { Camera } from 'ionic-native';
 
 import { ChatService } from '../../providers/chat-service';
 import { UserService } from '../../providers/user-service';
@@ -68,6 +69,11 @@ export class ChatPage {
     ionViewWillUnload() {
         this.chatS.stopObservingMessagesIn(this.chat);
         this.chatS.updateUserActivityIn(this.chat);
+    }
+
+    changeState(state) {
+        console.log("State toggled:", state);
+        this.viewState = state;
     }
 
     showOptions() {
@@ -154,14 +160,60 @@ export class ChatPage {
         alert.present();
     }
     
-    attach(event, user) {
+    presentActionSheet() {
+        let actionSheet = this.actionSheetCtrl.create({
+        title: 'Select Image Source',
+        cssClass: 'action-sheet',
+        buttons: [
+            {
+            text: 'Photo Library',
+            handler: () => {
+                this.takePicture(Camera.PictureSourceType.PHOTOLIBRARY);
+            }
+            },
+            {
+            text: 'Camera',
+            handler: () => {
+                this.takePicture(Camera.PictureSourceType.CAMERA);
+            }
+            },
+            {
+            text: 'Cancel',
+            role: 'cancel'
+            }
+        ]
+        });
+        actionSheet.present();
+    }
+
+    takePicture(sourceType) {
+        // Create options for the Camera Dialog
+        var options = {
+            quality: 100,
+            destinationType : Camera.DestinationType.DATA_URL,
+            sourceType: sourceType,
+            allowEdit : true,
+            encodingType: Camera.EncodingType.PNG,
+            targetWidth: 500,
+            targetHeight: 500,
+            saveToPhotoAlbum: true,
+            correctOrientation: true
+        };
+        
+        // Get the data of an image
+        Camera.getPicture(options).then((imageData) => {
+            this.uploadAttachment(imageData);
+        }, (error) => {
+            console.log(error);
+        });
+    }
+    uploadAttachment(imageData) {
         console.log('Attach pressed');
-        var file = event.srcElement.files[0];
-        this.storageS.uploadAttachmentIn(this.chat.id, file).then(url => {
-            this.chatS.sendAttachmentTo(user, file).then(url => {
+        this.storageS.uploadAttachmentIn(this.chat.id, imageData).then(url => {
+            this.chatS.sendAttachmentTo(this.user, url).then(url => {
                 console.log(url);
                 if (this.user.pushId) {
-                    this.pushS.post(this.userS.user.firstName + " sent an image.", this.user);
+                    this.pushS.push(this.userS.user.firstName + " sent an image.", this.user);
                 }
             }).catch(error => {
                 console.log(error);
@@ -181,7 +233,7 @@ export class ChatPage {
             this.chatS.sendMessageTo(input, this.user).then(message => {
                 console.log('Message sent successfully!');
                 if (this.user.pushId) {
-                    this.pushS.post(input, this.user);
+                    this.pushS.push(input, this.user);
                 }
             }).catch(error => {
                 console.log(error);
