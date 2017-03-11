@@ -16,7 +16,6 @@ import { ProfilePage } from '../profile/profile';
 })
 export class ChatPage {
     @ViewChild(Content) content: Content;
-    viewState = "";
     chatInput = "";
     user: any;
     chat: any;
@@ -33,7 +32,6 @@ export class ChatPage {
                 private pushS: PushService) {
         this.user = navParams.get('user');
         this.chat = navParams.get('chat');
-        this.viewState = "messages";
     }
 
     ionViewDidEnter() {
@@ -71,9 +69,10 @@ export class ChatPage {
         this.chatS.updateUserActivityIn(this.chat);
     }
 
-    changeState(state) {
-        console.log("State toggled:", state);
-        this.viewState = state;
+    showProfile() {
+        this.navCtrl.push(ProfilePage, {
+            user: this.user
+        });
     }
 
     showOptions() {
@@ -93,12 +92,9 @@ export class ChatPage {
                     this.reportUser();
                 }
                 },{
-                text: 'Show ' + this.user.firstName + '\'s profile',
+                text: 'Show ' + this.user.firstName + '\'s Profile',
                 handler: () => {
-                    this.navCtrl.push(ProfilePage, {
-                        user: this.user
-                    });
-                    
+                    this.showProfile();
                 }
                 }
             ]

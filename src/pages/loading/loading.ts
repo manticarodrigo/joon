@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 
-import { LoadingService } from '../../providers/loading-service';
+import { ModalService } from '../../providers/modal-service';
 
 @Component({
   selector: 'page-loading',
@@ -9,7 +9,7 @@ import { LoadingService } from '../../providers/loading-service';
 })
 export class LoadingPage {
   
-  constructor(private loadingS: LoadingService) {
+  constructor(private modalS: ModalService) {
   }
 
 }

@@ -40,7 +40,7 @@ export class PushService {
                           app_id: "5eb5a37e-b458-11e3-ac11-000c2940e62c",
                           headings: { en: this.userS.user.firstName },
                           contents: { en: message },
-                          data: { uid: user.id },
+                          data: { uid: this.userS.user.id },
                           include_player_ids: [user.pushId],
                           isAppInFocus: null,
                           shown: null,

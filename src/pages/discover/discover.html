@@ -18,23 +18,25 @@
     <div swing-stack #swingContainer [stackConfig]="stackConfig" (throwoutleft)="swipeLeft()" (throwoutright)="swipeRight()" id="card-stack">
         <div class="swing-message">
             <h3>No more users to show...</h3>
-            <h5>Please update your preferences!</h5>
+            <h5>Please update your <a (click)="showPreferences()">Preferences!</a></h5>
         </div>
         <ion-card #cardsContainer swing-card *ngFor="let user of users">
             <ion-card-content class="crop" *ngIf="user" (click)="userTapped(user)">
                 <img *ngIf="user.photoURL"[src]="user.photoURL">
                 <ion-item id="cardsDock" *ngIf="user.firstName">
-                    <h2>{{ user.firstName }}<span *ngIf="user.showAge !== false">, {{ user.age }}</span></h2>
-                    <p *ngIf="user.job">{{ user.job }}<span *ngIf="user.company"> at {{ user.company }}</span></p>
-                    <p class="mutual" *ngIf="user.mutual">
-                        <img src="assets/mutual.png"/>
-                        {{ user.mutual }}
-                    </p>
+                    <div class="wrapper">
+                        <h1>{{ user.firstName }}<span *ngIf="user.showAge !== false && user.age">, {{ user.age }}</span></h1>
+                        <h4 *ngIf="user.job">{{ user.job }}<span *ngIf="user.company"> at {{ user.company }}</span></h4>
+                        <p class="mutual" *ngIf="user.mutual">
+                            <img src="assets/mutual.png"/>
+                            {{ user.mutual }}
+                        </p>
+                    </div>
                 </ion-item>
             </ion-card-content>
         </ion-card>
     </div>
-    <div class="discover-footer">
+    <div class="discover-footer" [class.inactive]="noUsers">
         <img src="assets/redo.png" (click)="undo()"/>
         <img class="lower" src="assets/ignore.png" (click)="swipeLeft()"/>
         <img class="lower" src="assets/like.png" (click)="swipeRight()"/>

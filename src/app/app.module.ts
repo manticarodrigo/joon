@@ -10,6 +10,7 @@ import { ProfilePage } from '../pages/profile/profile';
 import { EditProfilePage } from '../pages/edit-profile/edit-profile';
 import { TopUsersPage } from '../pages/top-users/top-users';
 import { PreferencesPage } from '../pages/preferences/preferences';
+import { PopoverPage } from '../pages/popover/popover';
 import { SettingsPage } from '../pages/settings/settings';
 import { HelpPage } from '../pages/help/help';
 import { FeedbackPage } from '../pages/feedback/feedback';
@@ -24,7 +25,8 @@ import { Facebook, NativeStorage, OneSignal } from 'ionic-native';
 import { FacebookService } from 'ng2-facebook-sdk';
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
-import { LoadingService } from '../providers/loading-service';
+import { ModalService } from '../providers/modal-service';
+import { PopoverService } from '../providers/popover-service';
 import { DiscoverService } from '../providers/discover-service';
 import { ChatService } from '../providers/chat-service';
 import { StorageService } from '../providers/storage-service';
@@ -42,6 +44,7 @@ import { LocationService } from '../providers/location-service';
     EditProfilePage,
     TopUsersPage,
     PreferencesPage,
+    PopoverPage,
     SettingsPage,
     HelpPage,
     FeedbackPage,
@@ -56,6 +59,7 @@ import { LocationService } from '../providers/location-service';
         menuType: 'reveal',
         backButtonText: 'Back',
         backButtonIcon: 'ios-arrow-back',
+        activator: 'none' 
     }),
     SwingModule
   ],
@@ -70,6 +74,7 @@ import { LocationService } from '../providers/location-service';
     EditProfilePage,
     TopUsersPage,
     PreferencesPage,
+    PopoverPage,
     SettingsPage,
     HelpPage,
     FeedbackPage,
@@ -82,7 +87,8 @@ import { LocationService } from '../providers/location-service';
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
     UserService,
-    LoadingService,
+    ModalService,
+    PopoverService,
     DiscoverService,
     ChatService,
     StorageService,

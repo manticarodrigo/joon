@@ -83,6 +83,13 @@ page-discover {
             left: 0;
             width: 100%;
             text-align: center;
+            .wrapper {
+                display: inline-block;
+                max-width: 80%;
+            }
+            ion-label {
+                white-space: normal;
+            }
             img {
                 position: static;
                 max-width: 25px;
@@ -91,9 +98,13 @@ page-discover {
                 margin-bottom: -7px;
                 display: inline;
             }
-            h2 {
+            h1 {
                 text-transform: capitalize;
                 margin: 0;
+                color: color($colors, med);
+            }
+            h4 {
+                color: color($colors, med);
             }
             .mutual {
                 font-weight: 700;
@@ -146,5 +157,11 @@ page-discover {
         content:'';
         display:inline-block;
         width:100%;
+    }
+    .inactive {
+        img {
+            filter: grayscale(100%)brightness(90%);
+            //opacity: 0.5;
+        }
     }
 }

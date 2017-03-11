@@ -4,6 +4,9 @@ import { Camera } from 'ionic-native';
 
 import { UserService } from '../../providers/user-service';
 import { StorageService } from '../../providers/storage-service';
+import { PopoverService } from '../../providers/popover-service';
+
+import { PopoverPage } from '../popover/popover';
 
 @Component({
   selector: 'page-edit-profile',
@@ -15,7 +18,8 @@ export class EditProfilePage {
     constructor(private navCtrl: NavController,
                 private actionSheetCtrl: ActionSheetController,
                 private userS: UserService,
-                private storageS: StorageService) {
+                private storageS: StorageService,
+                private popoverS: PopoverService) {
         this.user = this.userS.user;
     }
     
@@ -29,9 +33,37 @@ export class EditProfilePage {
         });
     }
 
+    selectFeet() {
+        this.popoverS.create(PopoverPage);
+        this.popoverS.options = ['2', '3', '4', '5', '6', '7', '8'];
+        this.popoverS.popover.onDidDismiss(feet => {
+            if (feet) {
+                console.log("Feet selected!");
+                console.log(this.user.heightFt);
+                this.user.heightFt = feet;
+                console.log(this.user.heightFt);
+            }
+        });
+        this.popoverS.present();
+    }
+
+    selectInches() {
+        this.popoverS.create(PopoverPage);
+        this.popoverS.options = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+        this.popoverS.popover.onDidDismiss(inches => {
+            if (inches) {
+                console.log("Feet selected!");
+                console.log(this.user.heightFt);
+                this.user.heightIn = inches;
+                console.log(this.user.heightFt);
+            }
+        });
+        this.popoverS.present();
+    }
+
     editProfileSubmit() {
         console.log("Save pressed!");
-        this.userS.updateUser(this.userS.user);
+        this.userS.updateUser(this.user);
     }
 
     presentPhotoOptions(): Promise<any> {

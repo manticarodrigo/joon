@@ -25,7 +25,7 @@ import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
 import { ChatService } from '../providers/chat-service';
 import { DiscoverService } from '../providers/discover-service';
-import { LoadingService } from '../providers/loading-service';
+import { ModalService } from '../providers/modal-service';
 import { PushService } from '../providers/push-service';
 
 @Component({
@@ -44,7 +44,7 @@ export class Joon {
                 private userS: UserService,
                 private chatS: ChatService,
                 private discoverS: DiscoverService,
-                private loadingS: LoadingService,
+                private modalS: ModalService,
                 private pushS: PushService,
                 private fb: FacebookService,
                 private storage: Storage) {
@@ -116,17 +116,17 @@ export class Joon {
           if (!storedUser) {
             console.log('No stored user found!')
           } else if (storedUser.accessToken) {
-            this.loadingS.user = storedUser;
-            this.loadingS.message = "Reauthenticating current user...";
-            this.loadingS.create(LoadingPage);
-            this.loadingS.present();
+            this.modalS.user = storedUser;
+            this.modalS.message = "Reauthenticating current user...";
+            this.modalS.create(LoadingPage);
+            this.modalS.present();
             console.log('Stored user found: ', storedUser);
             let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
             this.authS.authenticateWith(facebookCredential).then(success => {
               if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
                 // Current user signed into firebase
                 console.log("Current user: " + storedUser);
-                this.loadingS.message = "Retreiving latest user data...";
+                this.modalS.message = "Retreiving latest user data...";
                 this.userS.fetchUser(storedUser.id).then(user => {
                   // Current user updated
                   this.userS.user = user;
@@ -136,18 +136,18 @@ export class Joon {
                 }).catch(error => {
                   console.log(error);
                   this.logoutApp();
-                  this.loadingS.dismiss();
+                  this.modalS.dismiss();
                 });
               } else {
                 // No current user
                 console.log("Stored user does not match authenticated firebase user.");
                 this.logoutApp();
-                this.loadingS.dismiss();
+                this.modalS.dismiss();
               }
             }).catch(error => {
               console.log(error);
               this.logoutApp();
-              this.loadingS.dismiss();
+              this.modalS.dismiss();
             });
           } else {
             console.log('No stored user found!');

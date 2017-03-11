@@ -26,7 +26,7 @@
             </ion-slide>
         </ion-slides>
         <h1 *ngIf="user.firstName">
-          {{ user.firstName }}<span *ngIf="user.age">, {{ user.age }}</span>
+          {{ user.firstName }}<span *ngIf="user.showAge !== false && user.age">, {{ user.age }}</span>
         </h1>
         <div class="middle-section">
             <ion-item *ngIf="user.instagram">

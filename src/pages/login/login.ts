@@ -3,7 +3,7 @@ import { NavController } from 'ionic-angular';
 
 import { AuthService } from '../../providers/auth-service';
 import { UserService } from '../../providers/user-service';
-import { LoadingService } from '../../providers/loading-service';
+import { ModalService } from '../../providers/modal-service';
 import { ChatService } from '../../providers/chat-service';
 import { PushService } from '../../providers/push-service';
 
@@ -19,7 +19,7 @@ export class LoginPage {
     constructor(public navCtrl: NavController,
                 private authS: AuthService,
                 private userS: UserService,
-                private loadingS: LoadingService,
+                private modalS: ModalService,
                 private chatS: ChatService,
                 private pushS: PushService) {
 
@@ -28,18 +28,18 @@ export class LoginPage {
     login() {
         console.log("login pressed...");
         let user = {photoURL : 'assets/user-placeholder.png'}
-        this.loadingS.user = user;
-        this.loadingS.message = "Starting authentication...";
-        if (!this.loadingS.isActive) {
-            this.loadingS.create(LoadingPage);
-            this.loadingS.present();
+        this.modalS.user = user;
+        this.modalS.message = "Starting authentication...";
+        if (!this.modalS.isActive) {
+            this.modalS.create(LoadingPage);
+            this.modalS.present();
         }
         this.authS.beginAuth().then(success => {
             if (success) {
                 console.log("Auth succeeded!");
                 this.navCtrl.setRoot(DiscoverPage);
                 this.chatS.observeChats();
-                this.loadingS.dismiss();
+                this.modalS.dismiss();
                 this.pushS.getPushId().then(pushId => {
                     console.log("Appending pushId:");
                     console.log(pushId);
@@ -52,11 +52,11 @@ export class LoginPage {
                 });
             } else {
                 console.log("No user returned");
-                this.loadingS.dismiss();
+                this.modalS.dismiss();
             }
         }).catch(error => {
             console.log(error);
-            this.loadingS.dismiss();
+            this.modalS.dismiss();
         });
     }
 }

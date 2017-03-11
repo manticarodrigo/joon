@@ -42,16 +42,19 @@
     </ion-grid>
     <form (ngSubmit)="editProfileSubmit()" name="edit-profile-form">
         <ion-list no-lines>
+            <ion-label>Name:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-first-name" [(ngModel)]="user.firstName" placeholder="First Name" ></ion-input>
             </ion-item>
+            <ion-label>Birthday:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-input>
             </ion-item>
+            <ion-label>Instagram:</ion-label>
             <ion-item>
                 <ion-input id="insta" type="text" name="user-instagram" [(ngModel)]="user.instagram" placeholder="Instagram Handle" ></ion-input>
             </ion-item>
-            <ion-grid padding>
+            <ion-grid class="anatomy" padding>
                 <ion-label>Gender:</ion-label>
                 <ion-row radio-group name="user-gender" [(ngModel)]="user.gender">
                   <ion-col width-50>
@@ -66,66 +69,52 @@
                 <ion-label>Height:</ion-label>
                 <ion-row>
                     <ion-col width-50>
-                        <ion-select name="user-height-ft" [(ngModel)]="user.heightFt" placeholder="Feet">
-                          <ion-option value="1">1</ion-option>
-                          <ion-option value="2">2</ion-option>
-                          <ion-option value="3">3</ion-option>
-                          <ion-option value="4">4</ion-option>
-                          <ion-option value="5">5</ion-option>
-                          <ion-option value="6">6</ion-option>
-                          <ion-option value="7">7</ion-option>
-                          <ion-option value="8">8</ion-option>
-                        </ion-select>
+                        <button class="height" ion-button block outline (click)="selectFeet()">
+                            {{ user.heightFt ? user.heightFt : 'Feet' }}
+                            <img src="assets/down.png">
+                        </button>
                     </ion-col>
                     <ion-col width-50>
-                        <ion-select name="user-height-in" [(ngModel)]="user.heightIn" placeholder="Inches">
-                          <ion-option value="0">0</ion-option>
-                          <ion-option value="1">1</ion-option>
-                          <ion-option value="2">2</ion-option>
-                          <ion-option value="3">3</ion-option>
-                          <ion-option value="4">4</ion-option>
-                          <ion-option value="5">5</ion-option>
-                          <ion-option value="6">6</ion-option>
-                          <ion-option value="7">7</ion-option>
-                          <ion-option value="8">8</ion-option>
-                          <ion-option value="2">2</ion-option>
-                          <ion-option value="3">3</ion-option>
-                          <ion-option value="4">4</ion-option>
-                          <ion-option value="5">5</ion-option>
-                          <ion-option value="6">6</ion-option>
-                          <ion-option value="7">7</ion-option>
-                          <ion-option value="8">8</ion-option>
-                          <ion-option value="9">9</ion-option>
-                          <ion-option value="10">10</ion-option>
-                          <ion-option value="11">11</ion-option>
-                        </ion-select>
+                        <button class="height" ion-button block outline (click)="selectInches()">
+                            {{ user.heightIn ? user.heightIn : 'Inches' }}
+                            <img src="assets/down.png">
+                        </button>
                     </ion-col>
                 </ion-row>
             </ion-grid>
+            <ion-label>Country:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-country" [(ngModel)]="user.country" placeholder="Country"></ion-input>
             </ion-item>
+            <ion-label>City:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-city" [(ngModel)]="user.city" placeholder="City"></ion-input>
             </ion-item>
+            <ion-label>School:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-school" [(ngModel)]="user.school" placeholder="University or School"></ion-input>
             </ion-item>
+            <ion-label>Other School:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-school2" [(ngModel)]="user.school2" placeholder="Additional University or School"></ion-input>
             </ion-item>
+            <ion-label>Job:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-job" [(ngModel)]="user.job" placeholder="Job Title"></ion-input>
             </ion-item>
+            <ion-label>Company:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-company" [(ngModel)]="user.company" placeholder="Company"></ion-input>
             </ion-item>
+            <ion-label>Religion:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion"></ion-input>
             </ion-item>
+            <ion-label>Ethnicity:</ion-label>
             <ion-item>
                 <ion-input type="text" name="user-ethnicity" [(ngModel)]="user.ethnicity" placeholder="Ethnicity"></ion-input>
             </ion-item>
+            <ion-label>Bio:</ion-label>
             <ion-textarea class="textarea" name="user-bio" [(ngModel)]="user.bio" placeholder="About Me">
             </ion-textarea>
             <button ion-button type="submit"\ block>Save</button>

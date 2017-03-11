@@ -211,7 +211,7 @@ export class ChatService {
                 }
                 this.zone.run(() => {
                     this.chats = chats;
-                    this.updateTime();
+                    this.fetchUnreadCount();
                     console.log("Set chats: ", chats);
                 });
             });
@@ -228,7 +228,6 @@ export class ChatService {
         this.chats.sort(function(a, b){
             return b.timestamp-a.timestamp;
         });
-        this.fetchUnreadCount();
     }
 
     fetchUnreadCount() {
@@ -245,6 +244,7 @@ export class ChatService {
                 if (chatCount == this.chats.length) {
                     this.zone.run(() => {
                         this.unreadCount = totalUnreadCount;
+                        this.updateTime();
                     });
                 }
             }).catch(error => {
@@ -253,6 +253,7 @@ export class ChatService {
                 if (chatCount == this.chats.length) {
                     this.zone.run(() => {
                         this.unreadCount = totalUnreadCount;
+                        this.updateTime();
                     });
                 }
             });

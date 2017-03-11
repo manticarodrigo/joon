@@ -29,12 +29,10 @@
     
     <ion-label>Search Distance</ion-label>
     <ion-item class="borderless">
-        <ion-select [(ngModel)]="user.distance">
-            <!-- see about replacing this verbose way of binding selectedDistance -->
-            <ion-option value="local" selected="true" (ionSelect)="selectedDistance('local')">Local</ion-option>
-            <ion-option value="national" (ionSelect)="selectedDistance('national')">National</ion-option>
-            <ion-option value="global" (ionSelect)="selectedDistance('global')">Global</ion-option>
-        </ion-select>
+        <button class="distance" ion-button block outline (click)="selectDistance()">
+            {{ user.distance }}
+            <img src="assets/down.png">
+        </button>
     </ion-item>
     
     <ion-item class="borderless">

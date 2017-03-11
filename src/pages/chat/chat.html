@@ -4,7 +4,7 @@
         <button color="primary" ion-button menuToggle>
             <ion-icon name="menu"></ion-icon>
         </button>
-        <ion-title class="title" *ngIf="user">
+        <ion-title class="title" *ngIf="user" (click)="showProfile()">
             <img [src]="user.photoURL">
             {{ user.firstName }}
         </ion-title>
@@ -17,15 +17,7 @@
 </ion-header>
 
 <ion-content>
-    <ion-segment class="segment" [(ngModel)]="viewState" color="primary">
-        <ion-segment-button value="messages" (click)="changeState('messages')">
-            Messages
-        </ion-segment-button>
-        <ion-segment-button value="about" (click)="changeState('about')">
-            About
-        </ion-segment-button>
-    </ion-segment>
-    <div class="chat-area" [ngClass]="{'hidden': viewState == 'about' }">
+    <div class="chat-area">
         <h5 id="messages-text" *ngIf="!messages">Say Hi to start the conversation.</h5>
         <ion-list no-lines [virtualScroll]="messages" approxItemWidth="200px" approxItemHeight="200px">
             <ion-item *virtualItem="let message">
@@ -40,14 +32,6 @@
                 </div>
             </ion-item>
         </ion-list>
-    </div>
-    <div class="about" *ngIf="viewState == 'about'">
-        <div class="content">
-            <img [src]="user.photoURL">
-            <h5 *ngIf="!user.bio">{{ user.firstName }} does not have a bio.</h5>
-            <h5 *ngIf="user.bio">{{ user.bio }}</h5>
-            <p>Tap the options button above to view {{ user.firstName }}'s profile.</p>
-        </div>
     </div>
 </ion-content>
 <ion-footer class="chat-footer">

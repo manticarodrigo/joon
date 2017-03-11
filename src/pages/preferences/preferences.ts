@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 
 import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
+import { PopoverService } from '../../providers/popover-service';
+
+import { PopoverPage } from '../popover/popover';
 
 import { NavController } from 'ionic-angular';
 
@@ -17,7 +20,10 @@ export class PreferencesPage {
     distance: 'global'
   };
   
-  constructor(public navCtrl: NavController, private userS: UserService, private discoverS: DiscoverService) {
+  constructor(private navCtrl: NavController,
+              private userS: UserService,
+              private discoverS: DiscoverService,
+              private popoverS: PopoverService) {
 
   }
 
@@ -37,12 +43,19 @@ export class PreferencesPage {
     this.userS.updateUser(this.user).catch(error => { alert(error); });
   }
 
-  selectedDistance(distance) {
-    console.log("Distance selected!");
-    console.log(this.user.distance);
-    this.user.distance = distance;
-    console.log(this.user.distance);
-    this.userS.updateUser(this.user).catch(error => { alert(error); });
+  selectDistance() {
+    this.popoverS.create(PopoverPage);
+    this.popoverS.options = ['local', 'national', 'global'];
+    this.popoverS.popover.onDidDismiss(distance => {
+      if (distance) {
+        console.log("Distance selected!");
+        console.log(this.user.distance);
+        this.user.distance = distance;
+        console.log(this.user.distance);
+        this.userS.updateUser(this.user).catch(error => { alert(error); });
+      }
+    });
+    this.popoverS.present();
   }
 
   toggledShowAge() {

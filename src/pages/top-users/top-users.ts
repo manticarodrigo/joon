@@ -3,7 +3,7 @@ import { NavController, NavParams, AlertController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
-import { LoadingService } from '../../providers/loading-service';
+import { ModalService } from '../../providers/modal-service';
 import { LocationService } from '../../providers/location-service';
 
 import { ProfilePage } from '../profile/profile';
@@ -24,7 +24,7 @@ export class TopUsersPage {
               private alertCtrl: AlertController,
               private userS: UserService,
               private discoverS: DiscoverService,
-              private loadingS: LoadingService,
+              private modalS: ModalService,
               private locationS: LocationService) {
   }
 
@@ -63,11 +63,11 @@ export class TopUsersPage {
     console.log("Fetching global top users");
     let env = this;
     let user = this.userS.user;
-    this.loadingS.user = this.userS.user;
-    this.loadingS.message = "Finding people nearby...";
-    if (!this.loadingS.isActive) {
-      this.loadingS.create(LoadingPage);
-      this.loadingS.present();
+    this.modalS.user = this.userS.user;
+    this.modalS.message = "Finding people nearby...";
+    if (!this.modalS.isActive) {
+      this.modalS.create(LoadingPage);
+      this.modalS.present();
     }
     env.locationS.getLocation().then(() => {
       env.locationS.fetchNearbyKeys().then(nearbyKeys => {
@@ -88,18 +88,18 @@ export class TopUsersPage {
           return this.userS.fetchUsers(localTopIds);
         }).then(users => {
           env.localUsers = users;
-          env.loadingS.dismiss();
+          env.modalS.dismiss();
         }).catch(error => {
           console.log(error);
-          env.loadingS.dismiss();
+          env.modalS.dismiss();
         });
       }).catch(error => {
         console.log(error);
-        env.loadingS.dismiss();
+        env.modalS.dismiss();
       });
     }).catch(error => {
       console.log(error);
-      env.loadingS.dismiss();
+      env.modalS.dismiss();
     });
   }
 

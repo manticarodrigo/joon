@@ -15,11 +15,11 @@ page-preferences {
         position: relative;
         .label {
             position: absolute;
-            top: calc(50% - 9.5px);
+            top: calc(50% - 11px);
             margin: auto;
             z-index: 2;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 800;
             text-transform: capitalize;
         }
         .checkbox {
@@ -28,9 +28,11 @@ page-preferences {
                 width: 100%;
                 height: 70px;
                 border-radius: 0px;
-                border: 1px solid #999999;
+                border: 0.5px solid #999999;
+                border-width: 0.5px;
             }
             .checkbox-inner {
+                display: none;
                 top: 40px !important;
                 right: 0;
                 bottom: 0;
@@ -41,7 +43,7 @@ page-preferences {
     }
     .men {
         .label {
-            left: calc(50% - 14px);
+            left: calc(50% - 16px);
         }
         .checkbox-icon {
             border-right: 0px !important;
@@ -49,7 +51,7 @@ page-preferences {
     }
     .women {
         .label {
-            left: calc(50% - 24.5px);
+            left: calc(50% - 28px);
         }
     }
 
@@ -65,19 +67,26 @@ page-preferences {
         padding: 0px;
     }
 
-    .select {
+    .distance {
         font-weight: 800;
+        font-size: 16px !important;
+        font-family: 'Open Sans-Light', Helvetica, sans-serif;
+        text-transform: capitalize;
+        color: color($colors, med);
         border: 0.5px solid color($colors, secondary);
-        max-width: 100% !important;
         width: 100%;
         height: 70px;
         line-height: 40px;
-        .select-icon { 
-            display: block;
+        .button-inner {
+            justify-content:flex-start;
+        }
+        img {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
             margin: auto;
-            .select-icon-inner {
-                color: color($colors, primary);
-            }
+            width: 25px;
         }
     }
     .item-checkbox {
@@ -85,11 +94,15 @@ page-preferences {
         padding: 20px 0px;
         .checkbox {
             margin-right: 10px !important;
+            .checkbox-checked {
+                background-color: #fff;
+            }
             .checkbox-icon {
                 border-radius: 0px;
                 border: 1px solid #999999;
             }
             .checkbox-inner {
+                border-color: color($colors, primary);
                 top: 0 !important;
                 right: 0;
                 bottom: 2px;

@@ -126,6 +126,15 @@ strong {
     background-image: none;
 }
 
+/* Popover styles */
+.popover-content {
+    box-shadow: none !important;
+    border: 0.5px solid color($colors, secondary);
+    ion-list {
+        margin: 10px 0px !important;
+    }
+}
+
 /* Slide styles */
 
 .swiper-pagination-bullet-active {

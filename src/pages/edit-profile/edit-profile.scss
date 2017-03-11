@@ -1,19 +1,30 @@
 page-edit-profile {
-  
     .item {
         padding: 0;
     }
-
     .list-md .item-block .item-inner {
         padding: 0;
     }
-    
+    ion-list ion-label {
+        padding-left: 12px;
+    }
+    .anatomy {
+        ion-label {
+            padding-left: 0px;
+        }
+    }
+    .radio-icon {
+        border-width: 0.5px !important;
+    }
+    .radio-inner {
+        top: 3px !important;
+        left: 3px !important;
+    }
     .checkbox-icon {
         border-radius: 50% !important;
         border-width: 0.5px !important;
         
-    }
-    
+    } 
     .select {
         position: relative;
         border: 0.5px solid color($colors, secondary);
@@ -29,30 +40,45 @@ page-edit-profile {
             }
         }
     }
-    
+    .height {
+        font-family: 'Open Sans-Light', Helvetica, sans-serif;
+        text-transform: capitalize;
+        color: color($colors, med);
+        border: 0.5px solid color($colors, secondary);
+        width: 100%;
+        height: 70px;
+        line-height: 40px;
+        .button-inner {
+            justify-content:flex-start;
+        }
+        img {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            width: 25px;
+        }
+    }
     .textarea {
         height: 200px;
         .text-input {
             font-size: 16px;
-            border-bottom: 0.5px solid #999999;
             height: 100%;
             width: 100%;
             padding: 10px 9px;
             margin: 0px;
         }   
     }
-    
     .button {
         display: block;
         margin: 10px auto;
         width: 180px;
         height: 50px;
     }
-    
     .toolbar-background {
         background-color: #fff;
     }
-    
     .images {
         background: #FFFDF8;
         padding-top: 1px;
@@ -92,15 +118,20 @@ page-edit-profile {
         }
     }
     .input {
-        border: 1px solid color($colors, secondary);
-        border-bottom: none;
+        height: 70px;
+        border: 0.5px solid color($colors, secondary);
+        .text-input {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 15px;
+            margin: auto;
+        }
     }
-    
     #insta {
-        border-bottom: 1px solid color($colors, secondary);
+        //border-bottom: 1px solid color($colors, secondary);
     }
-    
     .item-input:last-child {
-        border-bottom: 1px solid color($colors, secondary) !important;
+        //border-bottom: 1px solid color($colors, secondary) !important;
     }
 }

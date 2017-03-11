@@ -4,7 +4,7 @@ import { NavController, NavParams, ToastController } from 'ionic-angular';
 import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
 import { ChatService } from '../../providers/chat-service';
-import { LoadingService } from '../../providers/loading-service';
+import { ModalService } from '../../providers/modal-service';
 import { LocationService } from '../../providers/location-service';
 
 import { ChatsPage } from '../chats/chats';
@@ -12,6 +12,7 @@ import { ChatPage } from '../chat/chat';
 import { LoadingPage } from '../loading/loading';
 import { MatchedPage } from '../matched/matched';
 import { ProfilePage } from '../profile/profile';
+import { PreferencesPage } from '../preferences/preferences';
 
 import {
   StackConfig,
@@ -32,6 +33,7 @@ export class DiscoverPage {
   @ViewChildren('cardsContainer') swingCards: QueryList<SwingCardComponent>;
 
   users: Array<any>;
+  noUsers: boolean = true;
   undoHistory: Array<any>;
   stackConfig: StackConfig;
 
@@ -41,7 +43,7 @@ export class DiscoverPage {
               private discoverS: DiscoverService,
               private userS: UserService,
               private chatS: ChatService,
-              private loadingS: LoadingService,
+              private modalS: ModalService,
               private locationS: LocationService) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
@@ -73,6 +75,10 @@ export class DiscoverPage {
   openChats() {
     this.navCtrl.push(ChatsPage);
   }
+  
+  showPreferences() {
+    this.navCtrl.setRoot(PreferencesPage);
+  }
 
   presentToast(message) {
     let toast = this.toastCtrl.create({
@@ -93,11 +99,11 @@ export class DiscoverPage {
     console.log("Fetching discoverable users");
     let env = this;
     let user = this.userS.user;
-    this.loadingS.user = this.userS.user;
-    this.loadingS.message = "Finding people nearby...";
-    if (!this.loadingS.isActive) {
-      this.loadingS.create(LoadingPage);
-      this.loadingS.present();
+    this.modalS.user = this.userS.user;
+    this.modalS.message = "Finding people nearby...";
+    if (!this.modalS.isActive) {
+      this.modalS.create(LoadingPage);
+      this.modalS.present();
     }
     if (this.userS.user.distance == 'local') {
       env.locationS.getLocation().then(() => {
@@ -105,6 +111,7 @@ export class DiscoverPage {
             env.userS.fetchUsers(keys).then(users => {
               env.discoverS.fetchLocalUsers(users).then(localUsers => {
                 for (var i in localUsers) {
+                  env.noUsers = false;
                   var mutual = [];
                   for (var key in localUsers[i].friends) {
                     if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
@@ -116,28 +123,29 @@ export class DiscoverPage {
                   }
                 }
                 env.users = localUsers;
-                env.loadingS.dismiss();
+                env.modalS.dismiss();
               }).catch(error => {
                 console.log(error);
-                env.loadingS.dismiss();
+                env.modalS.dismiss();
               });
             }).catch(error => {
               console.log(error);
-              env.loadingS.dismiss();
+              env.modalS.dismiss();
             });
           }).catch(error => {
             console.log(error);
-            env.loadingS.dismiss();
+            env.modalS.dismiss();
           });
         }).catch(error => {
           console.log(error);
-          env.loadingS.dismiss();
+          env.modalS.dismiss();
         });
     } else {
       this.discoverS.fetchGlobalUsers().then(users => {
         console.log("fetch returned visible users");
         console.log(users);
         for (var i in users) {
+          env.noUsers = false;
           var mutual = [];
           for (var key in users[i].friends) {
             if (this.userS.user.friends.includes(users[i].friends[key])) {
@@ -149,7 +157,7 @@ export class DiscoverPage {
           }
         }
         this.users = users;
-        this.loadingS.dismiss()
+        this.modalS.dismiss()
       }).catch(error => {
         console.log(error);
       });
@@ -170,6 +178,8 @@ export class DiscoverPage {
         this.presentToast('Error saving swipe');
         this.undo();
       });
+    } else {
+      this.noUsers = true;
     }
   }
 
@@ -184,10 +194,10 @@ export class DiscoverPage {
         this.discoverS.liked(currentCard).then(matched => {
           this.presentToast('You liked ' + currentCard.firstName);
           if (matched) {
-            this.loadingS.user = this.userS.user;
-            this.loadingS.otherUser = currentCard;
-            this.loadingS.create(MatchedPage);
-            this.loadingS.modal.onDidDismiss(data => {
+            this.modalS.user = this.userS.user;
+            this.modalS.otherUser = currentCard;
+            this.modalS.create(MatchedPage);
+            this.modalS.modal.onDidDismiss(data => {
               if (data) {
                 this.navCtrl.push(ChatPage, {
                     user: data[0],
@@ -195,7 +205,7 @@ export class DiscoverPage {
                 });
               }
             });
-            this.loadingS.present();
+            this.modalS.present();
           }
         }).catch(error => {
           console.log(error);
@@ -207,6 +217,8 @@ export class DiscoverPage {
         this.presentToast('Error saving swipe');
         this.undo();
       });
+    } else {
+      this.noUsers = true;
     }
   }
 
@@ -221,10 +233,10 @@ export class DiscoverPage {
         this.discoverS.doubleLiked(currentCard).then(matched => {
           this.presentToast('You double liked ' + currentCard.firstName);
           if (matched) {
-            this.loadingS.user = this.userS.user;
-            this.loadingS.otherUser = currentCard;
-            this.loadingS.create(MatchedPage);
-            this.loadingS.present();
+            this.modalS.user = this.userS.user;
+            this.modalS.otherUser = currentCard;
+            this.modalS.create(MatchedPage);
+            this.modalS.present();
           }
         }).catch(error => {
           console.log(error);
@@ -236,6 +248,8 @@ export class DiscoverPage {
         this.presentToast('Error saving swipe');
         this.undo();
       });
+    } else {
+      this.noUsers = true;
     }
   }
 

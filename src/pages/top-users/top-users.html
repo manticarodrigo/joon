@@ -23,7 +23,7 @@
                     <img [src]="user.photoURL">
                 </div>
                 <h6 *ngIf="user.firstName">
-                    {{ user.firstName }}, {{ user.age }}
+                    {{ user.firstName }}<span *ngIf="user.showAge !== false && user.age">, {{ user.age }}</span>
                 </h6>
             </ion-col>
         </ion-row>
@@ -38,7 +38,7 @@
                     <img [src]="user.photoURL">
                 </div>
                 <h6 *ngIf="user.firstName">
-                    {{ user.firstName }}<span *ngIf="user.showAge !== false">, {{ user.age }}</span>
+                    {{ user.firstName }}<span *ngIf="user.showAge !== false && user.age">, {{ user.age }}</span>
                 </h6>
             </ion-col>
         </ion-row>
