@@ -71,8 +71,6 @@ export class Joon {
             // Here you can do any higher level native things you might need.
             StatusBar.styleDefault();
             Splashscreen.hide();
-            // Disable sidemenu swipe gesture
-            this.menu.swipeEnable(false, 'sidemenu');
             // Initialize firebase sdk
             firebase.initializeApp({
                 apiKey: "AIzaSyATmWDysiY_bRGBtxTv-l_haia3BXzdfCg",
@@ -100,7 +98,9 @@ export class Joon {
     }
     
     menuToggled() {
-        this.isMenuOpen = !(this.isMenuOpen);
+        // this.isMenuOpen = !(this.isMenuOpen);
+        // Enable sidemenu swipe gesture
+        // this.menu.swipeEnable(true, 'sidemenu');
     }
     
     openPage(page) {
@@ -160,8 +160,8 @@ export class Joon {
     logoutApp() {
         this.nav.setRoot(LoginPage);
         this.menu.close();
-        this.userS.updateCurrentUser(null);
         this.chatS.stopObservingChats();
+        this.userS.updateCurrentUser(null);
         this.authS.signOut();
     }
 

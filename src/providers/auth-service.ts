@@ -316,6 +316,18 @@ export class AuthService {
             }
             rv.age = age;
             console.log(rv.age);
+            rv.birthday = year;
+            if (month < 10) {
+              rv.birthday += '-0' + month + '-';
+            } else {
+              rv.birthday += '-' + month + '-';
+            }
+            if (day < 10) {
+              rv.birthday += '0' + day;
+            } else {
+              rv.birthday += day;
+            }
+            console.log(rv.birthday);
         }
         if (rv.work) {
             console.log("rv has job");

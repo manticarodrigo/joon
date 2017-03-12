@@ -8,74 +8,6 @@ page-edit-profile {
     ion-list ion-label {
         padding-left: 12px;
     }
-    .anatomy {
-        ion-label {
-            padding-left: 0px;
-        }
-    }
-    .radio-icon {
-        border-width: 0.5px !important;
-    }
-    .radio-inner {
-        top: 3px !important;
-        left: 3px !important;
-    }
-    .checkbox-icon {
-        border-radius: 50% !important;
-        border-width: 0.5px !important;
-        
-    } 
-    .select {
-        position: relative;
-        border: 0.5px solid color($colors, secondary);
-        max-width: 100% !important;
-        width: 100%;
-        height: 70px;
-        line-height: 40px;
-        .select-icon {
-            display: block;
-            margin: auto;
-            .select-icon-inner {
-                color: color($colors, primary);
-            }
-        }
-    }
-    .height {
-        font-family: 'Open Sans-Light', Helvetica, sans-serif;
-        text-transform: capitalize;
-        color: color($colors, med);
-        border: 0.5px solid color($colors, secondary);
-        width: 100%;
-        height: 70px;
-        line-height: 40px;
-        .button-inner {
-            justify-content:flex-start;
-        }
-        img {
-            position: absolute;
-            right: 10px;
-            top: 0;
-            bottom: 0;
-            margin: auto;
-            width: 25px;
-        }
-    }
-    .textarea {
-        height: 200px;
-        .text-input {
-            font-size: 16px;
-            height: 100%;
-            width: 100%;
-            padding: 10px 9px;
-            margin: 0px;
-        }   
-    }
-    .button {
-        display: block;
-        margin: 10px auto;
-        width: 180px;
-        height: 50px;
-    }
     .toolbar-background {
         background-color: #fff;
     }
@@ -117,6 +49,14 @@ page-edit-profile {
             justify-content: space-between;
         }
     }
+    ion-datetime {
+        width: 100%;
+        height: 70px;
+        border: 0.5px solid color($colors, secondary);
+        .datetime-text {
+            margin: auto;
+        }
+    }
     .input {
         height: 70px;
         border: 0.5px solid color($colors, secondary);
@@ -131,7 +71,78 @@ page-edit-profile {
     #insta {
         //border-bottom: 1px solid color($colors, secondary);
     }
-    .item-input:last-child {
-        //border-bottom: 1px solid color($colors, secondary) !important;
+    .anatomy {
+        .radio {
+            padding-left: 12px;
+        }
+    }
+    .radio-icon {
+        border-width: 0.5px !important;
+    }
+    .radio-inner {
+        position: absolute;
+        top: 0 !important;
+        right: 0;
+        bottom: 0;
+        left: 0 !important;
+        margin: auto;
+        width: 10px !important;
+        height: 10px !important;
+    }
+    .checkbox-icon {
+        border-radius: 50% !important;
+        border-width: 0.5px !important;
+        
+    } 
+    .select {
+        position: relative;
+        border: 0.5px solid color($colors, secondary);
+        max-width: 100% !important;
+        width: 100%;
+        height: 70px;
+        line-height: 40px;
+        .select-icon {
+            display: block;
+            margin: auto;
+            .select-icon-inner {
+                color: color($colors, primary);
+            }
+        }
+    }
+    .height {
+        font-family: 'Open Sans-Light', Helvetica, sans-serif;
+        text-transform: capitalize;
+        color: color($colors, med);
+        border: 0.5px solid color($colors, secondary);
+        max-width: calc(100%);
+        height: 70px;
+        line-height: 40px;
+        .button-inner {
+            justify-content:flex-start;
+        }
+        img {
+            position: absolute;
+            right: 10px;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            width: 25px;
+        }
+    }
+    .textarea {
+        height: 200px;
+        .text-input {
+            font-size: 16px;
+            height: 100%;
+            width: 100%;
+            padding: 20px 0px;
+            margin: 0px;
+        }   
+    }
+    .button {
+        display: block;
+        margin: 10px auto;
+        width: 180px;
+        height: 50px;
     }
 }

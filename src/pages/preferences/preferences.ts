@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
+import { NavController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
 import { PopoverService } from '../../providers/popover-service';
 
 import { PopoverPage } from '../popover/popover';
-
-import { NavController } from 'ionic-angular';
 
 @Component({
   selector: 'page-preferences',

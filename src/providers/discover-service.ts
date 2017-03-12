@@ -160,11 +160,40 @@ export class DiscoverService {
           if (user.pushId) {
             this.pushS.push("I double liked you!", user);
           }
-          resolve(matched); 
+          resolve(matched);
         }).catch(error => {
           reject(error);
         });
       }).catch(error => {
+        reject(error);
+      });
+    });
+  }
+
+  checkDailyLikes(): Promise<number> {
+    console.log("Checking daily likes...");
+    return new Promise((resolve, reject) => {
+      var now = new Date();
+      var dayAgo = now.setDate(now.getDate() - 1);
+      let ref = firebase.database().ref('/user_liked/' + this.userS.user.id).limitToLast(15);
+      ref.once('value').then(snap => {
+        console.log(snap.val());
+        if (snap.exists()) {
+          let val = snap.val();
+          var todayCount = 0;
+          for (var key in val) {
+            let timestamp = val[key];
+            if (timestamp > dayAgo) {
+              todayCount++;
+            }
+          }
+          resolve(todayCount);
+        } else {
+          console.log("User has not liked anyone!");
+          resolve(0);
+        }
+      }).catch(error => {
+        console.log(error);
         reject(error);
       });
     });

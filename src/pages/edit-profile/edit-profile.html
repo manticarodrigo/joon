@@ -40,21 +40,22 @@
             </ion-col>
         </ion-row>
     </ion-grid>
-    <form (ngSubmit)="editProfileSubmit()" name="edit-profile-form">
+    <form name="edit-profile-form">
         <ion-list no-lines>
             <ion-label>Name:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-first-name" [(ngModel)]="user.firstName" placeholder="First Name" ></ion-input>
+                <ion-input type="text" name="user-first-name" [(ngModel)]="user.firstName" placeholder="First Name" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Birthday:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-input>
+                <ion-datetime displayFormat="MM/DD/YYYY" name="user-birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-datetime>
+                <!-- <ion-input type="text" name="user-birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-input> -->
             </ion-item>
             <ion-label>Instagram:</ion-label>
             <ion-item>
-                <ion-input id="insta" type="text" name="user-instagram" [(ngModel)]="user.instagram" placeholder="Instagram Handle" ></ion-input>
+                <ion-input id="insta" type="text" name="user-instagram" [(ngModel)]="user.instagram" placeholder="Instagram Handle" autocorrect="on"></ion-input>
             </ion-item>
-            <ion-grid class="anatomy" padding>
+            <ion-grid class="anatomy">
                 <ion-label>Gender:</ion-label>
                 <ion-row radio-group name="user-gender" [(ngModel)]="user.gender">
                   <ion-col width-50>
@@ -84,40 +85,40 @@
             </ion-grid>
             <ion-label>Country:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-country" [(ngModel)]="user.country" placeholder="Country"></ion-input>
+                <ion-input type="text" name="user-country" [(ngModel)]="user.country" placeholder="Country" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>City:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-city" [(ngModel)]="user.city" placeholder="City"></ion-input>
+                <ion-input type="text" name="user-city" [(ngModel)]="user.city" placeholder="City" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>School:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-school" [(ngModel)]="user.school" placeholder="University or School"></ion-input>
+                <ion-input type="text" name="user-school" [(ngModel)]="user.school" placeholder="University or School" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Other School:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-school2" [(ngModel)]="user.school2" placeholder="Additional University or School"></ion-input>
+                <ion-input type="text" name="user-school2" [(ngModel)]="user.school2" placeholder="Additional University or School" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Job:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-job" [(ngModel)]="user.job" placeholder="Job Title"></ion-input>
+                <ion-input type="text" name="user-job" [(ngModel)]="user.job" placeholder="Job Title" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Company:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-company" [(ngModel)]="user.company" placeholder="Company"></ion-input>
+                <ion-input type="text" name="user-company" [(ngModel)]="user.company" placeholder="Company" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Religion:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion"></ion-input>
+                <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Ethnicity:</ion-label>
             <ion-item>
-                <ion-input type="text" name="user-ethnicity" [(ngModel)]="user.ethnicity" placeholder="Ethnicity"></ion-input>
+                <ion-input type="text" name="user-ethnicity" [(ngModel)]="user.ethnicity" placeholder="Ethnicity" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Bio:</ion-label>
-            <ion-textarea class="textarea" name="user-bio" [(ngModel)]="user.bio" placeholder="About Me">
+            <ion-textarea class="textarea" name="user-bio" [(ngModel)]="user.bio" placeholder="About Me" autocorrect="on">
             </ion-textarea>
-            <button ion-button type="submit"\ block>Save</button>
+            <button ion-button type="button" block (click)="editProfileSubmit()">Save</button>
         </ion-list>
     </form>
 </ion-content>

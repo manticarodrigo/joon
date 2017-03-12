@@ -1,6 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { NavController, NavParams, ActionSheetController, AlertController, Content } from 'ionic-angular';
-import { Camera } from 'ionic-native';
+import { Camera, PhotoViewer } from 'ionic-native';
 
 import { ChatService } from '../../providers/chat-service';
 import { UserService } from '../../providers/user-service';
@@ -73,6 +73,10 @@ export class ChatPage {
         this.navCtrl.push(ProfilePage, {
             user: this.user
         });
+    }
+
+    showImage(url) {
+        PhotoViewer.show(url);
     }
 
     showOptions() {

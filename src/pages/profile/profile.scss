@@ -8,6 +8,15 @@ page-profile {
         // border-bottom: none;
         padding: 0;
     }
+
+    ion-label {
+        white-space: normal;
+        max-width: 80%;
+    }
+
+    .label {
+        margin: 10px auto;
+    }
     
     .toolbar-background {
         background-color: #fff;
@@ -45,8 +54,9 @@ page-profile {
     
     .middle-section .item-inner {
         background: #FDFDFD;
-        .list-md .item-block .item-inner {
-            
+        a,
+        a:visited {
+            text-decoration: none;
         }
     }
     

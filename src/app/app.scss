@@ -64,12 +64,12 @@ strong {
     .toolbar-background {
         background-color: black;
         opacity: 0.3;
-        z-index: 100;
+        //z-index: 0;
     }
     .fixed-content {
         background-color: black;
         opacity: 0.3;
-        z-index: 100;
+        z-index: 2;
     }
 }
 

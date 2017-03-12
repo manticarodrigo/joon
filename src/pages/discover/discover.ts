@@ -1,5 +1,5 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { NavController, NavParams, ToastController } from 'ionic-angular';
+import { NavController, NavParams, ToastController, AlertController, MenuController } from 'ionic-angular';
 
 import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
@@ -36,10 +36,13 @@ export class DiscoverPage {
   noUsers: boolean = true;
   undoHistory: Array<any>;
   stackConfig: StackConfig;
+  toastSeen: Array<boolean>;
 
-  constructor(public navCtrl: NavController,
-              public navParams: NavParams,
-              public toastCtrl: ToastController,
+  constructor(private navCtrl: NavController,
+              private navParams: NavParams,
+              private toastCtrl: ToastController,
+              private alertCtrl: AlertController,
+              private menu: MenuController,
               private discoverS: DiscoverService,
               private userS: UserService,
               private chatS: ChatService,
@@ -58,6 +61,7 @@ export class DiscoverPage {
     };
     this.users = [];
     this.undoHistory = [];
+    this.toastSeen = [false, false, false];
   }
 
   ionViewDidLoad() {
@@ -172,7 +176,10 @@ export class DiscoverPage {
       this.undoHistory.push(currentCard);
       console.log(currentCard);
       this.discoverS.saw(currentCard).then(success => {
-        this.presentToast('You did not like ' + currentCard.firstName);
+        if (!this.toastSeen[0]) {
+          this.toastSeen[0] = true;
+          this.presentToast('You did not like ' + currentCard.firstName);
+        }
       }).catch(error => {
         console.log(error);
         this.presentToast('Error saving swipe');
@@ -187,35 +194,59 @@ export class DiscoverPage {
     console.log("Swiping right...");
     console.log(this.users.length);
     if (this.users.length > 0) {
-      let currentCard = this.users.pop();
-      this.undoHistory.push(currentCard);
-      console.log(currentCard);
-      this.discoverS.saw(currentCard).then(success => {
-        this.discoverS.liked(currentCard).then(matched => {
-          this.presentToast('You liked ' + currentCard.firstName);
-          if (matched) {
-            this.modalS.user = this.userS.user;
-            this.modalS.otherUser = currentCard;
-            this.modalS.create(MatchedPage);
-            this.modalS.modal.onDidDismiss(data => {
-              if (data) {
-                this.navCtrl.push(ChatPage, {
-                    user: data[0],
-                    chat: data[1]
-                });
+      this.discoverS.checkDailyLikes().then(num => {
+        let currentCard = this.users.pop();
+        this.undoHistory.push(currentCard);
+        console.log(currentCard);
+        if (num < 7) {
+          this.discoverS.saw(currentCard).then(success => {
+            this.discoverS.liked(currentCard).then(matched => {
+              if (!this.toastSeen[1]) {
+                this.toastSeen[1] = true;
+                this.presentToast('You liked ' + currentCard.firstName);
               }
+              if (matched) {
+                this.modalS.user = this.userS.user;
+                this.modalS.otherUser = currentCard;
+                this.modalS.create(MatchedPage);
+                this.modalS.modal.onDidDismiss(data => {
+                  if (data) {
+                    this.navCtrl.push(ChatPage, {
+                        user: data[0],
+                        chat: data[1]
+                    });
+                  }
+                });
+                this.modalS.present();
+              }
+            }).catch(error => {
+              console.log(error);
+              this.presentToast('Error saving swipe');
+              this.undo();
             });
-            this.modalS.present();
-          }
-        }).catch(error => {
-          console.log(error);
-          this.presentToast('Error saving swipe');
-          this.undo();
-        });
+          }).catch(error => {
+            console.log(error);
+            this.presentToast('Error saving swipe');
+            this.undo();
+          });
+        } else {
+          let alert = this.alertCtrl.create({
+            title: 'Out of likes!',
+            subTitle: 'Please come back in 24 hours.',
+            buttons: [
+            {
+                text: 'Dismiss',
+                handler: data => {
+                    console.log('Dismiss clicked');
+                    this.undo();
+                }
+            },
+            ]
+          });
+          alert.present();
+        }
       }).catch(error => {
         console.log(error);
-        this.presentToast('Error saving swipe');
-        this.undo();
       });
     } else {
       this.noUsers = true;
@@ -226,27 +257,51 @@ export class DiscoverPage {
     console.log("Double liking...");
     console.log(this.users.length);
     if (this.users.length > 0) {
-      let currentCard = this.users.pop();
-      this.undoHistory.push(currentCard);
-      console.log(currentCard);
-      this.discoverS.saw(currentCard).then(success => {
-        this.discoverS.doubleLiked(currentCard).then(matched => {
-          this.presentToast('You double liked ' + currentCard.firstName);
-          if (matched) {
-            this.modalS.user = this.userS.user;
-            this.modalS.otherUser = currentCard;
-            this.modalS.create(MatchedPage);
-            this.modalS.present();
-          }
-        }).catch(error => {
-          console.log(error);
-          this.presentToast('Error saving swipe');
-          this.undo();
-        });
+      this.discoverS.checkDailyLikes().then(num => {
+        let currentCard = this.users.pop();
+        this.undoHistory.push(currentCard);
+        console.log(currentCard);
+        if (num < 7) {
+          this.discoverS.saw(currentCard).then(success => {
+            this.discoverS.doubleLiked(currentCard).then(matched => {
+              if (!this.toastSeen[2]) {
+                this.toastSeen[2] = true;
+                this.presentToast('You double liked ' + currentCard.firstName);
+              }
+              if (matched) {
+                this.modalS.user = this.userS.user;
+                this.modalS.otherUser = currentCard;
+                this.modalS.create(MatchedPage);
+                this.modalS.present();
+              }
+            }).catch(error => {
+              console.log(error);
+              this.presentToast('Error saving swipe');
+              this.undo();
+            });
+          }).catch(error => {
+            console.log(error);
+            this.presentToast('Error saving swipe');
+            this.undo();
+          });
+        } else {
+          let alert = this.alertCtrl.create({
+            title: 'Out of likes!',
+            subTitle: 'Please come back in 24 hours.',
+            buttons: [
+            {
+                text: 'Dismiss',
+                handler: data => {
+                    console.log('Dismiss clicked');
+                    this.undo();
+                }
+            },
+            ]
+          });
+          alert.present();
+        }
       }).catch(error => {
         console.log(error);
-        this.presentToast('Error saving swipe');
-        this.undo();
       });
     } else {
       this.noUsers = true;
@@ -254,7 +309,7 @@ export class DiscoverPage {
   }
 
   undo() {
-    this.presentToast("Undo pressed!");
+    console.log("Undo pressed!");
     if (this.undoHistory.length > 0) {
       let undoCard = this.undoHistory.pop();
       this.users.push(undoCard);

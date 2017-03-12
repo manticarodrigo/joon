@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, ActionSheetController } from 'ionic-angular';
+import { NavController, ActionSheetController, AlertController } from 'ionic-angular';
 import { Camera } from 'ionic-native';
 
 import { UserService } from '../../providers/user-service';
@@ -17,6 +17,7 @@ export class EditProfilePage {
     user: any;
     constructor(private navCtrl: NavController,
                 private actionSheetCtrl: ActionSheetController,
+                private alertCtrl: AlertController,
                 private userS: UserService,
                 private storageS: StorageService,
                 private popoverS: PopoverService) {
@@ -63,7 +64,28 @@ export class EditProfilePage {
 
     editProfileSubmit() {
         console.log("Save pressed!");
+        let splitBDay = this.user.birthday.split('-');
+        var year = parseInt(splitBDay[0]);
+        var month = parseInt(splitBDay[1]);
+        var day = parseInt(splitBDay[2]);
+
+        let today = new Date();
+        let age = today.getFullYear() - year;
+        if ( today.getMonth() < (month - 1) ) {
+            age--;
+        } else if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
+            age--;
+        }
+
+        this.user.age = age;
         this.userS.updateUser(this.user);
+        
+        let alert = this.alertCtrl.create({
+            title: 'Done!',
+            subTitle: 'Your changes have been saved.',
+            buttons: ['Dismiss']
+        });
+        alert.present();
     }
 
     presentPhotoOptions(): Promise<any> {
