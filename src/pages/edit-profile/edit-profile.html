@@ -24,7 +24,7 @@
             </ion-col>
             <ion-col width-25 class="right">
                 <div class="thumbnail" *ngFor="let i of [0, 1, 2]">
-                    <img *ngIf="images && images[i]" class="edit" src="assets/edit.png" (click)="uploadImage(i)">
+                    <img *ngIf="images && images[i]" class="delete" src="assets/delete.png" (click)="deleteImage(i)">
                         <img *ngIf="!(images && images[i])" src="assets/add.png" (click)="uploadImage(i)">
                     <img class="img" *ngIf="images && images[i]" [src]="images[i]">
                 </div>
@@ -33,7 +33,7 @@
         <ion-row class="bottom">
             <ion-col width-25 *ngFor="let i of [3, 4, 5, 6]">
                 <div class="thumbnail">
-                    <img *ngIf="images && images[i]" class="edit" src="assets/edit.png" (click)="uploadImage(i)">
+                    <img *ngIf="images && images[i]" class="delete" src="assets/delete.png" (click)="deleteImage(i)">
                         <img *ngIf="!(images && images[i])" src="assets/add.png" (click)="uploadImage(i)">
                     <img class="img" *ngIf="images && images[i]" [src]="images[i]">
                 </div>
@@ -108,8 +108,12 @@
                 <ion-input type="text" name="user-company" [(ngModel)]="user.company" placeholder="Company" autocorrect="on"></ion-input>
             </ion-item>
             <ion-label>Religion:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion" autocorrect="on"></ion-input>
+            <ion-item class="religion">
+                <!-- <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion" autocorrect="on"></ion-input> -->
+                <button ion-button block outline (click)="selectReligion()">
+                    {{ user.religion ? user.religion : 'Religion' }}
+                    <img src="assets/down.png">
+                </button>
             </ion-item>
             <ion-label>Ethnicity:</ion-label>
             <ion-item>

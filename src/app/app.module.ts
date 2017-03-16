@@ -4,6 +4,7 @@ import { Joon } from './app.component';
 
 import { LoginPage } from '../pages/login/login';
 import { LoadingPage } from '../pages/loading/loading';
+import { SpinnerPage } from '../pages/spinner/spinner';
 import { DiscoverPage } from '../pages/discover/discover';
 import { MatchedPage } from '../pages/matched/matched';
 import { ProfilePage } from '../pages/profile/profile';
@@ -33,12 +34,14 @@ import { ChatService } from '../providers/chat-service';
 import { StorageService } from '../providers/storage-service';
 import { PushService } from '../providers/push-service';
 import { LocationService } from '../providers/location-service';
+import { SettingsService } from '../providers/settings-service';
 
 @NgModule({
   declarations: [
     Joon,
     LoginPage,
     LoadingPage,
+    SpinnerPage,
     DiscoverPage,
     MatchedPage,
     ProfilePage,
@@ -69,6 +72,7 @@ import { LocationService } from '../providers/location-service';
     Joon,
     LoginPage,
     LoadingPage,
+    SpinnerPage,
     DiscoverPage,
     MatchedPage,
     ProfilePage,
@@ -95,6 +99,7 @@ import { LocationService } from '../providers/location-service';
     StorageService,
     PushService,
     LocationService,
+    SettingsService,
     Facebook,
     FacebookService,
     NativeStorage,

@@ -109,4 +109,23 @@ export class UserService {
           });
       });
     }
+
+    hideUser(user) {
+        console.log("Hiding user with id: " + user.id);
+        return new Promise((resolve, reject) => {
+            let ref = firebase.database().ref('/archived_users/' + user.id);
+            ref.update(user).then(() => {
+                let realRef = firebase.database().ref('/users/' + user.id);
+                realRef.remove();
+                console.log("Archive succeeded!");
+                if (user.id == this.user.id) {
+                    this.updateCurrentUser(user);
+                }
+            }).catch(error => {
+                console.log(error);
+                reject(error);
+            });
+        });
+    }
+
 }

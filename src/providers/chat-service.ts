@@ -296,7 +296,7 @@ export class ChatService {
         console.log("Observing messages...");
         return new Observable(observer => {
             let ref = firebase.database().ref('messages/' + chat.id);
-            ref.on('child_added', (snapshot) => {
+            ref.on('value', (snapshot) => {
                 console.log(snapshot.val());
                 this.zone.run(() => {
                     observer.next(snapshot.val());

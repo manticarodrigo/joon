@@ -4,13 +4,15 @@ import firebase from 'firebase';
 import { UserService } from './user-service';
 import { ChatService } from './chat-service';
 import { PushService } from './push-service';
+import { SettingsService } from './settings-service';
 
 @Injectable()
 export class DiscoverService {
 
   constructor(private userS: UserService,
               private chatS: ChatService,
-              private pushS: PushService) {
+              private pushS: PushService,
+              private settingsS: SettingsService) {
   }
 
   isDiscoverableTo(user1, user2, seenUIDs): boolean {
@@ -158,7 +160,13 @@ export class DiscoverService {
         let ref = firebase.database().ref('/double_liked_by/' + this.userS.user.id);
         ref.update(data).then(() => {
           if (user.pushId) {
-            this.pushS.push("I double liked you!", user);
+            this.settingsS.fetchUserSettings(user).then(settings => {
+              if (settings.doubleLikes) {
+                this.pushS.push("I double liked you!", user);
+              }
+            }).catch(error => {
+              console.log(error);
+            });
           }
           resolve(matched);
         }).catch(error => {
@@ -245,7 +253,13 @@ export class DiscoverService {
               this.chatS.chats = [chat];
             }
             if (user.pushId) {
-              this.pushS.push("You matched with me!", user);
+              this.settingsS.fetchUserSettings(user).then(settings => {
+                if (settings.matches) {
+                  this.pushS.push("You matched with me!", user);
+                }
+              }).catch(error => {
+                console.log(error);
+              });
             }
             resolve(true);
           }).catch(error => {

@@ -7,8 +7,11 @@ import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
 import { StorageService } from '../../providers/storage-service';
 import { PushService } from '../../providers/push-service';
+import { SettingsService } from '../../providers/settings-service';
+import { ModalService } from '../../providers/modal-service';
 
 import { ProfilePage } from '../profile/profile';
+import { SpinnerPage } from '../spinner/spinner';
 
 @Component({
   selector: 'page-chat',
@@ -29,37 +32,43 @@ export class ChatPage {
                 private userS: UserService,
                 private discoverS: DiscoverService,
                 private storageS: StorageService,
-                private pushS: PushService) {
+                private pushS: PushService,
+                private settingsS: SettingsService,
+                private modalS: ModalService) {
         this.user = navParams.get('user');
         this.chat = navParams.get('chat');
     }
 
     ionViewDidEnter() {
+        /*if (!this.modalS.isActive) {
+            this.modalS.create(SpinnerPage);
+            this.modalS.present();
+        }*/
         this.scrollToBottom();
     }
 
     scrollToBottom() {
         console.log("Scrolling to bottom!");
         let dimensions = this.content.getContentDimensions();
-        // this.content.scrollToBottom(250);
         this.content.scrollTo(0, dimensions.scrollHeight, 250); //x, y, ms animation speed
     }
 
     ionViewWillLoad() {
-        this.chatS.observeMessagesIn(this.chat).subscribe(message => {
-            if (message['sender'] == this.user.id) {
-                message['position'] = 'left';
-            } else {
-                message['position'] = 'right';
+        this.chatS.observeMessagesIn(this.chat).subscribe(messages => {
+            var messageArr = [];
+            for (var key in messages) {
+                var message = messages[key];
+                if (message['sender'] == this.user.id) {
+                    message['position'] = 'left';
+                } else {
+                    message['position'] = 'right';
+                }
+                messageArr.push(message);
             }
-            if (this.messages) {
-                this.messages.push(message);
-            } else {
-                this.messages = [message];
-            }
-            this.messages.sort(function(a, b){
+            messageArr.sort(function(a, b){
                 return a.timestamp-b.timestamp;
             });
+            this.messages = messageArr;
             this.scrollToBottom();
         });
     }
@@ -213,7 +222,13 @@ export class ChatPage {
             this.chatS.sendAttachmentTo(this.user, url).then(url => {
                 console.log(url);
                 if (this.user.pushId) {
-                    this.pushS.push(this.userS.user.firstName + " sent an image.", this.user);
+                    this.settingsS.fetchUserSettings(this.user).then(settings => {
+                        if (settings.messages) {
+                            this.pushS.push(this.userS.user.firstName + " sent an image.", this.user);
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
                 }
             }).catch(error => {
                 console.log(error);
@@ -233,7 +248,13 @@ export class ChatPage {
             this.chatS.sendMessageTo(input, this.user).then(message => {
                 console.log('Message sent successfully!');
                 if (this.user.pushId) {
-                    this.pushS.push(input, this.user);
+                    this.settingsS.fetchUserSettings(this.user).then(settings => {
+                        if (settings.messages) {
+                            this.pushS.push(input, this.user);
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
                 }
             }).catch(error => {
                 console.log(error);

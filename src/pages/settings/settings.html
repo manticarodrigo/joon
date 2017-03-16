@@ -16,39 +16,32 @@
     <h6>Notifications</h6>
     <ion-item>
         <ion-label>New Match</ion-label>
-        <ion-toggle checked="true"></ion-toggle>
+        <ion-toggle [(ngModel)]="settings.matches" (ionChange)="updateSettings()"></ion-toggle>
     </ion-item>
         <ion-item>
         <ion-label>Messages</ion-label>
-        <ion-toggle checked="false"></ion-toggle>
+        <ion-toggle [(ngModel)]="settings.messages" (ionChange)="updateSettings()"></ion-toggle>
     </ion-item>
     <ion-item>
         <ion-label>Double Likes</ion-label>
-        <ion-toggle checked="true"></ion-toggle>
+        <ion-toggle [(ngModel)]="settings.doubleLikes" (ionChange)="updateSettings()"></ion-toggle>
     </ion-item>
     
+    <!--
     <h6>Legal</h6>
     <ion-item>
-        <ion-label>Licenses</ion-label>
-        <ion-toggle checked="false"></ion-toggle>
-    </ion-item>
-        <ion-item>
         <ion-label>Privacy Policy</ion-label>
         <ion-toggle checked="false"></ion-toggle>
-    </ion-item>
-    <ion-item>
-        <ion-label>Notifications</ion-label>
-        <ion-toggle checked="false"></ion-toggle>
-    </ion-item>
+    </ion-item> -->
     
     <h6>Account Settings</h6>
     <ion-item>
         <ion-label>Hide Account</ion-label>
-        <ion-toggle checked="false"></ion-toggle>
+        <ion-toggle checked="false" (ionChange)="hideUser()"></ion-toggle>
     </ion-item>
         <ion-item>
         <ion-label>Delete Account</ion-label>
-        <ion-toggle checked="false"></ion-toggle>
+        <ion-toggle checked="false" (ionChange)="hideUser()"></ion-toggle>
     </ion-item>
     
 </ion-content>

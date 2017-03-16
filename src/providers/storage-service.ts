@@ -22,6 +22,10 @@ export class StorageService {
         });
       });
     }
+
+    removeImageFor(uid, index) {
+        firebase.database().ref('/user_images/' + uid + '/' + index).remove();
+    }
     
     setProfileImageFor(uid, url): Promise<any> {
       console.log("Setting profile image url in DB...");

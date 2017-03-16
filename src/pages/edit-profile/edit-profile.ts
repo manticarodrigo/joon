@@ -62,6 +62,20 @@ export class EditProfilePage {
         this.popoverS.present();
     }
 
+    selectReligion() {
+        this.popoverS.create(PopoverPage);
+        this.popoverS.options = ['Christian', 'Catholic', 'Muslim (Sunni)', 'Muslim (Shiite)', 'Baha\'i', 'Jewish (Orthodox)', 'Jewish (Conservative)', 'Other'];
+        this.popoverS.popover.onDidDismiss(religion => {
+            if (religion) {
+                console.log("Religion selected!");
+                console.log(this.user.religion);
+                this.user.religion = religion;
+                console.log(this.user.religion);
+            }
+        });
+        this.popoverS.present();
+    }
+
     editProfileSubmit() {
         console.log("Save pressed!");
         let splitBDay = this.user.birthday.split('-');
@@ -183,6 +197,11 @@ export class EditProfilePage {
         }).catch(error => {
             console.log(error);
         });
+    }
+
+    deleteImage(index) {
+        this.storageS.removeImageFor(this.userS.user.id, index);
+        this.images[index] = null;
     }
 
 }

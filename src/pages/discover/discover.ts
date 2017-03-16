@@ -198,7 +198,7 @@ export class DiscoverPage {
         let currentCard = this.users.pop();
         this.undoHistory.push(currentCard);
         console.log(currentCard);
-        if (num < 7) {
+        if (num < 15) {
           this.discoverS.saw(currentCard).then(success => {
             this.discoverS.liked(currentCard).then(matched => {
               if (!this.toastSeen[1]) {
@@ -261,7 +261,7 @@ export class DiscoverPage {
         let currentCard = this.users.pop();
         this.undoHistory.push(currentCard);
         console.log(currentCard);
-        if (num < 7) {
+        if (num < 15) {
           this.discoverS.saw(currentCard).then(success => {
             this.discoverS.doubleLiked(currentCard).then(matched => {
               if (!this.toastSeen[2]) {

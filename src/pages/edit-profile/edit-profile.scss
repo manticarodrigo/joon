@@ -43,6 +43,20 @@ page-edit-profile {
             border: none;
             z-index: 1;
         }
+        .delete {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            padding: 6px;
+            width: 30px !important;
+            height: 30px !important;
+            min-width: 30px !important;
+            min-height: 30px !important;
+            border: none;
+            z-index: 1;
+            background: rgba(255,255,255,.9) !important;
+            border-radius: 50% !important;
+        }
         .right {
             display: flex;
             flex-direction: column;
@@ -127,6 +141,32 @@ page-edit-profile {
             bottom: 0;
             margin: auto;
             width: 25px;
+        }
+    }
+    .religion {
+        .label {
+            padding-left: 0;
+        }
+        .button {
+            font-family: 'Open Sans-Light', Helvetica, sans-serif;
+            font-size: 16px !important;
+            text-transform: capitalize;
+            color: color($colors, med);
+            border: 0.5px solid color($colors, secondary);
+            line-height: 40px;
+            width: 100% !important;
+            height: 70px !important;
+            .button-inner {
+                justify-content:flex-start;
+            }
+            img {
+                position: absolute;
+                right: 10px;
+                top: 0;
+                bottom: 0;
+                margin: auto;
+                width: 25px;
+            }
         }
     }
     .textarea {
