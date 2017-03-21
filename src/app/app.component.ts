@@ -33,7 +33,6 @@ import { PushService } from '../providers/push-service';
 })
 export class Joon {
     @ViewChild(Nav) nav: Nav;
-    isMenuOpen: boolean = false;
     rootPage: any = LoginPage;
     pages: Array<{title: string, component: any}>;
     
@@ -97,10 +96,9 @@ export class Joon {
         });
     }
     
-    menuToggled() {
-        // this.isMenuOpen = !(this.isMenuOpen);
-        // Enable sidemenu swipe gesture
-        // this.menu.swipeEnable(true, 'sidemenu');
+    closeMenu() {
+        // console.log("Pressed fixed content area!");
+        this.menu.close();
     }
     
     openPage(page) {

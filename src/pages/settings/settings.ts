@@ -18,7 +18,8 @@ export class SettingsPage {
         messages: true,
         doubleLikes: true
     };
-    
+    user: any;
+
     constructor(private navCtrl: NavController,
                 private menuCtrl: MenuController,
                 private alertCtrl: AlertController,
@@ -29,14 +30,20 @@ export class SettingsPage {
     }
 
     ionViewWillEnter() {
+        this.user = null;
         this.settingsS.fetchUserSettings(this.userS.user).then(settings => {
             this.settings = settings;
+            this.user = this.userS.user;
+        }).catch(error => {
+            console.log(error);
         });
     }
 
     updateSettings() {
         console.log("Setting toggled!");
-        this.settingsS.updateNotificationSettings(this.settings);
+        if (this.user) {
+            this.settingsS.updateNotificationSettings(this.settings);
+        }
     }
 
     hideUser() {

@@ -12,12 +12,13 @@ import { PopoverPage } from '../popover/popover';
   templateUrl: 'preferences.html'
 })
 export class PreferencesPage {
-  user = {
-    showAge: true,
-    lfm: null,
-    lff: null,
-    distance: 'global'
+  preferences = {
+      showAge: true,
+      lfm: true,
+      lff: true,
+      distance: 'global'
   };
+  user: any;
   
   constructor(private navCtrl: NavController,
               private userS: UserService,
@@ -27,19 +28,21 @@ export class PreferencesPage {
   }
 
   ionViewWillEnter() {
-    this.user = this.userS.user;
+    this.user = null;
+    this.userS.fetchUserPreferences(this.userS.user).then(preferences => {
+      this.preferences = preferences;
+      this.user = this.userS.user;
+    }).catch(error => {
+      console.log(error);
+    });
   }
 
-  toggledMen() {
-    console.log("Men toggled!");
-    console.log(this.user.lfm);
-    this.userS.updateUser(this.user).catch(error => { alert(error); });
-  }
-  
-  toggledWomen() {
-    console.log("Women toggled!");
-    console.log(this.user.lff);
-    this.userS.updateUser(this.user).catch(error => { alert(error); });
+  toggled() {
+    console.log("Toggled!");
+    console.log(this.preferences);
+    if (this.user) {
+      this.userS.updateUserPreferences(this.preferences);
+    }
   }
 
   selectDistance() {
@@ -48,19 +51,15 @@ export class PreferencesPage {
     this.popoverS.popover.onDidDismiss(distance => {
       if (distance) {
         console.log("Distance selected!");
-        console.log(this.user.distance);
-        this.user.distance = distance;
-        console.log(this.user.distance);
-        this.userS.updateUser(this.user).catch(error => { alert(error); });
+        console.log(this.preferences.distance);
+        this.preferences.distance = distance;
+        console.log(this.preferences.distance);
+        if (this.user) {
+          this.userS.updateUserPreferences(this.preferences);
+        }
       }
     });
     this.popoverS.present();
-  }
-
-  toggledShowAge() {
-    console.log("Show age toggled!");
-    console.log(this.user.showAge);
-    this.userS.updateUser(this.user).catch(error => { alert(error); });
   }
 
   resetDiscoverableUsers() {

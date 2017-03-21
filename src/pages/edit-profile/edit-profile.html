@@ -70,13 +70,13 @@
                 <ion-label>Height:</ion-label>
                 <ion-row>
                     <ion-col width-50>
-                        <button class="height" ion-button block outline (click)="selectFeet()">
+                        <button class="height" type="button" ion-button block outline (click)="selectFeet()">
                             {{ user.heightFt ? user.heightFt : 'Feet' }}
                             <img src="assets/down.png">
                         </button>
                     </ion-col>
                     <ion-col width-50>
-                        <button class="height" ion-button block outline (click)="selectInches()">
+                        <button class="height" type="button" ion-button block outline (click)="selectInches()">
                             {{ user.heightIn ? user.heightIn : 'Inches' }}
                             <img src="assets/down.png">
                         </button>
@@ -110,7 +110,7 @@
             <ion-label>Religion:</ion-label>
             <ion-item class="religion">
                 <!-- <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion" autocorrect="on"></ion-input> -->
-                <button ion-button block outline (click)="selectReligion()">
+                <button type="button" ion-button block outline (click)="selectReligion()">
                     {{ user.religion ? user.religion : 'Religion' }}
                     <img src="assets/down.png">
                 </button>

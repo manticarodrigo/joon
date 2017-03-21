@@ -14,6 +14,7 @@ import { PopoverPage } from '../popover/popover';
 })
 export class EditProfilePage {
     images: Array<any>;
+    keys: Array<any>;
     user: any;
     constructor(private navCtrl: NavController,
                 private actionSheetCtrl: ActionSheetController,
@@ -29,8 +30,16 @@ export class EditProfilePage {
     }
     
     fetchUserImages() {
-        this.storageS.fetchImagesFor(this.userS.user.id).then(urlList => {
+        this.storageS.fetchImagesFor(this.userS.user.id).then(snap => {
+            let urlList = [];
+            let keyList = [];
+            snap.forEach(snapshot => {
+                console.log(snapshot.key);
+                urlList.push(snapshot.val());
+                keyList.push(snapshot.key);
+            })
             this.images = urlList;
+            this.keys = keyList;
         });
     }
 
@@ -184,12 +193,12 @@ export class EditProfilePage {
         });
     }
     
-    uploadImage(index) {
+    uploadImage() {
         let env = this;
         this.presentPhotoOptions().then(imageData => {
             if (imageData) {
-                env.storageS.uploadImageFor(env.userS.user.id, imageData, index).then(url => {
-                    env.images[index] = url;
+                env.storageS.uploadImageFor(env.userS.user.id, imageData).then(url => {
+                    env.images.push(url);
                 }).catch(error => {
                     console.log(error);
                 });
@@ -200,7 +209,9 @@ export class EditProfilePage {
     }
 
     deleteImage(index) {
-        this.storageS.removeImageFor(this.userS.user.id, index);
+        var key = this.keys[index];
+        console.log("Deleting image with key:", key);
+        this.storageS.removeImageFor(this.userS.user.id, key);
         this.images[index] = null;
     }
 

@@ -56,7 +56,12 @@ export class ProfilePage {
     }
     
     fetchUserImages() {
-        this.storageS.fetchImagesFor(this.user.id).then(urlList => {
+        this.storageS.fetchImagesFor(this.user.id).then(snap => {
+            let urlList = [];
+            snap.forEach(snapshot => {
+                console.log(snapshot.key);
+                urlList.push(snapshot.val());
+            })
             this.images = urlList;
         });
     }

@@ -15,22 +15,31 @@ export class DiscoverService {
               private settingsS: SettingsService) {
   }
 
-  isDiscoverableTo(user1, user2, seenUIDs): boolean {
-    if (user1.id == user2.id)
-      return false;
-    if (seenUIDs && user2.id in seenUIDs)
-      return false;
-    if (user1.gender == 'male' && !user2.lfm)
-      return false;
-    if (user1.gender == 'female' && !user2.lff)
-      return false;
-    if (user2.gender == 'male' && !user1.lfm)
-      return false;
-    if (user2.gender == 'female' && !user1.lff)
-      return false;
-    if (user1.distance == 'national' && user1.country != user2.country)
-      return false;
-    return true;
+  isDiscoverableTo(user1, user2, seenUIDs): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      Promise.all([this.userS.fetchUserPreferences(user1), this.userS.fetchUserPreferences(user2)])
+      .then(data => {
+        let pref1 = data[0];
+        let pref2 = data[1];
+        if (!user2.id)
+          resolve(false);
+        if (user1.id == user2.id)
+          resolve(false);
+        if (seenUIDs && user2.id in seenUIDs)
+          resolve(false);
+        if (user1.gender == 'male' && !pref2.lfm)
+          resolve(false);
+        if (user1.gender == 'female' && !pref2.lff)
+          resolve(false);
+        if (user2.gender == 'male' && !pref1.lfm)
+          resolve(false);
+        if (user2.gender == 'female' && !pref1.lff)
+          resolve(false);
+        if (pref1.distance == 'national' && user1.country != user2.country)
+          resolve(false);
+        resolve(true);
+      });
+    });
   }
 
   fetchSeenUIDs(): Promise<any> {
@@ -60,7 +69,7 @@ export class DiscoverService {
   }
 
   fetchGlobalUsers(): Promise<any> {
-    let user = this.userS.user;
+    let currentUser = this.userS.user;
     let env = this;
     return new Promise((resolve, reject) => {
       Promise.all([this.userS.fetchAllUsers(), this.fetchSeenUIDs()])
@@ -71,13 +80,23 @@ export class DiscoverService {
 
         // this method for parsing out seenUIDs is not totally optimal
         // - better to remove keys when both are dictionaries
+        var userCount = 0;
+        allUsers.forEach(user => {
+          env.isDiscoverableTo(currentUser, user, seenUIDs).then(discoverable => {
+            console.log("User is discoverable:", discoverable);
 
-        allUsers.forEach(other => {
-          if (env.isDiscoverableTo(user, other, seenUIDs)) {
-            visibleUsers.push(other);
-          }
+            if (discoverable) {
+              visibleUsers.push(user);
+            }
+            userCount++;
+            if (userCount == allUsers.length) {
+              resolve(visibleUsers);
+            }
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
         });
-        resolve(visibleUsers);
       }).catch(error => {
         reject(error);
       });
@@ -85,20 +104,29 @@ export class DiscoverService {
   }
 
   fetchLocalUsers(users): Promise<any> {
-    let user = this.userS.user;
+    let currentUser = this.userS.user;
     let env = this;
     return new Promise((resolve, reject) => {
-     this.fetchSeenUIDs().then(seenUIDs => {
-          let visibleUsers = [];
-          users.forEach(other => {
-            if (env.isDiscoverableTo(user, other, seenUIDs)) {
-              visibleUsers.push(other);
+      this.fetchSeenUIDs().then(seenUIDs => {
+        var visibleUsers = [];
+        var userCount = 0;
+        users.forEach(user => {
+          env.isDiscoverableTo(currentUser, user, seenUIDs).then(discoverable => {
+            if (discoverable) {
+              visibleUsers.push(user);
             }
+            userCount++;
+            if (userCount == users.length) {
+              resolve(visibleUsers);
+            }
+          }).catch(error => {
+            console.log(error);
+            reject(error);
           });
-          resolve(visibleUsers);
-        }).catch(error => {
-          reject(error);
         });
+      }).catch(error => {
+        reject(error);
+      });
     });
   }
 
@@ -157,7 +185,7 @@ export class DiscoverService {
       this.liked(user.id).then(matched => {
         var data = {};
         data[user.id] = new Date().getTime();
-        let ref = firebase.database().ref('/double_liked_by/' + this.userS.user.id);
+        let ref = firebase.database().ref('/user_double_liked/' + this.userS.user.id);
         ref.update(data).then(() => {
           if (user.pushId) {
             this.settingsS.fetchUserSettings(user).then(settings => {
@@ -183,7 +211,7 @@ export class DiscoverService {
     return new Promise((resolve, reject) => {
       var now = new Date();
       var dayAgo = now.setDate(now.getDate() - 1);
-      let ref = firebase.database().ref('/user_liked/' + this.userS.user.id).limitToLast(15);
+      let ref = firebase.database().ref('/user_liked/' + this.userS.user.id).limitToLast(25);
       ref.once('value').then(snap => {
         console.log(snap.val());
         if (snap.exists()) {
@@ -206,6 +234,36 @@ export class DiscoverService {
       });
     });
   }
+
+  checkDailyDoubleLikes(): Promise<number> {
+    console.log("Checking daily likes...");
+    return new Promise((resolve, reject) => {
+      var now = new Date();
+      var dayAgo = now.setDate(now.getDate() - 1);
+      let ref = firebase.database().ref('/user_double_liked/' + this.userS.user.id).limitToLast(2);
+      ref.once('value').then(snap => {
+        console.log(snap.val());
+        if (snap.exists()) {
+          let val = snap.val();
+          var todayCount = 0;
+          for (var key in val) {
+            let timestamp = val[key];
+            if (timestamp > dayAgo) {
+              todayCount++;
+            }
+          }
+          resolve(todayCount);
+        } else {
+          console.log("User has not double liked anyone!");
+          resolve(0);
+        }
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
 
   checkForMatchWith(user): Promise<boolean> {
     console.log("Checking for match...");
@@ -359,7 +417,7 @@ export class DiscoverService {
           });
         })
 
-        let ref2 = firebase.database().ref('/double_liked_by/');
+        let ref2 = firebase.database().ref('/user_double_liked/');
         ref2.once('value').then(snapshots => {
           snapshots.forEach(snapshot => {
             if (!(snapshot.key in likedCounts)) {

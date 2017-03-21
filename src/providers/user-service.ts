@@ -128,4 +128,51 @@ export class UserService {
         });
     }
 
+    fetchUserPreferences(user): Promise<any> {
+      console.log("Getting user preferences with id: " + user.id);
+      return new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/user_preferences/' + user.id);
+          ref.once('value').then((snap) => {
+              if (snap.exists()) {
+                let val = snap.val();
+                console.log("Fetch returned user preferences:", val);
+                resolve(val);
+              } else {
+                  var preferences = {
+                    showAge: true,
+                    lfm: true,
+                    lff: true,
+                    distance: 'global'
+                };
+                if (user.gender == 'male') {
+                    preferences.lfm == false;
+                } else if (user.gender == 'female') {
+                    preferences.lff == false;
+                }
+                resolve(preferences);
+              }
+          }).catch(error => {
+              console.log(error);
+              reject(error);
+          });
+      });
+    }
+
+    updateUserPreferences(preferences): Promise<any> {
+      console.log("Updating current user preferences...");
+      return new Promise((resolve, reject) => {
+          let ref = firebase.database().ref('/user_preferences/' + this.user.id);
+          ref.update(preferences).then(data => {
+            console.log("User preferences saved to DB!");
+            return ref.once('value');
+        }).then(snapshot => {
+            console.log("User preferences returned from DB!");
+            resolve(snapshot.val());
+        }).catch(error => {
+            console.log(error);
+            reject(error);
+        });
+      });
+    }
+
 }

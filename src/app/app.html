@@ -1,4 +1,4 @@
-<ion-menu [content]="content" id="sidemenu" (click)="menuToggled()" (ionClose)="menuToggled()">
+<ion-menu [content]="content" id="sidemenu">
   <ion-header>
     <ion-toolbar>
       <ion-title></ion-title>
@@ -19,5 +19,5 @@
 </ion-menu>
 
 <!-- Disable swipe-to-go-back because it's poor UX to combine STGB with side menus -->
-<ion-nav [root]="rootPage" #content swipeBackEnabled="false">
+<ion-nav [root]="rootPage" #content swipeBackEnabled="false" (click)="closeMenu()">
 </ion-nav>

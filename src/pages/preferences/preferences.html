@@ -17,12 +17,12 @@
     <ion-grid>
         <ion-row>
             <ion-col width-50 class="relationship men">
-                <ion-label [style.color] = "user.lfm ? '#fff' : '#58595B'">Men</ion-label>
-                <ion-checkbox [(ngModel)]="user.lfm" (ionChange)="toggledMen()"></ion-checkbox>
+                <ion-label [style.color] = "preferences.lfm ? '#fff' : '#58595B'">Men</ion-label>
+                <ion-checkbox [(ngModel)]="preferences.lfm" (ionChange)="toggled()"></ion-checkbox>
             </ion-col>
             <ion-col width-50 class="relationship women">
-                <ion-label [style.color] = "user.lff ? '#fff' : '#58595B'">Women</ion-label>
-                <ion-checkbox [(ngModel)]="user.lff" (ionChange)="toggledWomen()"></ion-checkbox>
+                <ion-label [style.color] = "preferences.lff ? '#fff' : '#58595B'">Women</ion-label>
+                <ion-checkbox [(ngModel)]="preferences.lff" (ionChange)="toggled()"></ion-checkbox>
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -30,13 +30,13 @@
     <ion-label>Search Distance</ion-label>
     <ion-item class="borderless">
         <button class="distance" ion-button block outline (click)="selectDistance()">
-            {{ user.distance }}
+            {{ preferences.distance }}
             <img src="assets/down.png">
         </button>
     </ion-item>
     
     <ion-item class="borderless">
-        <ion-checkbox class="age" [(ngModel)]="user.showAge" (ionChange)="toggledShowAge()"></ion-checkbox>
+        <ion-checkbox class="age" [(ngModel)]="preferences.showAge" (ionChange)="toggled()"></ion-checkbox>
         <ion-label>Show Age</ion-label>
     </ion-item>
 

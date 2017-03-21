@@ -109,25 +109,30 @@ export class DiscoverPage {
       this.modalS.create(LoadingPage);
       this.modalS.present();
     }
-    if (this.userS.user.distance == 'local') {
-      env.locationS.getLocation().then(() => {
-          env.locationS.fetchNearbyKeys().then(keys => {
-            env.userS.fetchUsers(keys).then(users => {
-              env.discoverS.fetchLocalUsers(users).then(localUsers => {
-                for (var i in localUsers) {
-                  env.noUsers = false;
-                  var mutual = [];
-                  for (var key in localUsers[i].friends) {
-                    if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
-                      mutual.push(localUsers[i].friends[key]);
+    this.userS.fetchUserPreferences(this.userS.user).then(preferences => {
+      if (preferences.distance == 'local') {
+        env.locationS.getLocation().then(() => {
+            env.locationS.fetchNearbyKeys().then(keys => {
+              env.userS.fetchUsers(keys).then(users => {
+                env.discoverS.fetchLocalUsers(users).then(localUsers => {
+                  for (var i in localUsers) {
+                    env.noUsers = false;
+                    var mutual = [];
+                    for (var key in localUsers[i].friends) {
+                      if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
+                        mutual.push(localUsers[i].friends[key]);
+                      }
+                    }
+                    if (mutual.length > 0) {
+                      localUsers[i]['mutual'] = mutual.length;
                     }
                   }
-                  if (mutual.length > 0) {
-                    localUsers[i]['mutual'] = mutual.length;
-                  }
-                }
-                env.users = localUsers;
-                env.modalS.dismiss();
+                  env.users = localUsers;
+                  env.modalS.dismiss();
+                }).catch(error => {
+                  console.log(error);
+                  env.modalS.dismiss();
+                });
               }).catch(error => {
                 console.log(error);
                 env.modalS.dismiss();
@@ -140,32 +145,32 @@ export class DiscoverPage {
             console.log(error);
             env.modalS.dismiss();
           });
-        }).catch(error => {
-          console.log(error);
-          env.modalS.dismiss();
-        });
-    } else {
-      this.discoverS.fetchGlobalUsers().then(users => {
-        console.log("fetch returned visible users");
-        console.log(users);
-        for (var i in users) {
-          env.noUsers = false;
-          var mutual = [];
-          for (var key in users[i].friends) {
-            if (this.userS.user.friends.includes(users[i].friends[key])) {
-              mutual.push(users[i].friends[key]);
+      } else {
+        this.discoverS.fetchGlobalUsers().then(users => {
+          console.log("fetch returned visible users");
+          console.log(users);
+          for (var i in users) {
+            env.noUsers = false;
+            var mutual = [];
+            for (var key in users[i].friends) {
+              if (this.userS.user.friends.includes(users[i].friends[key])) {
+                mutual.push(users[i].friends[key]);
+              }
+            }
+            if (mutual.length > 0) {
+              users[i]['mutual'] = mutual.length;
             }
           }
-          if (mutual.length > 0) {
-            users[i]['mutual'] = mutual.length;
-          }
-        }
-        this.users = users;
-        this.modalS.dismiss()
-      }).catch(error => {
-        console.log(error);
-      });
-    }
+          this.users = users;
+          this.modalS.dismiss()
+        }).catch(error => {
+          console.log(error);
+        });
+      }
+    }).catch(error => {
+      console.log(error);
+      env.modalS.dismiss();
+    });
   }
 
   swipeLeft() {
@@ -198,7 +203,7 @@ export class DiscoverPage {
         let currentCard = this.users.pop();
         this.undoHistory.push(currentCard);
         console.log(currentCard);
-        if (num < 15) {
+        if (num < 25) {
           this.discoverS.saw(currentCard).then(success => {
             this.discoverS.liked(currentCard).then(matched => {
               if (!this.toastSeen[1]) {
@@ -257,11 +262,11 @@ export class DiscoverPage {
     console.log("Double liking...");
     console.log(this.users.length);
     if (this.users.length > 0) {
-      this.discoverS.checkDailyLikes().then(num => {
+      this.discoverS.checkDailyDoubleLikes().then(num => {
         let currentCard = this.users.pop();
         this.undoHistory.push(currentCard);
         console.log(currentCard);
-        if (num < 15) {
+        if (num < 2) {
           this.discoverS.saw(currentCard).then(success => {
             this.discoverS.doubleLiked(currentCard).then(matched => {
               if (!this.toastSeen[2]) {

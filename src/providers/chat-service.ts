@@ -173,29 +173,12 @@ export class ChatService {
         }
     }
 
-    newUserFor(chat) {
-        for (var uid in chat.users) {
-            if (uid != this.userS.user.id) {
-                this.userS.fetchUser(uid).then(user => {
-                    chat['user'] = user;
-                    if (this.chats) {
-                        this.chats.push(chat);
-                    } else {
-                        this.chats = [chat];
-                    }
-                }).catch(error => {
-                    console.log(error);
-                });
-            }
-         }
-    }
-
     observeChats() {
         console.log("Observing chats...");
-        this.fetchMatchedUsers().then(matchedUsers => {
-            this.matchedUsers = matchedUsers;
-            let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id).startAt(0);
-            ref.on('value', (snapshot) => {
+        let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id).startAt(0);
+        ref.on('value', (snapshot) => {
+            this.fetchMatchedUsers().then(matchedUsers => {
+                this.matchedUsers = matchedUsers;
                 let val = snapshot.val();
                 console.log("Chats returned from DB:", val);
                 var chats = [];
@@ -206,54 +189,56 @@ export class ChatService {
                         chats.push(chat);
                     } else {
                         console.log("Didn't find user for chat:", chat);
-                        this.newUserFor(chat);
                     }
                 }
                 this.zone.run(() => {
-                    this.chats = chats;
-                    this.fetchUnreadCount();
+                    this.fetchUnreadCountFor(this.updateTimeIn(chats));
                     console.log("Set chats: ", chats);
                 });
+            }).catch(error => {
+                console.log(error);
             });
-        }).catch(error => {
-            console.log(error);
         });
     }
 
-    updateTime() {
+    updateTimeIn(chats) {
         console.log("Updating time for chats...");
-        for (var key in this.chats) {
-            this.chats[key]['time'] = this.getTimeStringFrom(this.chats[key].timestamp);
+        for (var key in chats) {
+            console.log("Adding time property to chat:", chats[key]);
+            var chat = chats[key];
+            chat['time'] = this.getTimeStringFrom(chat.timestamp);
         }
-        this.chats.sort(function(a, b){
+        chats.sort(function(a, b) {
             return b.timestamp-a.timestamp;
         });
+        console.log(chats);
+        return chats;
     }
 
-    fetchUnreadCount() {
+    fetchUnreadCountFor(chats) {
         console.log("Fetching unread count for chats...");
         var chatCount = 0;
         var totalUnreadCount = 0;
-        for (var key in this.chats) {
-            this.fetchUnreadCountIn(this.chats[key]).then(unreadCount => {
+        for (var key in chats) {
+            this.fetchUnreadCountIn(chats[key]).then(unreadCount => {
                 if (unreadCount) {
-                    this.chats[key]['unreadCount'] = unreadCount;
+                    chats[key]['unreadCount'] = unreadCount;
                     totalUnreadCount += unreadCount;
                 }
                 chatCount++;
-                if (chatCount == this.chats.length) {
+                if (chatCount == chats.length) {
                     this.zone.run(() => {
+                        this.chats = chats;
                         this.unreadCount = totalUnreadCount;
-                        this.updateTime();
                     });
                 }
             }).catch(error => {
                 console.log(error);
                 chatCount++;
-                if (chatCount == this.chats.length) {
+                if (chatCount == chats.length) {
                     this.zone.run(() => {
+                        this.chats = chats;
                         this.unreadCount = totalUnreadCount;
-                        this.updateTime();
                     });
                 }
             });

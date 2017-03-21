@@ -8,11 +8,12 @@ export class StorageService {
     constructor() {
     }
     
-    updateImageFor(uid, url, index): Promise<any> {
+    updateImageFor(uid, url): Promise<any> {
       console.log("Uploading image to storage...");
       return new Promise((resolve, reject) => {
         var updates = {};
-        updates[index] = url;
+        let timestamp = new Date().getTime();
+        updates[timestamp] = url;
         firebase.database().ref('/user_images/' + uid).update(updates).then(success => {
             console.log("DB saved image url!");
             resolve(url);
@@ -23,8 +24,8 @@ export class StorageService {
       });
     }
 
-    removeImageFor(uid, index) {
-        firebase.database().ref('/user_images/' + uid + '/' + index).remove();
+    removeImageFor(uid, key) {
+        firebase.database().ref('/user_images/' + uid + '/' + key).remove();
     }
     
     setProfileImageFor(uid, url): Promise<any> {
@@ -46,11 +47,7 @@ export class StorageService {
             let ref = firebase.database().ref('/user_images/' + uid);
             ref.once('value').then((snap) => {
                 console.log("fetch returned user images");
-                let snapArr = [];
-                snap.forEach(snapshot => {
-                    snapArr.push(snapshot.val());
-                })
-                resolve(snapArr);
+                resolve(snap);
             }).catch(error => {
                 console.log(error);
                 reject(error);
@@ -58,13 +55,13 @@ export class StorageService {
         });
     }
     
-    uploadImageFor(uid, imageString, index): Promise<any> {
-      console.log("Uploading profile image...");
+    uploadImageFor(uid, imageString): Promise<any> {
+      console.log("Uploading image...");
       return new Promise((resolve, reject) => {
         var now = JSON.stringify(new Date());
         this.storageRef.child(uid + '/images/' + now + '.png').putString(imageString, 'base64', {contentType: 'image/png'}).then((snapshot) => {
             console.log("Image uploaded to storage!");
-            this.updateImageFor(uid, snapshot.downloadURL, index).then(url => {
+            this.updateImageFor(uid, snapshot.downloadURL).then(url => {
                 resolve(url);
             }).catch(error => {
                 console.log(error);

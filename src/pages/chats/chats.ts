@@ -17,7 +17,7 @@ export class ChatsPage {
     }
 
     ionViewDidEnter() {
-        this.chatS.updateTime();
+        this.chatS.updateTimeIn(this.chatS.chats);
     }
 
     userTapped(event, user) {
