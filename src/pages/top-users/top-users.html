@@ -3,7 +3,7 @@
         <button ion-button menuToggle>
             <ion-icon color="primary" name="menu"></ion-icon>
         </button>
-        <ion-title class="smaller">Most Popular Users In Your Area</ion-title>
+        <ion-title>Most Popular Users</ion-title>
         <ion-buttons end>
           <button ion-button icon-only (click)="presentInfo()">
             <ion-icon color="primary" name="ios-information-circle-outline"></ion-icon>
@@ -13,7 +13,7 @@
 </ion-header>
 
 <ion-content>
-    <ion-item class="location">
+    <ion-item class="location" *ngIf="globalUsers && globalUsers.length > 0">
         <ion-label class="location-label">Global</ion-label>
     </ion-item>
     <ion-grid>
@@ -28,7 +28,7 @@
             </ion-col>
         </ion-row>
     </ion-grid>
-    <ion-item class="location">
+    <ion-item class="location" *ngIf="localUsers && localUsers.length > 0">
         <ion-label>Local</ion-label>
     </ion-item>
     <ion-grid>

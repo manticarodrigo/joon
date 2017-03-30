@@ -8,9 +8,9 @@
         <button *ngIf="user.id == this.userS.user.id" color="primary" ion-button (click)="editProfile()">
             Edit
         </button>
-        <button *ngIf="user.id != this.userS.user.id" ion-button icon-only>
-            <img height="25" src="assets/empty.png"/>
-          </button>
+        <button *ngIf="user.id != this.userS.user.id" ion-button icon-only (click)="showOptions()">
+            <img height="25" src="assets/dots.png"/>
+        </button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>

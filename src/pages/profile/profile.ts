@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, ActionSheetController, AlertController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { StorageService } from '../../providers/storage-service';
@@ -16,8 +16,10 @@ export class ProfilePage {
     images: Array<any>;
     mutual: Array<any>;
     
-    constructor(public navCtrl: NavController,
+    constructor(private navCtrl: NavController,
                 private navParams: NavParams,
+                private actionSheetCtrl: ActionSheetController,
+                private alertCtrl: AlertController,
                 private userS: UserService,
                 private storageS: StorageService) {
         let user = this.navParams.get('user');
@@ -68,6 +70,53 @@ export class ProfilePage {
 
     editProfile() {
         this.navCtrl.push(EditProfilePage);
+    }
+
+    showOptions() {
+        let actionSheet = this.actionSheetCtrl.create({
+            title: 'What would you like to do?',
+            cssClass: 'action-sheet',
+            buttons: [
+                {
+                text: 'Report ' + this.user.firstName,
+                handler: () => {
+                    this.reportUser();
+                }
+                },{
+                text: 'Cancel',
+                role: 'cancel'
+                }
+            ]
+        });
+        actionSheet.present();
+    }
+
+    reportUser() {
+        let alert = this.alertCtrl.create({
+            title: 'Report ' + this.user.firstName,
+            inputs: [
+            {
+                name: 'message',
+                placeholder: 'Message'
+            }
+            ],
+            buttons: [
+            {
+                text: 'Cancel',
+                role: 'cancel',
+                handler: data => {
+                    console.log('Cancel clicked');
+                }
+            },
+            {
+                text: 'Submit',
+                handler: data => {
+                    this.userS.reportUserWith(this.user.id, data.message);
+                }
+            }
+            ]
+        });
+        alert.present();
     }
 
 }

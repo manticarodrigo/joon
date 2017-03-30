@@ -13,6 +13,7 @@ page-preferences {
     }
     .relationship {
         position: relative;
+        padding: 0;
         .label {
             position: absolute;
             top: calc(50% - 11px);
@@ -62,7 +63,7 @@ page-preferences {
         width: 100%;
     }
 
-    ion-grid {
+    .grid {
         padding: 0px;
     }
 

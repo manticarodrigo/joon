@@ -7,7 +7,7 @@ import { NavController } from 'ionic-angular';
 })
 export class InvitePage {
 
-  constructor(public navCtrl: NavController) {
+  constructor(private navCtrl: NavController) {
     
   }
 }

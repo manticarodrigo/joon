@@ -104,7 +104,7 @@ export class DiscoverPage {
     let env = this;
     let user = this.userS.user;
     this.modalS.user = this.userS.user;
-    this.modalS.message = "Finding people nearby...";
+    // this.modalS.message = "Finding people nearby...";
     if (!this.modalS.isActive) {
       this.modalS.create(LoadingPage);
       this.modalS.present();
@@ -113,30 +113,35 @@ export class DiscoverPage {
       if (preferences.distance == 'local') {
         env.locationS.getLocation().then(() => {
             env.locationS.fetchNearbyKeys().then(keys => {
-              env.userS.fetchUsers(keys).then(users => {
-                env.discoverS.fetchLocalUsers(users).then(localUsers => {
-                  for (var i in localUsers) {
-                    env.noUsers = false;
-                    var mutual = [];
-                    for (var key in localUsers[i].friends) {
-                      if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
-                        mutual.push(localUsers[i].friends[key]);
+              if (keys.length > 0) {
+                env.userS.fetchUsers(keys).then(users => {
+                  env.discoverS.fetchLocalUsers(users).then(localUsers => {
+                    for (var i in localUsers) {
+                      env.noUsers = false;
+                      var mutual = [];
+                      for (var key in localUsers[i].friends) {
+                        if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
+                          mutual.push(localUsers[i].friends[key]);
+                        }
+                      }
+                      if (mutual.length > 0) {
+                        localUsers[i]['mutual'] = mutual.length;
                       }
                     }
-                    if (mutual.length > 0) {
-                      localUsers[i]['mutual'] = mutual.length;
-                    }
-                  }
-                  env.users = localUsers;
-                  env.modalS.dismiss();
+                    env.users = localUsers;
+                    env.modalS.dismiss();
+                  }).catch(error => {
+                    console.log(error);
+                    env.modalS.dismiss();
+                  });
                 }).catch(error => {
                   console.log(error);
                   env.modalS.dismiss();
                 });
-              }).catch(error => {
-                console.log(error);
+              } else {
+                console.log("No nearby users found!");
                 env.modalS.dismiss();
-              });
+              }
             }).catch(error => {
               console.log(error);
               env.modalS.dismiss();
@@ -237,7 +242,7 @@ export class DiscoverPage {
         } else {
           let alert = this.alertCtrl.create({
             title: 'Out of likes!',
-            subTitle: 'Please come back in 24 hours.',
+            message: 'Please come back in 24 hours.',
             buttons: [
             {
                 text: 'Dismiss',
@@ -291,8 +296,8 @@ export class DiscoverPage {
           });
         } else {
           let alert = this.alertCtrl.create({
-            title: 'Out of likes!',
-            subTitle: 'Please come back in 24 hours.',
+            title: 'Out of double likes!',
+            message: 'Please come back in 24 hours.',
             buttons: [
             {
                 text: 'Dismiss',

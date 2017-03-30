@@ -5,8 +5,10 @@ import { UserService } from '../../providers/user-service';
 import { SettingsService } from '../../providers/settings-service';
 import { ChatService } from '../../providers/chat-service';
 import { AuthService } from '../../providers/auth-service';
+import { ModalService } from '../../providers/modal-service';
 
 import { LoginPage } from '../login/login';
+import { LegalPage } from '../legal/legal';
 
 @Component({
   selector: 'page-settings',
@@ -26,7 +28,8 @@ export class SettingsPage {
                 private userS: UserService,
                 private chatS: ChatService,
                 private settingsS: SettingsService,
-                private authS: AuthService) {
+                private authS: AuthService,
+                private modalS: ModalService) {
     }
 
     ionViewWillEnter() {
@@ -74,6 +77,11 @@ export class SettingsPage {
             ]
         });
         alert.present();
+    }
+
+    showPolicy() {
+        this.modalS.create(LegalPage);
+        this.modalS.present();
     }
 
 }

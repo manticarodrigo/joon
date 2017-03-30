@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, NavParams, ActionSheetController, AlertController, Content } from 'ionic-angular';
+import { NavController, NavParams, ActionSheetController, AlertController, LoadingController, Content } from 'ionic-angular';
 import { Camera, PhotoViewer } from 'ionic-native';
 
 import { ChatService } from '../../providers/chat-service';
@@ -11,7 +11,6 @@ import { SettingsService } from '../../providers/settings-service';
 import { ModalService } from '../../providers/modal-service';
 
 import { ProfilePage } from '../profile/profile';
-import { SpinnerPage } from '../spinner/spinner';
 
 @Component({
   selector: 'page-chat',
@@ -28,6 +27,7 @@ export class ChatPage {
                 private navParams: NavParams,
                 private actionSheetCtrl: ActionSheetController,
                 private alertCtrl: AlertController,
+                private loadingCtrl: LoadingController,
                 private chatS: ChatService,
                 private userS: UserService,
                 private discoverS: DiscoverService,
@@ -40,17 +40,16 @@ export class ChatPage {
     }
 
     ionViewDidEnter() {
-        /*if (!this.modalS.isActive) {
-            this.modalS.create(SpinnerPage);
-            this.modalS.present();
-        }*/
         this.scrollToBottom();
     }
 
     scrollToBottom() {
         console.log("Scrolling to bottom!");
-        let dimensions = this.content.getContentDimensions();
-        this.content.scrollTo(0, dimensions.scrollHeight, 250); //x, y, ms animation speed
+        let env = this;
+        setTimeout(() => {
+            let dimensions = env.content.getContentDimensions();
+            env.content.scrollTo(0, dimensions.scrollHeight, 250); //x, y, ms animation speed
+        }, 250);
     }
 
     ionViewWillLoad() {
@@ -109,6 +108,9 @@ export class ChatPage {
                 handler: () => {
                     this.showProfile();
                 }
+                },{
+                text: 'Cancel',
+                role: 'cancel'
                 }
             ]
         });
@@ -218,9 +220,14 @@ export class ChatPage {
     }
     uploadAttachment(imageData) {
         console.log('Attach pressed');
+        let loading = this.loadingCtrl.create({
+            content: 'Uploading image...'
+        });
+        loading.present();
         this.storageS.uploadAttachmentIn(this.chat.id, imageData).then(url => {
             this.chatS.sendAttachmentTo(this.user, url).then(url => {
                 console.log(url);
+                loading.dismiss();
                 if (this.user.pushId) {
                     this.settingsS.fetchUserSettings(this.user).then(settings => {
                         if (settings.messages) {
@@ -232,9 +239,11 @@ export class ChatPage {
                 }
             }).catch(error => {
                 console.log(error);
+                loading.dismiss();
             });
         }).catch(error => {
             console.log(error);
+            loading.dismiss();
         });
     }
     

@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { Nav, NavParams, Platform, MenuController } from 'ionic-angular';
+import { Nav, NavParams, Platform, MenuController, AlertController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { Storage } from '@ionic/storage';
 
@@ -37,7 +37,8 @@ export class Joon {
     pages: Array<{title: string, component: any}>;
     
     constructor(private platform: Platform,
-                private menu: MenuController,
+                private menuCtrl: MenuController,
+                private alertCtrl: AlertController,
                 private el: ElementRef,
                 private authS: AuthService,
                 private userS: UserService,
@@ -78,11 +79,6 @@ export class Joon {
                 storageBucket: "joon-702c0.appspot.com",
                 messagingSenderId: '516717911226'
             });
-            // Remove web facebook sdk for production mobile apps
-            this.fb.init({
-                appId: '713879188793156',
-                version: 'v2.8'
-            });
             // Check current user auth state
             this.storage.ready().then(() => {
                 console.log("Local storage ready. Fetching stored user...");
@@ -98,7 +94,7 @@ export class Joon {
     
     closeMenu() {
         // console.log("Pressed fixed content area!");
-        this.menu.close();
+        this.menuCtrl.close();
     }
     
     openPage(page) {
@@ -110,42 +106,46 @@ export class Joon {
     fetchCurrentUser() {
       // console.log('erasing storage for login debugging');
       // this.storage.clear().then(() => { // clear cache for login debugging
+        let env = this;
         this.storage.get('user').then((storedUser) => {
           if (!storedUser) {
             console.log('No stored user found!')
           } else if (storedUser.accessToken) {
-            this.modalS.user = storedUser;
-            this.modalS.message = "Reauthenticating current user...";
-            this.modalS.create(LoadingPage);
-            this.modalS.present();
+            env.modalS.user = storedUser;
+            // env.modalS.message = "Reauthenticating current user...";
+            env.modalS.create(LoadingPage);
+            env.modalS.present();
             console.log('Stored user found: ', storedUser);
             let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
-            this.authS.authenticateWith(facebookCredential).then(success => {
+            env.authS.authenticateWith(facebookCredential).then(success => {
               if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
                 // Current user signed into firebase
                 console.log("Current user: " + storedUser);
-                this.modalS.message = "Retreiving latest user data...";
-                this.userS.fetchUser(storedUser.id).then(user => {
+                // this.modalS.message = "Retreiving latest user data...";
+                env.userS.fetchUser(storedUser.id).then(user => {
                   // Current user updated
-                  this.userS.user = user;
-                  this.userS.updateCurrentUser(user);
-                  this.chatS.observeChats();
-                  this.nav.setRoot(DiscoverPage);
+                  user.accessToken = storedUser.accessToken;
+                  env.userS.user = user;
+                  env.userS.updateCurrentUser(user);
+                  env.chatS.observeChats();
+                  env.nav.setRoot(DiscoverPage);
                 }).catch(error => {
                   console.log(error);
-                  this.logoutApp();
-                  this.modalS.dismiss();
+                  env.logoutApp();
+                  env.modalS.dismiss();
+                  env.presentError(error);
                 });
               } else {
                 // No current user
-                console.log("Stored user does not match authenticated firebase user.");
-                this.logoutApp();
-                this.modalS.dismiss();
+                env.logoutApp();
+                env.modalS.dismiss();
+                env.presentError("Stored user does not match authenticated user.");
               }
             }).catch(error => {
               console.log(error);
-              this.logoutApp();
-              this.modalS.dismiss();
+              env.logoutApp();
+              env.modalS.dismiss();
+              env.presentError(error);
             });
           } else {
             console.log('No stored user found!');
@@ -154,10 +154,19 @@ export class Joon {
 
       // }); // clear cache for login debug
     }
+
+    presentError(message) {
+        let alert = this.alertCtrl.create({
+            title: 'Login Failed!',
+            message: message,
+            buttons: ['Dismiss']
+            });
+        alert.present();
+    }
     
     logoutApp() {
         this.nav.setRoot(LoginPage);
-        this.menu.close();
+        this.menuCtrl.close();
         this.chatS.stopObservingChats();
         this.userS.updateCurrentUser(null);
         this.authS.signOut();

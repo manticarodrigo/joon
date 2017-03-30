@@ -24,7 +24,7 @@ export class FeedbackPage {
           this.userS.sendFeedback(input);
           let alert = this.alertCtrl.create({
             title: 'Thank you!',
-            subTitle: 'Your message has been received.',
+            message: 'Your message has been received.',
             buttons: ['Dismiss']
           });
           alert.present();

@@ -36,7 +36,7 @@ export class TopUsersPage {
   presentInfo() {
     let alert = this.alertCtrl.create({
       title: 'Welcome to Top Users',
-      subTitle: 'This page features the top six people globally and locally (within 100 miles) based on likes and double likes.',
+      message: 'This page features the top six people globally and locally (within 100 miles) based on likes and double likes.',
       buttons: ['Dismiss']
     });
     alert.present();
@@ -64,7 +64,7 @@ export class TopUsersPage {
     let env = this;
     let user = this.userS.user;
     this.modalS.user = this.userS.user;
-    this.modalS.message = "Finding people nearby...";
+    // this.modalS.message = "Finding people nearby...";
     if (!this.modalS.isActive) {
       this.modalS.create(LoadingPage);
       this.modalS.present();

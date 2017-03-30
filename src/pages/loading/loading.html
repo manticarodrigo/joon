@@ -14,13 +14,11 @@
     Hi<span *ngIf="this.modalS.user.firstName">, {{ this.modalS.user.firstName }}</span>!
   </h1>
   <h6>Just a moment...</h6>
-  <div style="width:140px;margin:auto;">
-    <div class="avatar" *ngIf="this.modalS.user.photoURL">
-      <img [src]="this.modalS.user.photoURL">
-    </div>
+  <div class="load">
+    <img *ngIf="this.modalS.user.photoURL" [src]="this.modalS.user.photoURL">
   </div>
-  <div class="footer">
+  <div class="footer" *ngIf="this.modalS.message">
     <img src="assets/location.png">
-    <h6 *ngIf="this.modalS.message">{{ this.modalS.message }}</h6>
+    <h6>{{ this.modalS.message }}</h6>
   </div>
 </ion-content>

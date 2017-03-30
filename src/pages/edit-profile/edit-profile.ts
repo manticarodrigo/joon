@@ -1,12 +1,16 @@
 import { Component } from '@angular/core';
-import { NavController, ActionSheetController, AlertController } from 'ionic-angular';
+import { NavController, ActionSheetController, AlertController, LoadingController } from 'ionic-angular';
 import { Camera } from 'ionic-native';
 
 import { UserService } from '../../providers/user-service';
+import { FbService } from '../../providers/fb-service';
 import { StorageService } from '../../providers/storage-service';
 import { PopoverService } from '../../providers/popover-service';
+import { ModalService } from '../../providers/modal-service';
+import { HttpService } from '../../providers/http-service';
 
 import { PopoverPage } from '../popover/popover';
+import { PhotoSelectPage } from '../photo-select/photo-select';
 
 @Component({
   selector: 'page-edit-profile',
@@ -16,12 +20,17 @@ export class EditProfilePage {
     images: Array<any>;
     keys: Array<any>;
     user: any;
+
     constructor(private navCtrl: NavController,
                 private actionSheetCtrl: ActionSheetController,
                 private alertCtrl: AlertController,
+                private loadingCtrl: LoadingController,
                 private userS: UserService,
+                private fbS: FbService,
                 private storageS: StorageService,
-                private popoverS: PopoverService) {
+                private popoverS: PopoverService,
+                private modalS: ModalService,
+                private httpS: HttpService) {
         this.user = this.userS.user;
     }
     
@@ -105,7 +114,7 @@ export class EditProfilePage {
         
         let alert = this.alertCtrl.create({
             title: 'Done!',
-            subTitle: 'Your changes have been saved.',
+            message: 'Your changes have been saved.',
             buttons: ['Dismiss']
         });
         alert.present();
@@ -117,6 +126,17 @@ export class EditProfilePage {
             title: 'Select Image Source',
             cssClass: 'action-sheet',
             buttons: [
+                {
+                text: 'Facebook',
+                handler: () => {
+                    this.fetchFacebookPhotos().then(url => {
+                        resolve(url);
+                    }).catch(error => {
+                        console.log(error);
+                        reject(error);
+                    });
+                }
+                },
                 {
                 text: 'Photo Library',
                 handler: () => {
@@ -163,7 +183,7 @@ export class EditProfilePage {
                 encodingType: Camera.EncodingType.PNG,
                 targetWidth: 500,
                 targetHeight: 500,
-                saveToPhotoAlbum: true,
+                saveToPhotoAlbum: false,
                 correctOrientation: true
             };
             
@@ -176,16 +196,80 @@ export class EditProfilePage {
             });
         });
     }
+
+    fetchFacebookPhotos(): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let loading = this.loadingCtrl.create({
+                content: 'Fetching Facebook albums...'
+            });
+            loading.present();
+            this.fbS.callFacebookPhotoAPI().then(albums => {
+                loading.dismiss();
+                console.log(albums);
+                if (albums) {
+                    this.modalS.albums = albums;
+                    this.modalS.create(PhotoSelectPage);
+                    this.modalS.modal.onDidDismiss(url => {
+                        if (url) {
+                            let loading = this.loadingCtrl.create({
+                                content: 'Fetching image...'
+                            });
+                            loading.present();
+                            console.log("Fetching selected image file...");
+                            var img = new Image();
+                            img.setAttribute('crossOrigin', 'anonymous');
+                            img.onload = function () {
+                                var canvas = document.createElement("canvas");
+                                canvas.width = this.width;
+                                canvas.height = this.height;
+
+                                var ctx = canvas.getContext("2d");
+                                ctx.drawImage(this, 0, 0);
+                                
+                                let data = canvas.toDataURL("image/png");
+                                console.log(data);
+                                var base64String = data.split('base64,')[1];               
+                                console.log(base64String);
+                                resolve(base64String);
+                                loading.dismiss();
+                            };
+                            img.src = url;
+                        } else {
+                            resolve(null);
+                        }
+                    });
+                    this.modalS.present();
+                } else {
+                    let alert = this.alertCtrl.create({
+                        title: 'No albums found!',
+                        message: 'Please check your app permissions in Facebook settings and log in again.',
+                        buttons: ['Dismiss']
+                    });
+                    alert.present();
+                }
+            }).catch(error => {
+                loading.dismiss();
+                console.log(error);
+                reject(error);
+            });
+        });
+    }
     
     uploadProfileImage() {
         let env = this;
         this.presentPhotoOptions().then(imageData => {
             if (imageData) {
+                let loading = this.loadingCtrl.create({
+                    content: 'Uploading image...'
+                });
+                loading.present();
                 env.storageS.uploadProfileImageFor(env.userS.user.id, imageData).then(url => {
                     env.user['photoURL'] = url;
                     env.userS.updateCurrentUser(env.user);
+                    loading.dismiss();
                 }).catch(error => {
                     console.log(error);
+                    loading.dismiss();
                 });
             }
         }).catch(error => {
@@ -197,10 +281,16 @@ export class EditProfilePage {
         let env = this;
         this.presentPhotoOptions().then(imageData => {
             if (imageData) {
+                let loading = this.loadingCtrl.create({
+                    content: 'Uploading image...'
+                });
+                loading.present();
                 env.storageS.uploadImageFor(env.userS.user.id, imageData).then(url => {
                     env.images.push(url);
+                    loading.dismiss();
                 }).catch(error => {
                     console.log(error);
+                    loading.dismiss();
                 });
             }
         }).catch(error => {

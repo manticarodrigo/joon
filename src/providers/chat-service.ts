@@ -282,9 +282,10 @@ export class ChatService {
         return new Observable(observer => {
             let ref = firebase.database().ref('messages/' + chat.id);
             ref.on('value', (snapshot) => {
-                console.log(snapshot.val());
+                let val = snapshot.val();
+                console.log("Messages returned from DB:", val);
                 this.zone.run(() => {
-                    observer.next(snapshot.val());
+                    observer.next(val);
                 });
             });
         });

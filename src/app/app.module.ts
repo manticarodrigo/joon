@@ -3,29 +3,30 @@ import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { Joon } from './app.component';
 
 import { LoginPage } from '../pages/login/login';
+import { LegalPage } from '../pages/legal/legal';
 import { LoadingPage } from '../pages/loading/loading';
-import { SpinnerPage } from '../pages/spinner/spinner';
 import { DiscoverPage } from '../pages/discover/discover';
 import { MatchedPage } from '../pages/matched/matched';
 import { ProfilePage } from '../pages/profile/profile';
 import { EditProfilePage } from '../pages/edit-profile/edit-profile';
+import { PhotoSelectPage} from '../pages/photo-select/photo-select';
 import { TopUsersPage } from '../pages/top-users/top-users';
 import { PreferencesPage } from '../pages/preferences/preferences';
 import { PopoverPage } from '../pages/popover/popover';
 import { SettingsPage } from '../pages/settings/settings';
-import { HelpPage } from '../pages/help/help';
 import { FeedbackPage } from '../pages/feedback/feedback';
 import { InvitePage } from '../pages/invite/invite';
-import { FriendsPage } from '../pages/friends/friends';
 import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
 
+import { IonicStorageModule } from '@ionic/storage';
+import { HttpModule } from '@angular/http';
 import { SwingModule } from 'angular2-swing';
 
-import { Storage } from '@ionic/storage';
 import { Facebook, NativeStorage, OneSignal } from 'ionic-native';
 import { FacebookService } from 'ng2-facebook-sdk';
 import { AuthService } from '../providers/auth-service';
+import { FbService } from'../providers/fb-service';
 import { UserService } from '../providers/user-service';
 import { ModalService } from '../providers/modal-service';
 import { PopoverService } from '../providers/popover-service';
@@ -35,25 +36,25 @@ import { StorageService } from '../providers/storage-service';
 import { PushService } from '../providers/push-service';
 import { LocationService } from '../providers/location-service';
 import { SettingsService } from '../providers/settings-service';
+import { HttpService } from '../providers/http-service';
 
 @NgModule({
   declarations: [
     Joon,
     LoginPage,
+    LegalPage,
     LoadingPage,
-    SpinnerPage,
     DiscoverPage,
     MatchedPage,
     ProfilePage,
     EditProfilePage,
+    PhotoSelectPage,
     TopUsersPage,
     PreferencesPage,
     PopoverPage,
     SettingsPage,
-    HelpPage,
     FeedbackPage,
     InvitePage,
-    FriendsPage,
     ChatsPage,
     ChatPage
   ],
@@ -65,32 +66,34 @@ import { SettingsService } from '../providers/settings-service';
         backButtonIcon: 'ios-arrow-back',
         activator: 'none' 
     }),
+    IonicStorageModule.forRoot(),
+    HttpModule,
     SwingModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     Joon,
     LoginPage,
+    LegalPage,
     LoadingPage,
-    SpinnerPage,
     DiscoverPage,
     MatchedPage,
     ProfilePage,
     EditProfilePage,
+    PhotoSelectPage,
     TopUsersPage,
     PreferencesPage,
     PopoverPage,
     SettingsPage,
-    HelpPage,
     FeedbackPage,
     InvitePage,
-    FriendsPage,
     ChatsPage,
     ChatPage
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     AuthService,
+    FbService,
     UserService,
     ModalService,
     PopoverService,
@@ -100,11 +103,11 @@ import { SettingsService } from '../providers/settings-service';
     PushService,
     LocationService,
     SettingsService,
+    HttpService,
     Facebook,
     FacebookService,
     NativeStorage,
-    OneSignal,
-    Storage
+    OneSignal
    ]
 })
 export class AppModule {}

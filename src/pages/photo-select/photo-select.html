@@ -1,0 +1,26 @@
+<ion-header>
+  <ion-navbar>
+      <ion-buttons start>
+        <button ion-button (click)="dismiss()">
+            <img height="20" src="assets/delete.png"/>
+        </button>
+      </ion-buttons>
+    <ion-title>Select Photo</ion-title>
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content padding>
+  <ion-grid>
+      <ion-row wrap *ngFor="let album of this.modalS.albums">
+          <ion-item class="album">
+            <ion-label >{{ album.name }}</ion-label>
+          </ion-item>
+          <ion-col width-33 *ngFor="let url of album.urls" (click)="imgTapped(url)">
+              <div class="img" *ngIf="url">
+                  <img [src]="url">
+              </div>
+          </ion-col>
+      </ion-row>
+  </ion-grid>
+</ion-content>

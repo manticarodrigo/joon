@@ -8,6 +8,7 @@ export class ModalService {
   otherUser: any;
   message: any;
   isActive: boolean = false;
+  albums: Array<any>;
   constructor(public modalCtrl: ModalController) {
   }
 

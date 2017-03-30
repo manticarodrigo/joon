@@ -15,7 +15,8 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 
-/* regular */
+/* Regular */
+
 @font-face {
   font-family: 'Open Sans';
   font-style: normal;
@@ -23,7 +24,8 @@
   src: local('Open Sans'), local('OpenSans'), url(../assets/fonts/OpenSans-Regular.ttf) format('truetype');
 }
 
-/* light */
+/* Light */
+
 @font-face {
   font-family: 'Open Sans-Light';
   font-style: normal;
@@ -31,7 +33,7 @@
   src: local('Open Sans'), local('OpenSans'), url(../assets/fonts/OpenSans-Light.ttf) format('truetype');
 }
 
-/* Set font family */
+/* Header styles */
 
 h1 {
     font-family: $font-family-base !important;
@@ -95,6 +97,10 @@ strong {
 
 /* Navbar styles */
 
+.back-button {
+    margin-right: 0px;
+    padding-right: 0px;
+}
 .back-button-icon {
     color: color($colors, primary);
 }
@@ -110,11 +116,7 @@ strong {
 .toolbar-title {
     font-family: $font-family-base;
     color: color($colors, med);
-}
-
-.toolbar-content {
     text-align: center;
-    // margin-right: 25px;
 }
 
 .bar-button {
@@ -126,7 +128,29 @@ strong {
     background-image: none;
 }
 
+/* Alert styles */
+
+.alert-head {
+    text-align: center !important;
+}
+
+.alert-message {
+    font-family: $font-family-base !important;
+    text-align: center !important;
+}
+
+.alert-button-group {
+    justify-content: center !important;
+}
+
+.alert-button {
+    font-family: $font-family-base !important;
+    font-weight: 800 !important;
+    text-transform: capitalize !important;
+}
+
 /* Popover styles */
+
 .popover-content {
     box-shadow: none !important;
     border: 0.5px solid color($colors, secondary);
