@@ -158,11 +158,13 @@ export class FbService {
             console.log("rv has job");
             let nJobs = rv.work.length;
             if (nJobs >= 1) {
-              if (rv.work[0].position.name) {
-                rv.job = rv.work[0].position.name;
-              }
-              if (rv.work[0].employer.name) {
-                rv.company = rv.work[0].employer.name;
+              if (rv.work[0]) {
+                if (rv.work[0].position) {
+                  rv.job = rv.work[0].position.name;
+                }
+                if (rv.work[0].employer) {
+                  rv.company = rv.work[0].employer.name;
+                }
               }
             }
             delete rv.work;
