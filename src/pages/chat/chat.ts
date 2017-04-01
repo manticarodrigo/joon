@@ -18,6 +18,7 @@ import { ProfilePage } from '../profile/profile';
 })
 export class ChatPage {
     @ViewChild(Content) content: Content;
+    atBottom = false;
     chatInput = "";
     user: any;
     chat: any;
@@ -41,15 +42,20 @@ export class ChatPage {
 
     ionViewDidEnter() {
         this.scrollToBottom();
+        /*let dimensions = this.content.getContentDimensions();
+        this.content.onScrollElementTransitionEnd((event) => {
+            console.log(event);
+            if (this.content.scrollTop + dimensions.contentHeight > dimensions.scrollHeight) {
+                this.atBottom = true;
+            } else {
+                this.atBottom = false;
+            }
+        });*/
     }
-
     scrollToBottom() {
         console.log("Scrolling to bottom!");
-        let env = this;
-        setTimeout(() => {
-            let dimensions = env.content.getContentDimensions();
-            env.content.scrollTo(0, dimensions.scrollHeight, 250); //x, y, ms animation speed
-        }, 250);
+        let dimensions = this.content.getContentDimensions();
+        this.content.scrollTo(0, dimensions.scrollHeight, 250); //x, y, ms animation speed
     }
 
     ionViewWillLoad() {

@@ -24,10 +24,6 @@ export class PreferencesPage {
               private userS: UserService,
               private discoverS: DiscoverService,
               private popoverS: PopoverService) {
-
-  }
-
-  ionViewWillEnter() {
     this.user = null;
     this.userS.fetchUserPreferences(this.userS.user).then(preferences => {
       this.preferences = preferences;

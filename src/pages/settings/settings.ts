@@ -30,9 +30,6 @@ export class SettingsPage {
                 private settingsS: SettingsService,
                 private authS: AuthService,
                 private modalS: ModalService) {
-    }
-
-    ionViewWillEnter() {
         this.user = null;
         this.settingsS.fetchUserSettings(this.userS.user).then(settings => {
             this.settings = settings;

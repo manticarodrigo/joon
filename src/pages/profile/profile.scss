@@ -65,12 +65,12 @@ page-profile {
         text-align: center;
         text-transform: capitalize;
         img {
-            max-height: 75%;
-            max-width: 75%;
+            max-height: 100%;
+            max-width: 100%;
             border-radius: 50%;
             display: block;
             margin: auto;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             object-fit: cover;
         }
     }

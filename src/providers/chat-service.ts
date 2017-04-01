@@ -217,28 +217,29 @@ export class ChatService {
 
     fetchUnreadCountFor(chats) {
         console.log("Fetching unread count for chats...");
+        let env = this;
         var chatCount = 0;
         var totalUnreadCount = 0;
         for (var key in chats) {
-            this.fetchUnreadCountIn(chats[key]).then(unreadCount => {
+            var chat = chats[key];
+            env.fetchUnreadCountIn(chat).then(unreadCount => {
                 if (unreadCount) {
-                    chats[key]['unreadCount'] = unreadCount;
                     totalUnreadCount += unreadCount;
                 }
                 chatCount++;
                 if (chatCount == chats.length) {
-                    this.zone.run(() => {
-                        this.chats = chats;
-                        this.unreadCount = totalUnreadCount;
+                    env.zone.run(() => {
+                        env.chats = chats;
+                        env.unreadCount = totalUnreadCount;
                     });
                 }
             }).catch(error => {
                 console.log(error);
                 chatCount++;
                 if (chatCount == chats.length) {
-                    this.zone.run(() => {
-                        this.chats = chats;
-                        this.unreadCount = totalUnreadCount;
+                    env.zone.run(() => {
+                        env.chats = chats;
+                        env.unreadCount = totalUnreadCount;
                     });
                 }
             });
@@ -246,20 +247,18 @@ export class ChatService {
     }
 
     fetchUnreadCountIn(chat): Promise<number> {
-        console.log("Fetching unread count...");
+        console.log("Fetching unread count in...", chat);
         return new Promise((resolve, reject) => {
-            let userStamp: any;
-            for (var uid in chat.users) {
-                if (uid == this.userS.user.id) {
-                    userStamp = chat.users[uid];
-                }
-            }
+            let userStamp = chat.users[this.userS.user.id];
             let ref = firebase.database().ref('/messages/'+ chat.id).orderByChild('timestamp').startAt(userStamp);
             ref.once('value').then(snap => {
                 if (snap.exists()) {
                     console.log("Found unread count!");
                     console.log(snap.numChildren());
                     console.log(snap.val());
+                    if (snap.numChildren() > 0) {
+                        chat.unreadCount = snap.numChildren();
+                    }
                     resolve(snap.numChildren());
                 } else {
                     console.log("No unread count found!");

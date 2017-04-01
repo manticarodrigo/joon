@@ -6,6 +6,7 @@ import { UserService } from '../../providers/user-service';
 import { ChatService } from '../../providers/chat-service';
 import { ModalService } from '../../providers/modal-service';
 import { LocationService } from '../../providers/location-service';
+import { PaymentService } from '../../providers/payment-service';
 
 import { ChatsPage } from '../chats/chats';
 import { ChatPage } from '../chat/chat';
@@ -47,7 +48,8 @@ export class DiscoverPage {
               private userS: UserService,
               private chatS: ChatService,
               private modalS: ModalService,
-              private locationS: LocationService) {
+              private locationS: LocationService,
+              private paymentS: PaymentService) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
         return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
@@ -120,7 +122,7 @@ export class DiscoverPage {
                       env.noUsers = false;
                       var mutual = [];
                       for (var key in localUsers[i].friends) {
-                        if (this.userS.user.friends.includes(localUsers[i].friends[key])) {
+                        if (env.userS.user.friends.includes(localUsers[i].friends[key])) {
                           mutual.push(localUsers[i].friends[key]);
                         }
                       }
@@ -128,7 +130,14 @@ export class DiscoverPage {
                         localUsers[i]['mutual'] = mutual.length;
                       }
                     }
-                    env.users = localUsers;
+                    var existingUsers = [];
+                    for (var key in localUsers) {
+                      var user = users[key];
+                      if (user) {
+                        existingUsers.push(user);
+                      }
+                    }
+                    env.users = existingUsers;
                     env.modalS.dismiss();
                   }).catch(error => {
                     console.log(error);
@@ -151,14 +160,14 @@ export class DiscoverPage {
             env.modalS.dismiss();
           });
       } else {
-        this.discoverS.fetchGlobalUsers().then(users => {
+        env.discoverS.fetchGlobalUsers().then(users => {
           console.log("fetch returned visible users");
           console.log(users);
           for (var i in users) {
             env.noUsers = false;
             var mutual = [];
             for (var key in users[i].friends) {
-              if (this.userS.user.friends.includes(users[i].friends[key])) {
+              if (env.userS.user.friends.includes(users[i].friends[key])) {
                 mutual.push(users[i].friends[key]);
               }
             }
@@ -166,10 +175,18 @@ export class DiscoverPage {
               users[i]['mutual'] = mutual.length;
             }
           }
-          this.users = users;
-          this.modalS.dismiss()
+          var existingUsers = [];
+          for (var key in users) {
+            var user = users[key];
+            if (user) {
+              existingUsers.push(user);
+            }
+          }
+          env.users = existingUsers;
+          env.modalS.dismiss()
         }).catch(error => {
           console.log(error);
+          env.modalS.dismiss();
         });
       }
     }).catch(error => {
@@ -208,7 +225,7 @@ export class DiscoverPage {
         let currentCard = this.users.pop();
         this.undoHistory.push(currentCard);
         console.log(currentCard);
-        if (num < 25) {
+        if (num < 15 + this.paymentS.extraLikes) {
           this.discoverS.saw(currentCard).then(success => {
             this.discoverS.liked(currentCard).then(matched => {
               if (!this.toastSeen[1]) {
@@ -271,7 +288,7 @@ export class DiscoverPage {
         let currentCard = this.users.pop();
         this.undoHistory.push(currentCard);
         console.log(currentCard);
-        if (num < 2) {
+        if (num < 2 + this.paymentS.extraDoubleLikes) {
           this.discoverS.saw(currentCard).then(success => {
             this.discoverS.doubleLiked(currentCard).then(matched => {
               if (!this.toastSeen[2]) {

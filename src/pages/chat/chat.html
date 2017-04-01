@@ -46,6 +46,11 @@
             </div>
         </ion-item>
     </ion-list>
+    <ion-fab class="down" *ngIf="!atBottom">
+        <button ion-fab (click)="scrollToBottom()">
+            <img src="assets/down.png">
+        </button>
+    </ion-fab>
     -->
 </ion-content>
 <ion-footer class="chat-footer">

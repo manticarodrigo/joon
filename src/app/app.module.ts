@@ -18,6 +18,7 @@ import { FeedbackPage } from '../pages/feedback/feedback';
 import { InvitePage } from '../pages/invite/invite';
 import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
+import { PaymentPage } from '../pages/payment/payment';
 
 import { IonicStorageModule } from '@ionic/storage';
 import { HttpModule } from '@angular/http';
@@ -37,6 +38,7 @@ import { PushService } from '../providers/push-service';
 import { LocationService } from '../providers/location-service';
 import { SettingsService } from '../providers/settings-service';
 import { HttpService } from '../providers/http-service';
+import { PaymentService } from '../providers/payment-service';
 
 @NgModule({
   declarations: [
@@ -56,7 +58,8 @@ import { HttpService } from '../providers/http-service';
     FeedbackPage,
     InvitePage,
     ChatsPage,
-    ChatPage
+    ChatPage,
+    PaymentPage,
   ],
   imports: [
     IonicModule.forRoot(Joon, {
@@ -88,7 +91,8 @@ import { HttpService } from '../providers/http-service';
     FeedbackPage,
     InvitePage,
     ChatsPage,
-    ChatPage
+    ChatPage,
+    PaymentPage
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
@@ -104,6 +108,7 @@ import { HttpService } from '../providers/http-service';
     LocationService,
     SettingsService,
     HttpService,
+    PaymentService,
     Facebook,
     FacebookService,
     NativeStorage,

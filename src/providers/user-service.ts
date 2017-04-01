@@ -62,12 +62,14 @@ export class UserService {
       return new Promise((resolve, reject) => {
           let ref = firebase.database().ref('/users/' + uid);
           ref.once('value').then((snap) => {
-              let val = snap.val();
-              console.log("Fetch returned user:", val);
-              if (!val["photoURL"]) {
-                  val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
+              if (snap.exists()) {
+                let val = snap.val();
+                console.log("Fetch returned user:", val);
+                if (!val["photoURL"]) {
+                    val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
+                }
+                resolve(val);
               }
-              resolve(val);
           }).catch(error => {
               console.log(error);
               reject(error);
@@ -77,17 +79,17 @@ export class UserService {
 
     fetchUsers(uids): Promise<any> {
       console.log("Getting users with ids: " + JSON.stringify(uids));
-
       var promises = [];
-
       uids.forEach(uid => {
-        let promise = new Promise((resolve, reject) => {
-          let ref = firebase.database().ref('/users/' + uid);
-          ref.once('value').then(snapshot => {
-            resolve(snapshot.val());
-          });
-        });
-        promises.push(promise);
+          if (uid) {
+            let promise = new Promise((resolve, reject) => {
+                let ref = firebase.database().ref('/users/' + uid);
+                ref.once('value').then(snapshot => {
+                    resolve(snapshot.val());
+                });
+            });
+            promises.push(promise);
+          }
       });
 
       return Promise.all(promises);
@@ -145,9 +147,11 @@ export class UserService {
                     distance: 'global'
                 };
                 if (user.gender == 'male') {
-                    preferences.lfm == false;
+                    console.log("User is male, removing men from preferences by default.");
+                    preferences.lfm = false;
                 } else if (user.gender == 'female') {
-                    preferences.lff == false;
+                    console.log("User is female, removing women from preferences by default.");
+                    preferences.lff = false;
                 }
                 resolve(preferences);
               }

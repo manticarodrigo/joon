@@ -26,9 +26,6 @@ export class TopUsersPage {
               private discoverS: DiscoverService,
               private modalS: ModalService,
               private locationS: LocationService) {
-  }
-
-  ionViewWillEnter() {
     this.fetchGlobalTopUsers();
     this.fetchLocalTopUsers();
   }
@@ -51,16 +48,23 @@ export class TopUsersPage {
       // since each query is passed seperately to Promise.all,
       // and the results array contains the result in the same order,
       // there should be no need to re-sort
-      console.log("fetch returned top users");
+      console.log("Global fetch returned top users");
       console.log(users);
-      this.globalUsers = users;
+      var existingUsers = [];
+      for (var key in users) {
+        var user = users[key];
+        if (user) {
+          existingUsers.push(user);
+        }
+      }
+      this.globalUsers = existingUsers;
     }).catch(error => {
-      alert(error);
+      console.log("Global fetch returned error:", error);
     });
   }
 
   fetchLocalTopUsers() {
-    console.log("Fetching global top users");
+    console.log("Fetching local top users");
     let env = this;
     let user = this.userS.user;
     this.modalS.user = this.userS.user;
@@ -87,7 +91,14 @@ export class TopUsersPage {
           });
           return this.userS.fetchUsers(localTopIds);
         }).then(users => {
-          env.localUsers = users;
+          var existingUsers = [];
+          for (var key in users) {
+            var user = users[key];
+            if (user) {
+              existingUsers.push(user);
+            }
+          }
+          env.localUsers = existingUsers;
           env.modalS.dismiss();
         }).catch(error => {
           console.log(error);

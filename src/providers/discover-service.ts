@@ -27,10 +27,10 @@ export class DiscoverService {
           resolve(false);
         if (seenUIDs && user2.id in seenUIDs)
           resolve(false);
-        if (user1.gender == 'male' && !pref2.lfm)
+        /*if (user1.gender == 'male' && !pref2.lfm)
           resolve(false);
         if (user1.gender == 'female' && !pref2.lff)
-          resolve(false);
+          resolve(false);*/
         if (user2.gender == 'male' && !pref1.lfm)
           resolve(false);
         if (user2.gender == 'female' && !pref1.lff)
@@ -211,7 +211,7 @@ export class DiscoverService {
     return new Promise((resolve, reject) => {
       var now = new Date();
       var dayAgo = now.setDate(now.getDate() - 1);
-      let ref = firebase.database().ref('/user_liked/' + this.userS.user.id).limitToLast(25);
+      let ref = firebase.database().ref('/user_liked/' + this.userS.user.id).orderByKey().startAt(dayAgo);
       ref.once('value').then(snap => {
         console.log(snap.val());
         if (snap.exists()) {
@@ -240,7 +240,7 @@ export class DiscoverService {
     return new Promise((resolve, reject) => {
       var now = new Date();
       var dayAgo = now.setDate(now.getDate() - 1);
-      let ref = firebase.database().ref('/user_double_liked/' + this.userS.user.id).limitToLast(2);
+      let ref = firebase.database().ref('/user_double_liked/' + this.userS.user.id).orderByKey().startAt(dayAgo);
       ref.once('value').then(snap => {
         console.log(snap.val());
         if (snap.exists()) {
@@ -408,24 +408,30 @@ export class DiscoverService {
       ref.once('value').then(snapshots => {
         let likedCounts = {};
         snapshots.forEach(snapshot => {
-          snapshot.forEach(liked => {
-            if (!(liked.key in likedCounts)) {
-              likedCounts[liked.key] = 0;
-            }
-            console.log("adding 1 for " + liked.key);
-            likedCounts[liked.key] += 1;
-          });
+          if (snapshot.exists()) {
+            snapshot.forEach(liked => {
+              if (liked) {
+                if (!(liked.key in likedCounts)) {
+                  likedCounts[liked.key] = 0;
+                }
+                console.log("adding 1 for " + liked.key);
+                likedCounts[liked.key] += 1;
+              }
+            });
+          }
         })
 
         let ref2 = firebase.database().ref('/user_double_liked/');
         ref2.once('value').then(snapshots => {
           snapshots.forEach(snapshot => {
-            if (!(snapshot.key in likedCounts)) {
-              likedCounts[snapshot.key] = 0;
+            if (snapshot) {
+              if (!(snapshot.key in likedCounts)) {
+                likedCounts[snapshot.key] = 0;
+              }
+              let count = snapshot.numChildren();
+              console.log("adding extra " + count + " for " + snapshot.key);
+              likedCounts[snapshot.key] += count;
             }
-            let count = snapshot.numChildren();
-            console.log("adding extra " + count + " for " + snapshot.key);
-            likedCounts[snapshot.key] += count;
           });
 
           console.log("liked Counts: ");
@@ -445,7 +451,6 @@ export class DiscoverService {
               return 0;
             }
           });
-
           resolve(userIdArr);
         }).catch(error => {
           reject(error);

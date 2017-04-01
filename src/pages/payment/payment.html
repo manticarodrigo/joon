@@ -1,0 +1,22 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Out of likes!</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding text-center>
+  <h3>Purchase Likes</h3>
+  <button ion-button *ngIf="!products" (click)="loadProducts()">
+    Load Products
+  </button>
+  <button ion-button *ngFor="let product of products" (click)="buy(product.productId)">
+    {{ product.title }} - {{ product.price }}
+  </button>
+  <h3>Restore Purchases</h3>
+  <button ion-button (click)="restore()">
+    Restore
+  </button>
+</ion-content>

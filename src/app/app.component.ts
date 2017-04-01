@@ -1,25 +1,18 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { Nav, NavParams, Platform, MenuController, AlertController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { Storage } from '@ionic/storage';
 
 import firebase from 'firebase';
-import { FacebookService, FacebookInitParams } from 'ng2-facebook-sdk';
 
 import { LoginPage } from '../pages/login/login';
 import { LoadingPage } from '../pages/loading/loading';
 import { DiscoverPage } from '../pages/discover/discover';
 import { ProfilePage } from '../pages/profile/profile';
-import { EditProfilePage } from '../pages/edit-profile/edit-profile';
 import { TopUsersPage } from '../pages/top-users/top-users';
 import { PreferencesPage } from '../pages/preferences/preferences';
 import { SettingsPage } from '../pages/settings/settings';
-import { HelpPage } from '../pages/help/help';
 import { FeedbackPage } from '../pages/feedback/feedback';
-import { InvitePage } from '../pages/invite/invite';
-import { FriendsPage } from '../pages/friends/friends';
-import { ChatsPage } from '../pages/chats/chats';
-import { ChatPage } from '../pages/chat/chat';
 
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
@@ -39,14 +32,12 @@ export class Joon {
     constructor(private platform: Platform,
                 private menuCtrl: MenuController,
                 private alertCtrl: AlertController,
-                private el: ElementRef,
                 private authS: AuthService,
                 private userS: UserService,
                 private chatS: ChatService,
                 private discoverS: DiscoverService,
                 private modalS: ModalService,
                 private pushS: PushService,
-                private fb: FacebookService,
                 private storage: Storage) {
 
         this.initializeApp();
@@ -60,7 +51,7 @@ export class Joon {
           { title: 'App Settings', component: SettingsPage },
           //{ title: 'Help & Support', component: HelpPage },
           { title: 'Feedback', component: FeedbackPage },
-          //{ title: 'Invite A Friend to Joon', component: InvitePage }
+          // { title: 'Invite A Friend to Joon', component: InvitePage }
 
         ];
     }
