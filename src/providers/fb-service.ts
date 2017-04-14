@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { Facebook } from 'ionic-native';
-import { FacebookService, FacebookLoginResponse } from 'ng2-facebook-sdk';
+import { FacebookService } from 'ng2-facebook-sdk';
 
 @Injectable()
 export class FbService {

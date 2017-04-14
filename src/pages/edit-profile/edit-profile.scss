@@ -71,6 +71,21 @@ page-edit-profile {
             margin: auto;
         }
     }
+    .instagram {
+        position: relative;
+        .input {
+            .text-input {
+                left: 20px;
+            }
+        }
+        p {
+            z-index: 2;
+            position: absolute;
+            top: 42px;
+            left: 7px;
+            color: color($colors, primary);
+        }
+    }
     .input {
         height: 70px;
         border: 0.5px solid color($colors, secondary);
@@ -81,9 +96,6 @@ page-edit-profile {
             left: 15px;
             margin: auto;
         }
-    }
-    #insta {
-        //border-bottom: 1px solid color($colors, secondary);
     }
     .anatomy {
         .radio {

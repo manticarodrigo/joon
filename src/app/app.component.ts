@@ -47,7 +47,7 @@ export class Joon {
           { title: 'Discover', component: DiscoverPage },
           { title: 'My Profile', component: ProfilePage },
           { title: 'Top Users', component: TopUsersPage },
-          { title: 'Discovery Preferences', component: PreferencesPage },
+          { title: 'Discover Preferences', component: PreferencesPage },
           { title: 'App Settings', component: SettingsPage },
           //{ title: 'Help & Support', component: HelpPage },
           { title: 'Feedback', component: FeedbackPage },

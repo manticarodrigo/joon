@@ -4,7 +4,6 @@ import { Observable } from "rxjs/Observable";
 import firebase from 'firebase';
 
 import { UserService } from './user-service';
-import { DiscoverService } from './discover-service';
 
 @Injectable()
 export class ChatService {
@@ -131,26 +130,34 @@ export class ChatService {
             ref.once('value').then(snapshot => {
                 console.log('Fetched user matches:');
                 console.log(snapshot.val());
-                let val = snapshot.val();
-                var users = [];
-                var userCount = 0;
-                for (var uid in val) {
-                    this.userS.fetchUser(uid).then(user => {
-                        users.push(user);
-                        userCount++
-                        let numUsers = snapshot.numChildren();
-                        if (userCount == numUsers) {
-                            console.log("Fetch returned matched users:", users);
-                            resolve(users);
-                        }
-                    }).catch(error => {
-                        console.log(error);
-                        let numUsers = snapshot.numChildren();
-                        if (userCount == numUsers) {
-                            console.log("Fetch returned matched users:", users);
-                            resolve(users);
-                        }
-                    });
+                if (snapshot.exists()) {
+                    let val = snapshot.val();
+                    var users = [];
+                    var userCount = 0;
+                    for (var uid in val) {
+                        this.userS.fetchUser(uid)
+                        .then(user => {
+                            users.push(user);
+                            userCount++
+                            let numUsers = snapshot.numChildren();
+                            if (userCount == numUsers) {
+                                console.log("Fetch returned matched users:", users);
+                                resolve(users);
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                            userCount++;
+                            let numUsers = snapshot.numChildren();
+                            if (userCount == numUsers) {
+                                console.log("Fetch returned matched users:", users);
+                                resolve(users);
+                            }
+                        });
+                    }
+                } else {
+                    console.log("Fetch did not return matched users!");
+                    resolve(null);
                 }
             }).catch(error => {
                 console.log(error);
@@ -177,13 +184,14 @@ export class ChatService {
         console.log("Observing chats...");
         let ref = firebase.database().ref('/chats/').orderByChild('users/' + this.userS.user.id).startAt(0);
         ref.on('value', (snapshot) => {
+            let val = snapshot.val();
+            console.log("Chats returned from DB:", val);
             this.fetchMatchedUsers().then(matchedUsers => {
                 this.matchedUsers = matchedUsers;
-                let val = snapshot.val();
-                console.log("Chats returned from DB:", val);
                 var chats = [];
                 for (var key in val) {
                     var chat = val[key];
+                    console.log(chat);
                     if (this.userFor(chat)) {
                         chat['user'] = this.userFor(chat);
                         chats.push(chat);
@@ -250,7 +258,10 @@ export class ChatService {
         console.log("Fetching unread count in...", chat);
         return new Promise((resolve, reject) => {
             let userStamp = chat.users[this.userS.user.id];
-            let ref = firebase.database().ref('/messages/'+ chat.id).orderByChild('timestamp').startAt(userStamp);
+            let ref = firebase.database().ref('/messages/'+ chat.id)
+            .orderByChild('timestamp')
+            .startAt(userStamp);
+            
             ref.once('value').then(snap => {
                 if (snap.exists()) {
                     console.log("Found unread count!");

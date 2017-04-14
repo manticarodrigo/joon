@@ -1,22 +1,50 @@
 <ion-header>
-
   <ion-navbar>
+    <ion-buttons start>
+      <button ion-button (click)="dismiss()">
+          <img height="20" src="assets/delete.png"/>
+      </button>
+    </ion-buttons>
     <ion-title>Out of likes!</ion-title>
   </ion-navbar>
 
 </ion-header>
 
-
 <ion-content padding text-center>
-  <h3>Purchase Likes</h3>
-  <button ion-button *ngIf="!products" (click)="loadProducts()">
-    Load Products
-  </button>
-  <button ion-button *ngFor="let product of products" (click)="buy(product.productId)">
-    {{ product.title }} - {{ product.price }}
-  </button>
-  <h3>Restore Purchases</h3>
-  <button ion-button (click)="restore()">
-    Restore
-  </button>
+  <ion-grid>
+    <ion-row>
+        <ion-col width-50>
+          <ion-label>Likes</ion-label>
+          <div class="avatar" [ngClass]="{'out': likesLeft <= 0 }">
+            <h3>{{ likesLeft }}</h3>
+          </div>
+        </ion-col>
+        <ion-col width-50>
+          <ion-label>Double Likes</ion-label>
+          <div class="avatar" [ngClass]="{'out': doubleLikesLeft <= 0 }">
+            <h3>{{ doubleLikesLeft }}</h3>
+          </div>
+        </ion-col>
+    </ion-row>
+  </ion-grid>
+  <div class="center">
+    <h3>Purchase Likes</h3>
+    <button ion-button *ngIf="!products" (click)="loadProducts()">
+      Load Products
+    </button>
+    <div class="products" *ngFor="let product of products">
+      <button ion-button *ngIf="!this.paymentS.restored" (click)="subscribe(product.productId)">
+        {{ product.title }} - {{ product.price }}
+      </button>
+      <button ion-button *ngIf="this.paymentS.restored" (click)="subscribe(product.productId)">
+        Manage Subscription
+      </button>
+      <p>{{ product.description }}</p>
+    </div>
+    <!--
+    <button ion-button *ngIf="!this.paymentS.restored" (click)="restore()">
+      Restore Purchases
+    </button>
+    -->
+  </div>
 </ion-content>

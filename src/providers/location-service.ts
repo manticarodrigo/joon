@@ -95,9 +95,7 @@ export class LocationService {
 
       var keyEntered = geoQuery.on("key_entered", (key, location, distance) => {
         console.log('Found ' + key + ', ' + distance + ' km away at coordinate:', location);
-        if (key != env.userS.user.id) {
-          nearbyKeys.push(key);
-        }
+        nearbyKeys.push(key);
       });
 
       geoQuery.on("ready", function() {

@@ -23,6 +23,7 @@ export class ChatPage {
     user: any;
     chat: any;
     messages: Array<any>;
+    unmatching = false;
 
     constructor(private navCtrl: NavController,
                 private navParams: NavParams,
@@ -80,7 +81,9 @@ export class ChatPage {
 
     ionViewWillUnload() {
         this.chatS.stopObservingMessagesIn(this.chat);
-        this.chatS.updateUserActivityIn(this.chat);
+        if (!this.unmatching) {
+            this.chatS.updateUserActivityIn(this.chat);
+        }
     }
 
     showProfile() {
@@ -138,6 +141,9 @@ export class ChatPage {
                 text: 'Unmatch',
                 handler: data => {
                     this.discoverS.unsetMatchWith(this.user).then(success => {
+                        this.unmatching = true;
+                        this.chatS.stopObservingChats();
+                        this.chatS.observeChats();
                         this.navCtrl.pop();
                     }).catch(error => {
                         console.log(error);

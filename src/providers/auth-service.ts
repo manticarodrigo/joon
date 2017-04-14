@@ -29,8 +29,8 @@ export class AuthService {
       console.log("Starting auth...");
       var env = this;
       return new Promise((resolve, reject) => {
-        this.fbS.facebookLogin().then(response => {
-          this.firebaseAuth(response).then(user => {
+        env.fbS.facebookLogin().then(response => {
+          env.firebaseAuth(response).then(user => {
             resolve(user);
           }).catch(error => {
             console.log(error);
@@ -124,38 +124,39 @@ export class AuthService {
 
     hasSearch(): Promise<boolean> {
       let uid = this.userS.user.id;
-      let ref = firebase.database().ref('/users/' + uid);
+      let ref = firebase.database().ref('/user_preferences/' + uid);
       return new Promise((resolve, reject) => {
         ref.once('value')
         .then(snapshot => {
           resolve(snapshot.hasChild('lff') && snapshot.hasChild('lfm'));
-        }).catch(error => { reject(error); });
+        })
+        .catch(error => { reject(error); });
       });
     }
 
     createSearch(): firebase.Promise<any> {
       let user = this.userS.user;
-      return firebase.database().ref('/users/' + user.id).update({
-        distance: 'global',
+      return firebase.database().ref('/user_preferences/' + user.id).update({
+        distance: 'national',
         lff: (user.gender == 'male'),
-        lfm: (user.gender == 'female')
+        lfm: (user.gender == 'female'),
+        showAge: true
       });
     }
 
     ensureSearch(): Promise<boolean> {
-      console.log('ensuring presence of search');
-      let uid = this.userS.user.id;
+      console.log('Ensuring presence of search...');
       return new Promise((resolve, reject) => {
         this.hasSearch()
         .then(hasSearch => {
           if (hasSearch) {
-            console.log('user search already exists');
+            console.log('User search already exists!');
             resolve(true);
           } else {
-            console.log('user search does not exist, creating')
+            console.log('User search does not exist, creating...')
             this.createSearch()
             .then(() => { 
-              console.log('user search created')
+              console.log('User search created!')
               resolve(true); 
             }).catch(error => { reject(error); });
           }
@@ -178,7 +179,7 @@ export class AuthService {
               console.log("DB update returned data");
               returnedUser["firebaseId"] = firebaseUID;
               if (!returnedUser.photoURL) {
-                returnedUser["photoURL"] = "https://graph.facebook.com/" + facebookUID + "/picture?type=large";
+                returnedUser["photoURL"] = "https://graph.facebook.com/" + facebookUID + "/picture?type=large&width=600&height=600";
               }
               resolve(returnedUser);
             }).catch(error => {

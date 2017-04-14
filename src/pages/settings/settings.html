@@ -34,12 +34,18 @@
     
     <h6>Account Settings</h6>
     <ion-item>
-        <ion-label>Hide Account</ion-label>
-        <ion-toggle checked="false" (ionChange)="hideUser()"></ion-toggle>
+        <ion-label><a (click)="hideUser()">Hide Account</a></ion-label>
     </ion-item>
-        <ion-item>
-        <ion-label>Delete Account</ion-label>
-        <ion-toggle checked="false" (ionChange)="hideUser()"></ion-toggle>
+    <ion-item>
+        <ion-label><a (click)="hideUser()">Delete Account</a></ion-label>
+    </ion-item>
+
+    <h6>App Info</h6>
+    <ion-item>
+        <ion-label>Version 1.0.4</ion-label>
+    </ion-item>
+    <ion-item>
+        <ion-label>Joon Dating Inc, All Rights Reserved</ion-label>
     </ion-item>
     
 </ion-content>

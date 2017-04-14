@@ -42,14 +42,20 @@ page-profile {
         margin-top: 0px;
         text-align: center;
         text-transform: capitalize;
+        color: color($colors, med);
     }
     
     h2 {
         text-transform: capitalize;
+        color: color($colors, med);
     }
     
     h5 {
         color: color($colors, primary);
+    }
+
+    h6 {
+        color: color($colors, secondary);
     }
     
     .middle-section .item-inner {
@@ -61,16 +67,39 @@ page-profile {
     }
     
     .mutual {
-        padding: 20px 40px;;
-        text-align: center;
-        text-transform: capitalize;
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        height: 0px;
+        padding-top:100%;
         img {
-            max-height: 100%;
-            max-width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 5px;
+            height: 100%;
+            width: 100%;
             border-radius: 50%;
-            display: block;
             margin: auto;
-            margin-bottom: 5px;
+            object-fit: cover;
+        }
+    }
+
+    .avatar {
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        height: 0px;
+        padding-top:100%;
+        img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 5px;
+            height: 100%;
+            width: 100%;
+            border-radius: 50%;
+            margin: auto;
             object-fit: cover;
         }
     }

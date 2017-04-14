@@ -3,27 +3,44 @@ import { InAppPurchase } from 'ionic-native';
 
 @Injectable()
 export class PaymentService {
-  extraLikes = 0;
-  extraDoubleLikes = 0;
+  restored = false;
   
   constructor() {
+    this.restorePurchases();
   }
   
   fetchProducts(): Promise<any> {
     return new Promise((resolve, reject) => {
       InAppPurchase
-      .getProducts(['2xlikes'])
-      .then((products) => {
+      .getProducts(['unlimitedLikes'])
+      .then(products => {
         console.log(products);
+        resolve(products);
           // [{ productId: 'com.yourapp.prod1', 'title': '...', description: '...', price: '...' }, ...]
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(error => {
+        console.log(error);
+        reject(error);
       });
     });
   }
 
   restorePurchases() {
+    console.log("Restoring purchases...");
+    InAppPurchase
+    .restorePurchases()
+    .then(purchases => {
+      console.log("Purchases returned:");
+      console.log(purchases);
+      if (purchases) {
+        this.restored = true;
+      } else {
+        this.restored = false;
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    });
     
   }
 
@@ -31,34 +48,40 @@ export class PaymentService {
     return new Promise((resolve, reject) => {
       InAppPurchase
       .subscribe(id)
-      .then((data)=> {
+      .then(data => {
         console.log(data);
+        this.restored = true;
+        resolve(data);
         // {
         //   transactionId: ...
         //   receipt: ...
         //   signature: ...
         // }
       })
-      .catch((err)=> {
-        console.log(err);
+      .catch(error => {
+        console.log(error);
+        reject(error);
       });
     });
   }
 
-  buyProduct(id): Promise<any> {
+  buy(id): Promise<any> {
     return new Promise((resolve, reject) => {
       InAppPurchase
       .buy(id)
-      .then((data)=> {
+      .then(data => {
         console.log(data);
+        this.restorePurchases();
+        resolve(data);
         // {
         //   transactionId: ...
         //   receipt: ...
         //   signature: ...
         // }
       })
-      .catch((err)=> {
-        console.log(err);
+      .catch(error => {
+        console.log(error);
+        reject(error);
       });
     });
   }

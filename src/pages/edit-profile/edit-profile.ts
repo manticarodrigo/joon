@@ -7,7 +7,6 @@ import { FbService } from '../../providers/fb-service';
 import { StorageService } from '../../providers/storage-service';
 import { PopoverService } from '../../providers/popover-service';
 import { ModalService } from '../../providers/modal-service';
-import { HttpService } from '../../providers/http-service';
 
 import { PopoverPage } from '../popover/popover';
 import { PhotoSelectPage } from '../photo-select/photo-select';
@@ -20,7 +19,6 @@ export class EditProfilePage {
     images: Array<any>;
     keys: Array<any>;
     user: any;
-
     constructor(private navCtrl: NavController,
                 private actionSheetCtrl: ActionSheetController,
                 private alertCtrl: AlertController,
@@ -29,8 +27,7 @@ export class EditProfilePage {
                 private fbS: FbService,
                 private storageS: StorageService,
                 private popoverS: PopoverService,
-                private modalS: ModalService,
-                private httpS: HttpService) {
+                private modalS: ModalService) {
         this.user = this.userS.user;
     }
     
@@ -61,6 +58,7 @@ export class EditProfilePage {
                 console.log(this.user.heightFt);
                 this.user.heightFt = feet;
                 console.log(this.user.heightFt);
+                this.userS.updateUser(this.user);
             }
         });
         this.popoverS.present();
@@ -75,6 +73,7 @@ export class EditProfilePage {
                 console.log(this.user.heightFt);
                 this.user.heightIn = inches;
                 console.log(this.user.heightFt);
+                this.userS.updateUser(this.user);
             }
         });
         this.popoverS.present();
@@ -89,13 +88,20 @@ export class EditProfilePage {
                 console.log(this.user.religion);
                 this.user.religion = religion;
                 console.log(this.user.religion);
+                this.userS.updateUser(this.user);
             }
         });
         this.popoverS.present();
     }
 
     editProfileSubmit() {
-        console.log("Save pressed!");
+        console.log("Changes made, updating user in database!");
+        this.user.age = this.getAge();
+        this.user.instagram = this.user.instagram.replace(/\W+/g, '');
+        this.userS.updateUser(this.user);
+    }
+
+    getAge() {
         let splitBDay = this.user.birthday.split('-');
         var year = parseInt(splitBDay[0]);
         var month = parseInt(splitBDay[1]);
@@ -108,16 +114,7 @@ export class EditProfilePage {
         } else if (((month - 1) == today.getMonth()) && (today.getDate() < day)) {
             age--;
         }
-
-        this.user.age = age;
-        this.userS.updateUser(this.user);
-        
-        let alert = this.alertCtrl.create({
-            title: 'Done!',
-            message: 'Your changes have been saved.',
-            buttons: ['Dismiss']
-        });
-        alert.present();
+        return age;
     }
 
     presentPhotoOptions(): Promise<any> {

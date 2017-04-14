@@ -14,6 +14,7 @@ import { LoadingPage } from '../loading/loading';
 import { MatchedPage } from '../matched/matched';
 import { ProfilePage } from '../profile/profile';
 import { PreferencesPage } from '../preferences/preferences';
+import { PaymentPage } from '../payment/payment';
 
 import {
   StackConfig,
@@ -34,6 +35,7 @@ export class DiscoverPage {
   @ViewChildren('cardsContainer') swingCards: QueryList<SwingCardComponent>;
 
   users: Array<any>;
+  loadedUsers: Array<any>;
   noUsers: boolean = true;
   undoHistory: Array<any>;
   stackConfig: StackConfig;
@@ -62,6 +64,7 @@ export class DiscoverPage {
       }
     };
     this.users = [];
+    this.loadedUsers = [];
     this.undoHistory = [];
     this.toastSeen = [false, false, false];
   }
@@ -73,7 +76,7 @@ export class DiscoverPage {
     });
   }
 
-  ionViewWillEnter() {
+  ionViewWillLoad() {
     console.log("Entered discover page");
     this.fetchUsers();
   }
@@ -111,39 +114,51 @@ export class DiscoverPage {
       this.modalS.create(LoadingPage);
       this.modalS.present();
     }
-    this.userS.fetchUserPreferences(this.userS.user).then(preferences => {
+    this.userS.fetchUserPreferences(this.userS.user)
+    .then(preferences => {
       if (preferences.distance == 'local') {
-        env.locationS.getLocation().then(() => {
-            env.locationS.fetchNearbyKeys().then(keys => {
+        env.locationS.getLocation()
+        .then(() => {
+            env.locationS.fetchNearbyKeys()
+            .then(keys => {
+              if (keys.includes(this.userS.user.id)) {
+                var i = keys.indexOf(this.userS.user.id);
+                if (i > -1) {
+                    keys.splice(i, 1);
+                }
+              }
               if (keys.length > 0) {
-                env.userS.fetchUsers(keys).then(users => {
-                  env.discoverS.fetchLocalUsers(users).then(localUsers => {
-                    for (var i in localUsers) {
-                      env.noUsers = false;
-                      var mutual = [];
-                      for (var key in localUsers[i].friends) {
-                        if (env.userS.user.friends.includes(localUsers[i].friends[key])) {
-                          mutual.push(localUsers[i].friends[key]);
-                        }
-                      }
-                      if (mutual.length > 0) {
-                        localUsers[i]['mutual'] = mutual.length;
-                      }
-                    }
+                env.userS.fetchUsers(keys)
+                .then(users => {
+                  env.discoverS.fetchLocalUsers(users)
+                  .then(localUsers => {
                     var existingUsers = [];
-                    for (var key in localUsers) {
-                      var user = users[key];
+                    for (var i in localUsers) {
+                      var user = localUsers[i];
                       if (user) {
                         existingUsers.push(user);
+                        env.noUsers = false;
+                        var mutual = [];
+                        for (var key in user.friends) {
+                          if (env.userS.user.friends.includes(user.friends[key])) {
+                            mutual.push(user.friends[key]);
+                          }
+                        }
+                        if (mutual.length > 0) {
+                          user['mutual'] = mutual.length;
+                        }
                       }
                     }
                     env.users = existingUsers;
+                    this.checkForEmptyStack();
                     env.modalS.dismiss();
-                  }).catch(error => {
+                  })
+                  .catch(error => {
                     console.log(error);
                     env.modalS.dismiss();
                   });
-                }).catch(error => {
+                })
+                .catch(error => {
                   console.log(error);
                   env.modalS.dismiss();
                 });
@@ -151,63 +166,86 @@ export class DiscoverPage {
                 console.log("No nearby users found!");
                 env.modalS.dismiss();
               }
-            }).catch(error => {
+            })
+            .catch(error => {
               console.log(error);
               env.modalS.dismiss();
             });
-          }).catch(error => {
+          })
+          .catch(error => {
             console.log(error);
             env.modalS.dismiss();
           });
       } else {
-        env.discoverS.fetchGlobalUsers().then(users => {
+        env.discoverS.fetchGlobalUsers()
+        .then(users => {
           console.log("fetch returned visible users");
           console.log(users);
-          for (var i in users) {
-            env.noUsers = false;
-            var mutual = [];
-            for (var key in users[i].friends) {
-              if (env.userS.user.friends.includes(users[i].friends[key])) {
-                mutual.push(users[i].friends[key]);
-              }
-            }
-            if (mutual.length > 0) {
-              users[i]['mutual'] = mutual.length;
-            }
-          }
           var existingUsers = [];
-          for (var key in users) {
-            var user = users[key];
+          for (var i in users) {
+            var user = users[i];
             if (user) {
               existingUsers.push(user);
+              env.noUsers = false;
+              var mutual = [];
+              for (var key in user.friends) {
+                if (env.userS.user.friends.includes(user.friends[key])) {
+                  mutual.push(user.friends[key]);
+                }
+              }
+              if (mutual.length > 0) {
+                user.mutual = mutual.length;
+              }
             }
+            
           }
           env.users = existingUsers;
+          this.checkForEmptyStack();
           env.modalS.dismiss()
-        }).catch(error => {
+        })
+        .catch(error => {
           console.log(error);
           env.modalS.dismiss();
         });
       }
-    }).catch(error => {
+    })
+    .catch(error => {
       console.log(error);
       env.modalS.dismiss();
     });
   }
 
+  checkForEmptyStack() {
+    if (this.loadedUsers.length == 0 && this.users.length > 0) {
+      console.log("Refilling users!");
+      var nextUsers = [];
+      for (var i = 0; i < 10; i++) {
+        if (this.users[i]) {
+          nextUsers.push(this.users[i]);
+        }
+      }
+      this.users.splice(0, nextUsers.length, null);
+      this.loadedUsers = nextUsers;
+    }
+  }
+
   swipeLeft() {
-    console.log("Swiping left...");
+    let currentCard = this.loadedUsers.pop();
+    this.undoHistory.push(currentCard);
+    this.checkForEmptyStack();
+    console.log("Swiping left on...");
+    console.log(currentCard);
+    console.log("Number of non-loaded users left...");
     console.log(this.users.length);
-    if (this.users.length > 0) {
-      let currentCard = this.users.pop();
-      this.undoHistory.push(currentCard);
-      console.log(currentCard);
-      this.discoverS.saw(currentCard).then(success => {
+    if (this.users.length > 0 || this.loadedUsers.length > 0) {
+      this.discoverS.saw(currentCard)
+      .then(success => {
         if (!this.toastSeen[0]) {
           this.toastSeen[0] = true;
           this.presentToast('You did not like ' + currentCard.firstName);
         }
-      }).catch(error => {
+      })
+      .catch(error => {
         console.log(error);
         this.presentToast('Error saving swipe');
         this.undo();
@@ -218,62 +256,50 @@ export class DiscoverPage {
   }
 
   swipeRight() {
-    console.log("Swiping right...");
+    let currentCard = this.loadedUsers.pop();
+    this.undoHistory.push(currentCard);
+    this.checkForEmptyStack();
+    console.log("Swiping right on...");
+    console.log(currentCard);
+    console.log("Number of non-loaded users left...");
     console.log(this.users.length);
-    if (this.users.length > 0) {
-      this.discoverS.checkDailyLikes().then(num => {
-        let currentCard = this.users.pop();
-        this.undoHistory.push(currentCard);
-        console.log(currentCard);
+    if (this.users.length > 0 || this.loadedUsers.length > 0) {
+      this.discoverS.fetchDailyLikes()
+      .then(num => {
         if (num < 15 + this.paymentS.extraLikes) {
-          this.discoverS.saw(currentCard).then(success => {
-            this.discoverS.liked(currentCard).then(matched => {
+          this.discoverS.saw(currentCard)
+          .then(success => {
+            this.discoverS.liked(currentCard)
+            .then(matched => {
               if (!this.toastSeen[1]) {
                 this.toastSeen[1] = true;
                 this.presentToast('You liked ' + currentCard.firstName);
               }
               if (matched) {
-                this.modalS.user = this.userS.user;
-                this.modalS.otherUser = currentCard;
-                this.modalS.create(MatchedPage);
-                this.modalS.modal.onDidDismiss(data => {
-                  if (data) {
-                    this.navCtrl.push(ChatPage, {
-                        user: data[0],
-                        chat: data[1]
-                    });
-                  }
-                });
-                this.modalS.present();
+                this.presentMatchWith(currentCard);
               }
-            }).catch(error => {
+            })
+            .catch(error => {
               console.log(error);
               this.presentToast('Error saving swipe');
               this.undo();
             });
-          }).catch(error => {
+          })
+          .catch(error => {
             console.log(error);
             this.presentToast('Error saving swipe');
             this.undo();
           });
         } else {
-          let alert = this.alertCtrl.create({
-            title: 'Out of likes!',
-            message: 'Please come back in 24 hours.',
-            buttons: [
-            {
-                text: 'Dismiss',
-                handler: data => {
-                    console.log('Dismiss clicked');
-                    this.undo();
-                }
-            },
-            ]
-          });
-          alert.present();
+          this.undo();
+          this.modalS.create(PaymentPage);
+          this.modalS.present();
         }
-      }).catch(error => {
+      })
+      .catch(error => {
         console.log(error);
+        this.presentToast('Error saving swipe');
+        this.undo();
       });
     } else {
       this.noUsers = true;
@@ -281,27 +307,30 @@ export class DiscoverPage {
   }
 
   doubleLike() {
+    let currentCard = this.loadedUsers.pop();
+    this.undoHistory.push(currentCard);
+    this.checkForEmptyStack();
     console.log("Double liking...");
+    console.log(currentCard);
+    console.log("Number of non-loaded users left...");
     console.log(this.users.length);
-    if (this.users.length > 0) {
-      this.discoverS.checkDailyDoubleLikes().then(num => {
-        let currentCard = this.users.pop();
-        this.undoHistory.push(currentCard);
-        console.log(currentCard);
+    if (this.users.length > 0 || this.loadedUsers.length > 0) {
+      this.discoverS.fetchDailyDoubleLikes()
+      .then(num => {
         if (num < 2 + this.paymentS.extraDoubleLikes) {
-          this.discoverS.saw(currentCard).then(success => {
-            this.discoverS.doubleLiked(currentCard).then(matched => {
+          this.discoverS.saw(currentCard)
+          .then(success => {
+            this.discoverS.doubleLiked(currentCard)
+            .then(matched => {
               if (!this.toastSeen[2]) {
                 this.toastSeen[2] = true;
                 this.presentToast('You double liked ' + currentCard.firstName);
               }
               if (matched) {
-                this.modalS.user = this.userS.user;
-                this.modalS.otherUser = currentCard;
-                this.modalS.create(MatchedPage);
-                this.modalS.present();
+                this.presentMatchWith(currentCard);
               }
-            }).catch(error => {
+            })
+            .catch(error => {
               console.log(error);
               this.presentToast('Error saving swipe');
               this.undo();
@@ -312,34 +341,41 @@ export class DiscoverPage {
             this.undo();
           });
         } else {
-          let alert = this.alertCtrl.create({
-            title: 'Out of double likes!',
-            message: 'Please come back in 24 hours.',
-            buttons: [
-            {
-                text: 'Dismiss',
-                handler: data => {
-                    console.log('Dismiss clicked');
-                    this.undo();
-                }
-            },
-            ]
-          });
-          alert.present();
+          this.undo();
+          this.modalS.create(PaymentPage);
+          this.modalS.present();
         }
-      }).catch(error => {
+      })
+      .catch(error => {
         console.log(error);
+        this.presentToast('Error saving swipe');
+        this.undo();
       });
     } else {
       this.noUsers = true;
     }
   }
 
+  presentMatchWith(user) {
+    this.modalS.user = this.userS.user;
+    this.modalS.otherUser = user;
+    this.modalS.create(MatchedPage);
+    this.modalS.modal.onDidDismiss(data => {
+      if (data) {
+        this.navCtrl.push(ChatPage, {
+            user: data[0],
+            chat: data[1]
+        });
+      }
+    });
+    this.modalS.present();
+  }
+
   undo() {
     console.log("Undo pressed!");
     if (this.undoHistory.length > 0) {
       let undoCard = this.undoHistory.pop();
-      this.users.push(undoCard);
+      this.loadedUsers.push(undoCard);
     }
   }
 

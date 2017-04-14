@@ -137,12 +137,18 @@ page-chat {
         min-width: 200px;
         overflow: hidden;
     }
+    /*
     .img-bubble ion-img {
         margin-bottom: -5px;
     }
     .img-bubble ion-img img {
         min-width: 100%;
         min-height: 100%;
+    }*/
+    .img-bubble img {
+        width: 200px;
+        height: 200px;
+        margin-bottom: -5px;
     }
     .img-bubble.left {
         background-color: #FAF4FF;

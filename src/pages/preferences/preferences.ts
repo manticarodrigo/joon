@@ -16,7 +16,7 @@ export class PreferencesPage {
       showAge: true,
       lfm: true,
       lff: true,
-      distance: 'global'
+      distance: 'national'
   };
   user: any;
   
@@ -66,6 +66,11 @@ export class PreferencesPage {
   resetLikes() {
     console.log("Like reset pressed!");
     this.discoverS.resetLikes();
+  }
+
+  resetDoubleLikes() {
+    console.log("Double like reset pressed!");
+    this.discoverS.resetDoubleLikes();
   }
   
 }

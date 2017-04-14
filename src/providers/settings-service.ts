@@ -11,7 +11,6 @@ export class SettingsService {
   }
 
   fetchUserSettings(user): Promise<any> {
-    let env = this;
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/user_settings/' + user.id);
       ref.once('value').then((snap) => {

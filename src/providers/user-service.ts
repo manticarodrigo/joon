@@ -66,9 +66,11 @@ export class UserService {
                 let val = snap.val();
                 console.log("Fetch returned user:", val);
                 if (!val["photoURL"]) {
-                    val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large";
+                    val["photoURL"] = "https://graph.facebook.com/" + val.id + "/picture?type=large&width=600&height=600";
                 }
                 resolve(val);
+              } else {
+                reject(null);
               }
           }).catch(error => {
               console.log(error);
@@ -85,13 +87,20 @@ export class UserService {
             let promise = new Promise((resolve, reject) => {
                 let ref = firebase.database().ref('/users/' + uid);
                 ref.once('value').then(snapshot => {
-                    resolve(snapshot.val());
+                    if (snapshot.exists()) {
+                        let val = snapshot.val();
+                        if (!val.photoURL) {
+                            val.photoURL = "https://graph.facebook.com/" + val.id + "/picture?type=large&width=600&height=600";
+                        }
+                        resolve(val);
+                    } else {
+                        resolve(null);
+                    }
                 });
             });
             promises.push(promise);
           }
       });
-
       return Promise.all(promises);
     }
 
@@ -142,17 +151,10 @@ export class UserService {
               } else {
                   var preferences = {
                     showAge: true,
-                    lfm: true,
-                    lff: true,
-                    distance: 'global'
+                    lff: (user.gender == 'male'),
+                    lfm: (user.gender == 'female'),
+                    distance: 'national'
                 };
-                if (user.gender == 'male') {
-                    console.log("User is male, removing men from preferences by default.");
-                    preferences.lfm = false;
-                } else if (user.gender == 'female') {
-                    console.log("User is female, removing women from preferences by default.");
-                    preferences.lff = false;
-                }
                 resolve(preferences);
               }
           }).catch(error => {

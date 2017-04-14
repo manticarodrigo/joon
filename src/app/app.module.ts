@@ -21,7 +21,6 @@ import { ChatPage } from '../pages/chat/chat';
 import { PaymentPage } from '../pages/payment/payment';
 
 import { IonicStorageModule } from '@ionic/storage';
-import { HttpModule } from '@angular/http';
 import { SwingModule } from 'angular2-swing';
 
 import { Facebook, NativeStorage, OneSignal } from 'ionic-native';
@@ -37,7 +36,6 @@ import { StorageService } from '../providers/storage-service';
 import { PushService } from '../providers/push-service';
 import { LocationService } from '../providers/location-service';
 import { SettingsService } from '../providers/settings-service';
-import { HttpService } from '../providers/http-service';
 import { PaymentService } from '../providers/payment-service';
 
 @NgModule({
@@ -70,7 +68,6 @@ import { PaymentService } from '../providers/payment-service';
         activator: 'none' 
     }),
     IonicStorageModule.forRoot(),
-    HttpModule,
     SwingModule
   ],
   bootstrap: [IonicApp],
@@ -107,7 +104,6 @@ import { PaymentService } from '../providers/payment-service';
     PushService,
     LocationService,
     SettingsService,
-    HttpService,
     PaymentService,
     Facebook,
     FacebookService,

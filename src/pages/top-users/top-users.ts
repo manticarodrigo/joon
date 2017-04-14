@@ -26,8 +26,7 @@ export class TopUsersPage {
               private discoverS: DiscoverService,
               private modalS: ModalService,
               private locationS: LocationService) {
-    this.fetchGlobalTopUsers();
-    this.fetchLocalTopUsers();
+    this.fetchTopUsers();
   }
 
   presentInfo() {
@@ -39,33 +38,8 @@ export class TopUsersPage {
     alert.present();
   }
 
-  fetchGlobalTopUsers() {
+  fetchTopUsers() {
     console.log("Fetching global top users");
-    this.discoverS.getRankedUsersIDs().then(sortedIds => {
-      let topIds = sortedIds.slice(0, this.topUsersLimit);
-      return this.userS.fetchUsers(topIds);
-    }).then(users => {
-      // since each query is passed seperately to Promise.all,
-      // and the results array contains the result in the same order,
-      // there should be no need to re-sort
-      console.log("Global fetch returned top users");
-      console.log(users);
-      var existingUsers = [];
-      for (var key in users) {
-        var user = users[key];
-        if (user) {
-          existingUsers.push(user);
-        }
-      }
-      this.globalUsers = existingUsers;
-    }).catch(error => {
-      console.log("Global fetch returned error:", error);
-    });
-  }
-
-  fetchLocalTopUsers() {
-    console.log("Fetching local top users");
-    let env = this;
     let user = this.userS.user;
     this.modalS.user = this.userS.user;
     // this.modalS.message = "Finding people nearby...";
@@ -73,48 +47,60 @@ export class TopUsersPage {
       this.modalS.create(LoadingPage);
       this.modalS.present();
     }
+    this.discoverS.getRankedUsersIDs().then(sortedIds => {
+      let topIds = sortedIds.slice(0, this.topUsersLimit + 3);
+      this.fetchLocalTopUsers(sortedIds);
+      return this.userS.fetchUsers(topIds);
+    }).then(users => {
+      // since each query is passed seperately to Promise.all,
+      // and the results array contains the result in the same order,
+      // there should be no need to re-sort
+      console.log("Global fetch returned top users");
+      console.log(users);
+      this.globalUsers = this.removeEmptyValues(users).slice(0, this.topUsersLimit);
+    }).catch(error => {
+      console.log("Global fetch returned error:", error);
+    });
+  }
+
+  fetchLocalTopUsers(topIds) {
+    console.log("Fetching local top users with ids:");
+    console.log(topIds);
+    let env = this;
     env.locationS.getLocation().then(() => {
       env.locationS.fetchNearbyKeys().then(nearbyKeys => {
-        env.discoverS.getRankedUsersIDs().then(sortedIds => {
-          var localTopIds = [];
+        var localTopIds = [];
           var count = 0;
-          sortedIds.forEach(uid => {
-            console.log(uid);
-            for (var key in nearbyKeys) {
-              let nearbyKey = nearbyKeys[key];
-              if (uid == nearbyKey && count <= this.topUsersLimit) {
-                console.log("uid exists nearby!", uid);
+          for (var key in nearbyKeys){
+            console.log(nearbyKeys[key]);
+            if (topIds.includes(nearbyKeys[key])) {
+              if (count < this.topUsersLimit) {
+                console.log("Key exists nearby:");
+                console.log(nearbyKeys[key]);
                 count++;
-                localTopIds.push(uid);
+                localTopIds.push(nearbyKeys[key]);
               }
             }
-          });
+          }
           return this.userS.fetchUsers(localTopIds);
         }).then(users => {
-          var existingUsers = [];
-          for (var key in users) {
-            var user = users[key];
-            if (user) {
-              existingUsers.push(user);
-            }
-          }
-          env.localUsers = existingUsers;
+          env.localUsers = this.removeEmptyValues(users);
           env.modalS.dismiss();
         }).catch(error => {
           console.log(error);
           env.modalS.dismiss();
         });
-      }).catch(error => {
-        console.log(error);
-        env.modalS.dismiss();
-      });
     }).catch(error => {
       console.log(error);
       env.modalS.dismiss();
     });
   }
 
-  userTapped(event, user) {
+  removeEmptyValues(array) {
+    return array.filter(function(n){ return n != undefined })
+  }
+
+  userTapped(user) {
     this.navCtrl.push(ProfilePage, {
         user: user
     });

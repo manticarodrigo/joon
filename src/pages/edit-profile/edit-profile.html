@@ -40,89 +40,93 @@
             </ion-col>
         </ion-row>
     </ion-grid>
-    <form name="edit-profile-form">
-        <ion-list no-lines>
-            <ion-label>Name:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-first-name" [(ngModel)]="user.firstName" placeholder="First Name" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>Birthday:</ion-label>
-            <ion-item>
-                <ion-datetime displayFormat="MM/DD/YYYY" name="user-birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-datetime>
-                <!-- <ion-input type="text" name="user-birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-input> -->
-            </ion-item>
+    <ion-list no-lines>
+        <ion-label>Name:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="firstName" [(ngModel)]="user.firstName" placeholder="First Name" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>Birthday:</ion-label>
+        <ion-item>
+            <ion-datetime (ionChange)="editProfileSubmit()" displayFormat="MM/DD/YYYY" name="birthday" [(ngModel)]="user.birthday" placeholder="Birthday"></ion-datetime>
+        </ion-item>
+        <div class="instagram">
             <ion-label>Instagram:</ion-label>
+            <p>@</p>
             <ion-item>
-                <ion-input id="insta" type="text" name="user-instagram" [(ngModel)]="user.instagram" placeholder="Instagram Handle" autocorrect="on"></ion-input>
+                <ion-input (input)="editProfileSubmit()" type="text" name="instagram" [(ngModel)]="user.instagram" placeholder="Instagram Handle" autocorrect="on"></ion-input>
             </ion-item>
-            <ion-grid class="anatomy">
-                <ion-label>Gender:</ion-label>
-                <ion-row radio-group name="user-gender" [(ngModel)]="user.gender">
-                  <ion-col width-50>
-                    <ion-label>Male</ion-label>
-                    <ion-radio value="male"></ion-radio>
-                  </ion-col>
-                  <ion-col width-50>
-                    <ion-label>Female</ion-label>
-                    <ion-radio value="female"></ion-radio>
-                  </ion-col>
-                </ion-row>
-                <ion-label>Height:</ion-label>
-                <ion-row>
-                    <ion-col width-50>
-                        <button class="height" type="button" ion-button block outline (click)="selectFeet()">
-                            {{ user.heightFt ? user.heightFt : 'Feet' }}
-                            <img src="assets/down.png">
-                        </button>
-                    </ion-col>
-                    <ion-col width-50>
-                        <button class="height" type="button" ion-button block outline (click)="selectInches()">
-                            {{ user.heightIn ? user.heightIn : 'Inches' }}
-                            <img src="assets/down.png">
-                        </button>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-            <ion-label>Country:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-country" [(ngModel)]="user.country" placeholder="Country" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>City:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-city" [(ngModel)]="user.city" placeholder="City" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>School:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-school" [(ngModel)]="user.school" placeholder="University or School" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>Other School:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-school2" [(ngModel)]="user.school2" placeholder="Additional University or School" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>Job:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-job" [(ngModel)]="user.job" placeholder="Job Title" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>Company:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-company" [(ngModel)]="user.company" placeholder="Company" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>Religion:</ion-label>
-            <ion-item class="religion">
-                <!-- <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion" autocorrect="on"></ion-input> -->
-                <button type="button" ion-button block outline (click)="selectReligion()">
-                    {{ user.religion ? user.religion : 'Religion' }}
-                    <img src="assets/down.png">
-                </button>
-            </ion-item>
-            <ion-label>Ethnicity:</ion-label>
-            <ion-item>
-                <ion-input type="text" name="user-ethnicity" [(ngModel)]="user.ethnicity" placeholder="Ethnicity" autocorrect="on"></ion-input>
-            </ion-item>
-            <ion-label>Bio:</ion-label>
-            <ion-textarea class="textarea" name="user-bio" [(ngModel)]="user.bio" placeholder="About Me" autocorrect="on">
-            </ion-textarea>
-            <button ion-button type="button" block (click)="editProfileSubmit()">Save</button>
-        </ion-list>
+        </div>
+        <ion-grid class="anatomy">
+            <ion-label>Gender:</ion-label>
+            <ion-row radio-group name="gender" [(ngModel)]="user.gender">
+                <ion-col width-50>
+                <ion-label>Male</ion-label>
+                <ion-radio (ionSelect)="editProfileSubmit()" value="male"></ion-radio>
+                </ion-col>
+                <ion-col width-50>
+                <ion-label>Female</ion-label>
+                <ion-radio (ionSelect)="editProfileSubmit()" value="female"></ion-radio>
+                </ion-col>
+            </ion-row>
+            <ion-label>Height:</ion-label>
+            <ion-row>
+                <ion-col width-50>
+                    <button class="height" type="button" ion-button block outline (click)="selectFeet()">
+                        {{ user.heightFt ? user.heightFt : 'Feet' }}
+                        <img src="assets/down.png">
+                    </button>
+                </ion-col>
+                <ion-col width-50>
+                    <button class="height" type="button" ion-button block outline (click)="selectInches()">
+                        {{ user.heightIn ? user.heightIn : 'Inches' }}
+                        <img src="assets/down.png">
+                    </button>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
+        <ion-label>Country:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="country" [(ngModel)]="user.country" placeholder="Country" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>City:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="city" [(ngModel)]="user.city" placeholder="City" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>School:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="school" [(ngModel)]="user.school" placeholder="University or School" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>Other School:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="school2" [(ngModel)]="user.school2" placeholder="Additional University or School" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>Job:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="job" [(ngModel)]="user.job" placeholder="Job Title" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>Company:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="company" [(ngModel)]="user.company" placeholder="Company" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>Religion:</ion-label>
+        <ion-item class="religion">
+            <!-- <ion-input type="text" name="user-religion" [(ngModel)]="user.religion" placeholder="Religion" autocorrect="on"></ion-input> -->
+            <button type="button" ion-button block outline (click)="selectReligion()">
+                {{ user.religion ? user.religion : 'Religion' }}
+                <img src="assets/down.png">
+            </button>
+        </ion-item>
+        <ion-label>Ethnicity:</ion-label>
+        <ion-item>
+            <ion-input (input)="editProfileSubmit()" type="text" name="ethnicity" [(ngModel)]="user.ethnicity" placeholder="Ethnicity" autocorrect="on"></ion-input>
+        </ion-item>
+        <ion-label>Bio:</ion-label>
+        <ion-textarea (input)="editProfileSubmit()" class="textarea" name="bio" [(ngModel)]="user.bio" placeholder="About Me" autocorrect="on">
+        </ion-textarea>
+    </ion-list>
+    <!--
+    <form name="edit-profile-form">
+        <button ion-button type="button" block (click)="editProfileSubmit()">Save</button>
     </form>
+    -->
 </ion-content>

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams, ActionSheetController, AlertController } from 'ionic-angular';
+import { PhotoViewer } from 'ionic-native';
 
 import { UserService } from '../../providers/user-service';
 import { StorageService } from '../../providers/storage-service';
@@ -31,9 +32,8 @@ export class ProfilePage {
             this.user = this.userS.user;
         }
     }
-    
-    ionViewWillEnter() {
-        this.fetchUserImages();
+
+    ionViewWillLoad() {
         let env = this;
         if (this.user.id != this.userS.user.id) {
             for (var i in env.user.friends) {
@@ -57,6 +57,16 @@ export class ProfilePage {
         }
     }
     
+    ionViewWillEnter() {
+        this.fetchUserImages();
+    }
+
+    mutualFriendTapped(user) {
+    this.navCtrl.push(ProfilePage, {
+        user: user
+    });
+  }
+    
     fetchUserImages() {
         this.storageS.fetchImagesFor(this.user.id).then(snap => {
             let urlList = [];
@@ -66,6 +76,10 @@ export class ProfilePage {
             })
             this.images = urlList;
         });
+    }
+
+    showImage(url) {
+        PhotoViewer.show(url);
     }
 
     editProfile() {
