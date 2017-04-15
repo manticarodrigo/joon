@@ -1,5 +1,5 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { NavController, NavParams, ToastController, AlertController, MenuController } from 'ionic-angular';
+import { NavController, NavParams, ToastController, AlertController, MenuController, ModalController } from 'ionic-angular';
 
 import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
@@ -45,6 +45,7 @@ export class DiscoverPage {
               private navParams: NavParams,
               private toastCtrl: ToastController,
               private alertCtrl: AlertController,
+              private modalCtrl: ModalController,
               private menu: MenuController,
               private discoverS: DiscoverService,
               private userS: UserService,
@@ -256,6 +257,7 @@ export class DiscoverPage {
   }
 
   swipeRight() {
+    let env = this;
     let currentCard = this.loadedUsers.pop();
     this.undoHistory.push(currentCard);
     this.checkForEmptyStack();
@@ -264,49 +266,53 @@ export class DiscoverPage {
     console.log("Number of non-loaded users left...");
     console.log(this.users.length);
     if (this.users.length > 0 || this.loadedUsers.length > 0) {
-      this.discoverS.fetchDailyLikes()
+      env.discoverS.fetchDailyLikes()
       .then(num => {
-        if (num < 15 + this.paymentS.extraLikes) {
-          this.discoverS.saw(currentCard)
+        if (num < 12 || env.paymentS.restored) {
+          env.discoverS.saw(currentCard)
           .then(success => {
-            this.discoverS.liked(currentCard)
+            env.discoverS.liked(currentCard)
             .then(matched => {
-              if (!this.toastSeen[1]) {
-                this.toastSeen[1] = true;
-                this.presentToast('You liked ' + currentCard.firstName);
+              if (!env.toastSeen[1]) {
+                env.toastSeen[1] = true;
+                env.presentToast('You liked ' + currentCard.firstName);
               }
               if (matched) {
-                this.presentMatchWith(currentCard);
+                env.presentMatchWith(currentCard);
               }
             })
             .catch(error => {
               console.log(error);
-              this.presentToast('Error saving swipe');
-              this.undo();
+              env.presentToast('Error saving swipe');
+              env.undo();
             });
           })
           .catch(error => {
             console.log(error);
-            this.presentToast('Error saving swipe');
-            this.undo();
+            env.presentToast('Error saving swipe');
+            env.undo();
           });
         } else {
-          this.undo();
-          this.modalS.create(PaymentPage);
-          this.modalS.present();
+          let modal = env.modalCtrl.create(PaymentPage, {
+              user: currentCard,
+              discovering: true
+          });
+          modal.present();
+          env.undo();
         }
       })
       .catch(error => {
         console.log(error);
-        this.presentToast('Error saving swipe');
-        this.undo();
+        env.presentToast('Error saving swipe');
+        env.undo();
       });
     } else {
-      this.noUsers = true;
+      env.noUsers = true;
     }
   }
 
   doubleLike() {
+    let env = this;
     let currentCard = this.loadedUsers.pop();
     this.undoHistory.push(currentCard);
     this.checkForEmptyStack();
@@ -317,42 +323,53 @@ export class DiscoverPage {
     if (this.users.length > 0 || this.loadedUsers.length > 0) {
       this.discoverS.fetchDailyDoubleLikes()
       .then(num => {
-        if (num < 2 + this.paymentS.extraDoubleLikes) {
-          this.discoverS.saw(currentCard)
+        if (num < 2) {
+          env.discoverS.saw(currentCard)
           .then(success => {
-            this.discoverS.doubleLiked(currentCard)
+            env.discoverS.doubleLiked(currentCard)
             .then(matched => {
-              if (!this.toastSeen[2]) {
-                this.toastSeen[2] = true;
-                this.presentToast('You double liked ' + currentCard.firstName);
+              if (!env.toastSeen[2]) {
+                env.toastSeen[2] = true;
+                env.presentToast('You double liked ' + currentCard.firstName);
               }
               if (matched) {
-                this.presentMatchWith(currentCard);
+                env.presentMatchWith(currentCard);
               }
             })
             .catch(error => {
               console.log(error);
-              this.presentToast('Error saving swipe');
-              this.undo();
+              env.presentToast('Error saving swipe');
+              env.undo();
             });
           }).catch(error => {
             console.log(error);
-            this.presentToast('Error saving swipe');
-            this.undo();
+            env.presentToast('Error saving swipe');
+            env.undo();
           });
         } else {
-          this.undo();
-          this.modalS.create(PaymentPage);
-          this.modalS.present();
+          console.log(currentCard);
+          let modal = env.modalCtrl.create(PaymentPage, {
+              user: currentCard,
+              discovering: true
+          });
+          modal.present();
+          env.undo();
+          /*
+          let alert = this.alertCtrl.create({
+            title: 'Out of double likes!',
+            message: 'Please wait 24 hours before trying again.',
+            buttons: ['Dismiss']
+          });
+          alert.present();*/
         }
       })
       .catch(error => {
         console.log(error);
-        this.presentToast('Error saving swipe');
-        this.undo();
+        env.presentToast('Error saving swipe');
+        env.undo();
       });
     } else {
-      this.noUsers = true;
+      env.noUsers = true;
     }
   }
 

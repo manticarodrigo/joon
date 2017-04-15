@@ -3,6 +3,7 @@ import { NavController, NavParams, ViewController } from 'ionic-angular';
 
 import { PaymentService } from '../../providers/payment-service';
 import { DiscoverService } from '../../providers/discover-service';
+import { ModalService } from '../../providers/modal-service';
 
 @Component({
   selector: 'page-payment',
@@ -10,32 +11,21 @@ import { DiscoverService } from '../../providers/discover-service';
 })
 export class PaymentPage {
   products: Array<any>;
-  likesLeft = 15;
-  doubleLikesLeft = 2;
+  user: any;
+  discovering = false;
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
               private viewCtrl: ViewController,
               private paymentS: PaymentService,
-              private discoverS: DiscoverService) {
-    this.fetchDailyLikes();
+              private discoverS: DiscoverService,
+              private modalS: ModalService) {
+    this.user = this.navParams.get('user');
+    this.discovering = this.navParams.get('discovering');
     this.loadProducts();
   }
 
   dismiss() {
     this.viewCtrl.dismiss();
-  }
-
-  fetchDailyLikes() {
-    Promise.all([this.discoverS.fetchDailyLikes(), this.discoverS.fetchDailyDoubleLikes()])
-    .then(data => {
-      this.likesLeft = 15 + this.paymentS.extraLikes - data[0];
-      this.doubleLikesLeft = 2 + this.paymentS.extraDoubleLikes - data[1];
-      console.log(this.likesLeft);
-      console.log(this.doubleLikesLeft);
-    })
-    .catch(error => {
-      console.log(error);
-    });
   }
 
   loadProducts() {
@@ -51,7 +41,6 @@ export class PaymentPage {
   subscribe(id) {
     this.paymentS.subscribe(id)
     .then(receipt => {
-      this.fetchDailyLikes();
       console.log(receipt);
     })
     .catch(error => {
@@ -62,7 +51,6 @@ export class PaymentPage {
   restore() {
     console.log("Restore pressed!");
     this.paymentS.restorePurchases();
-    this.fetchDailyLikes();
   }
 
 }

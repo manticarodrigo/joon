@@ -13,6 +13,7 @@ import { TopUsersPage } from '../pages/top-users/top-users';
 import { PreferencesPage } from '../pages/preferences/preferences';
 import { SettingsPage } from '../pages/settings/settings';
 import { FeedbackPage } from '../pages/feedback/feedback';
+import { PaymentPage } from '../pages/payment/payment';
 
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
@@ -51,8 +52,8 @@ export class Joon {
           { title: 'App Settings', component: SettingsPage },
           //{ title: 'Help & Support', component: HelpPage },
           { title: 'Feedback', component: FeedbackPage },
-          // { title: 'Invite A Friend to Joon', component: InvitePage }
-
+          // { title: 'Invite A Friend to Joon', component: InvitePage },
+          { title: 'Joon Plus', component: PaymentPage }
         ];
     }
 
