@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, AlertController } from 'ionic-angular';
+import { NavController, NavParams, AlertController, ModalController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
-import { ModalService } from '../../providers/modal-service';
 import { LocationService } from '../../providers/location-service';
 
 import { ProfilePage } from '../profile/profile';
@@ -22,9 +21,9 @@ export class TopUsersPage {
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
               private alertCtrl: AlertController,
+              private modalCtrl: ModalController,
               private userS: UserService,
               private discoverS: DiscoverService,
-              private modalS: ModalService,
               private locationS: LocationService) {
     this.fetchTopUsers();
   }
@@ -41,15 +40,13 @@ export class TopUsersPage {
   fetchTopUsers() {
     console.log("Fetching global top users");
     let user = this.userS.user;
-    this.modalS.user = this.userS.user;
-    // this.modalS.message = "Finding people nearby...";
-    if (!this.modalS.isActive) {
-      this.modalS.create(LoadingPage);
-      this.modalS.present();
-    }
+    let modal = this.modalCtrl.create(LoadingPage, {
+        user: user
+    });
+    modal.present();
     this.discoverS.getRankedUsersIDs().then(sortedIds => {
       let topIds = sortedIds.slice(0, this.topUsersLimit + 3);
-      this.fetchLocalTopUsers(sortedIds);
+      this.fetchLocalTopUsers(sortedIds, modal);
       return this.userS.fetchUsers(topIds);
     }).then(users => {
       // since each query is passed seperately to Promise.all,
@@ -63,7 +60,7 @@ export class TopUsersPage {
     });
   }
 
-  fetchLocalTopUsers(topIds) {
+  fetchLocalTopUsers(topIds, modal) {
     console.log("Fetching local top users with ids:");
     console.log(topIds);
     let env = this;
@@ -85,14 +82,14 @@ export class TopUsersPage {
           return this.userS.fetchUsers(localTopIds);
         }).then(users => {
           env.localUsers = this.removeEmptyValues(users);
-          env.modalS.dismiss();
+          modal.dismiss();
         }).catch(error => {
           console.log(error);
-          env.modalS.dismiss();
+          modal.dismiss();
         });
     }).catch(error => {
       console.log(error);
-      env.modalS.dismiss();
+      modal.dismiss();
     });
   }
 

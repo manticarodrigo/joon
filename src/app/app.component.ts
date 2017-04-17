@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, NavParams, Platform, MenuController, AlertController } from 'ionic-angular';
+import { Nav, NavParams, Platform, MenuController, AlertController, ModalController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { Storage } from '@ionic/storage';
 
@@ -19,7 +19,6 @@ import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
 import { ChatService } from '../providers/chat-service';
 import { DiscoverService } from '../providers/discover-service';
-import { ModalService } from '../providers/modal-service';
 import { PushService } from '../providers/push-service';
 
 @Component({
@@ -33,11 +32,11 @@ export class Joon {
     constructor(private platform: Platform,
                 private menuCtrl: MenuController,
                 private alertCtrl: AlertController,
+                private modalCtrl: ModalController,
                 private authS: AuthService,
                 private userS: UserService,
                 private chatS: ChatService,
                 private discoverS: DiscoverService,
-                private modalS: ModalService,
                 private pushS: PushService,
                 private storage: Storage) {
 
@@ -103,10 +102,10 @@ export class Joon {
           if (!storedUser) {
             console.log('No stored user found!')
           } else if (storedUser.accessToken) {
-            env.modalS.user = storedUser;
-            // env.modalS.message = "Reauthenticating current user...";
-            env.modalS.create(LoadingPage);
-            env.modalS.present();
+            let modal = env.modalCtrl.create(LoadingPage, {
+                user: storedUser
+            });
+            modal.present();
             console.log('Stored user found: ', storedUser);
             let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
             env.authS.authenticateWith(facebookCredential).then(success => {
@@ -124,19 +123,19 @@ export class Joon {
                 }).catch(error => {
                   console.log(error);
                   env.logoutApp();
-                  env.modalS.dismiss();
+                  modal.dismiss();
                   env.presentError(error);
                 });
               } else {
                 // No current user
                 env.logoutApp();
-                env.modalS.dismiss();
+                modal.dismiss();
                 env.presentError("Stored user does not match authenticated user.");
               }
             }).catch(error => {
               console.log(error);
               env.logoutApp();
-              env.modalS.dismiss();
+              modal.dismiss();
               env.presentError(error);
             });
           } else {

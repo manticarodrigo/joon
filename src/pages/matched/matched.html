@@ -3,13 +3,13 @@
 
 <ion-content text-center padding>
   <img class="matched-image" src="assets/matched.png">
-  <p *ngIf="this.modalS.otherUser">{{ this.modalS.otherUser.firstName }} liked you too ;)</p>
+  <p *ngIf="otherUser">{{ otherUser.firstName }} liked you too ;)</p>
   <div class="images">
-    <div class="avatar" *ngIf="this.modalS.user.photoURL">
-      <img [src]="this.modalS.user.photoURL">
+    <div class="avatar" *ngIf="user.photoURL">
+      <img [src]="user.photoURL">
     </div>
-    <div class="avatar" *ngIf="this.modalS.otherUser.photoURL">
-      <img [src]="this.modalS.otherUser.photoURL">
+    <div class="avatar" *ngIf="otherUser.photoURL">
+      <img [src]="otherUser.photoURL">
     </div>
   </div>
   <div class="buttons">

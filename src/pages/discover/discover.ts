@@ -4,7 +4,6 @@ import { NavController, NavParams, ToastController, AlertController, MenuControl
 import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
 import { ChatService } from '../../providers/chat-service';
-import { ModalService } from '../../providers/modal-service';
 import { LocationService } from '../../providers/location-service';
 import { PaymentService } from '../../providers/payment-service';
 
@@ -50,7 +49,6 @@ export class DiscoverPage {
               private discoverS: DiscoverService,
               private userS: UserService,
               private chatS: ChatService,
-              private modalS: ModalService,
               private locationS: LocationService,
               private paymentS: PaymentService) {
     this.stackConfig = {
@@ -106,15 +104,13 @@ export class DiscoverPage {
   }
 
   fetchUsers() {
-    console.log("Fetching discoverable users");
+    console.log("Fetching discoverable users...");
     let env = this;
     let user = this.userS.user;
-    this.modalS.user = this.userS.user;
-    // this.modalS.message = "Finding people nearby...";
-    if (!this.modalS.isActive) {
-      this.modalS.create(LoadingPage);
-      this.modalS.present();
-    }
+    let modal = env.modalCtrl.create(LoadingPage, {
+        user: user
+    });
+    modal.present();
     this.userS.fetchUserPreferences(this.userS.user)
     .then(preferences => {
       if (preferences.distance == 'local') {
@@ -151,31 +147,31 @@ export class DiscoverPage {
                       }
                     }
                     env.users = existingUsers;
-                    this.checkForEmptyStack();
-                    env.modalS.dismiss();
+                    env.checkForEmptyStack();
+                    modal.dismiss();
                   })
                   .catch(error => {
                     console.log(error);
-                    env.modalS.dismiss();
+                    modal.dismiss();
                   });
                 })
                 .catch(error => {
                   console.log(error);
-                  env.modalS.dismiss();
+                  modal.dismiss();
                 });
               } else {
                 console.log("No nearby users found!");
-                env.modalS.dismiss();
+                modal.dismiss();
               }
             })
             .catch(error => {
               console.log(error);
-              env.modalS.dismiss();
+              modal.dismiss();
             });
           })
           .catch(error => {
             console.log(error);
-            env.modalS.dismiss();
+            modal.dismiss();
           });
       } else {
         env.discoverS.fetchGlobalUsers()
@@ -201,18 +197,18 @@ export class DiscoverPage {
             
           }
           env.users = existingUsers;
-          this.checkForEmptyStack();
-          env.modalS.dismiss()
+          env.checkForEmptyStack();
+          modal.dismiss()
         })
         .catch(error => {
           console.log(error);
-          env.modalS.dismiss();
+          modal.dismiss();
         });
       }
     })
     .catch(error => {
       console.log(error);
-      env.modalS.dismiss();
+      modal.dismiss();
     });
   }
 
@@ -268,7 +264,7 @@ export class DiscoverPage {
     if (this.users.length > 0 || this.loadedUsers.length > 0) {
       env.discoverS.fetchDailyLikes()
       .then(num => {
-        if (num < 12 || env.paymentS.restored) {
+        if (num < 15 + env.paymentS.extraLikes) {
           env.discoverS.saw(currentCard)
           .then(success => {
             env.discoverS.liked(currentCard)
@@ -298,7 +294,10 @@ export class DiscoverPage {
               discovering: true
           });
           modal.present();
-          env.undo();
+          modal.onDidDismiss(() => {
+            env.undo();
+          })
+          modal.present();
         }
       })
       .catch(error => {
@@ -323,7 +322,7 @@ export class DiscoverPage {
     if (this.users.length > 0 || this.loadedUsers.length > 0) {
       this.discoverS.fetchDailyDoubleLikes()
       .then(num => {
-        if (num < 2) {
+        if (num < 2 + this.paymentS.extraDoubleLikes) {
           env.discoverS.saw(currentCard)
           .then(success => {
             env.discoverS.doubleLiked(currentCard)
@@ -352,15 +351,10 @@ export class DiscoverPage {
               user: currentCard,
               discovering: true
           });
+          modal.onDidDismiss(() => {
+            env.undo();
+          })
           modal.present();
-          env.undo();
-          /*
-          let alert = this.alertCtrl.create({
-            title: 'Out of double likes!',
-            message: 'Please wait 24 hours before trying again.',
-            buttons: ['Dismiss']
-          });
-          alert.present();*/
         }
       })
       .catch(error => {
@@ -374,18 +368,20 @@ export class DiscoverPage {
   }
 
   presentMatchWith(user) {
-    this.modalS.user = this.userS.user;
-    this.modalS.otherUser = user;
-    this.modalS.create(MatchedPage);
-    this.modalS.modal.onDidDismiss(data => {
+    let modal = this.modalCtrl.create(MatchedPage, {
+        user: this.userS.user,
+        otherUser: user
+    });
+    modal.present();
+    modal.onDidDismiss((data) => {
       if (data) {
         this.navCtrl.push(ChatPage, {
             user: data[0],
             chat: data[1]
         });
       }
-    });
-    this.modalS.present();
+    })
+    modal.present();
   }
 
   undo() {

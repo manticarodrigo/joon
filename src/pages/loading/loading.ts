@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
-
-import { ModalService } from '../../providers/modal-service';
+import { NavController, NavParams } from 'ionic-angular';
 
 @Component({
   selector: 'page-loading',
   templateUrl: 'loading.html'
 })
 export class LoadingPage {
-  
-  constructor(private modalS: ModalService) {
+  user: any;
+  message: any;
+  constructor(private navParams: NavParams) {
+    this.user = this.navParams.get('user');
+    this.message = this.navParams.get('message');
   }
 
 }

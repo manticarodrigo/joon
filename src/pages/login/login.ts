@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController, AlertController } from 'ionic-angular';
+import { NavController, AlertController, ModalController } from 'ionic-angular';
 
 import { AuthService } from '../../providers/auth-service';
 import { UserService } from '../../providers/user-service';
-import { ModalService } from '../../providers/modal-service';
 import { ChatService } from '../../providers/chat-service';
 import { PushService } from '../../providers/push-service';
 
@@ -19,9 +18,9 @@ export class LoginPage {
 
     constructor(private navCtrl: NavController,
                 private alertCtrl: AlertController,
+                private modalCtrl: ModalController,
                 private authS: AuthService,
                 private userS: UserService,
-                private modalS: ModalService,
                 private chatS: ChatService,
                 private pushS: PushService) {
 
@@ -31,18 +30,16 @@ export class LoginPage {
         console.log("login pressed...");
         let env = this;
         let user = { photoURL : 'assets/user-placeholder.png' }
-        this.modalS.user = user;
-        // this.modalS.message = "Starting authentication...";
-        if (!this.modalS.isActive) {
-            this.modalS.create(LoadingPage);
-            this.modalS.present();
-        }
+        let modal = env.modalCtrl.create(LoadingPage, {
+            user: user
+        });
+        modal.present();
         this.authS.beginAuth().then(user => {
             if (user) {
                 console.log("Auth succeeded!");
                 env.navCtrl.setRoot(DiscoverPage);
                 env.chatS.observeChats();
-                env.modalS.dismiss();
+                modal.dismiss();
                 env.pushS.getPushId().then(pushId => {
                     console.log("Appending pushId:");
                     console.log(pushId);
@@ -55,12 +52,12 @@ export class LoginPage {
                 });
             } else {
                 console.log("No user returned");
-                env.modalS.dismiss();
+                modal.dismiss();
                 env.presentError('Authentication error! Please try again.');
             }
         }).catch(error => {
             console.log(error);
-            env.modalS.dismiss();
+            modal.dismiss();
             env.presentError(error);
         });
     }
@@ -75,7 +72,7 @@ export class LoginPage {
     }
 
     showPolicy() {
-        this.modalS.create(LegalPage);
-        this.modalS.present();
+        let modal = this.modalCtrl.create(LegalPage);
+        modal.present();
     }
 }

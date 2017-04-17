@@ -3,7 +3,6 @@ import { NavController, NavParams, ViewController } from 'ionic-angular';
 
 import { PaymentService } from '../../providers/payment-service';
 import { DiscoverService } from '../../providers/discover-service';
-import { ModalService } from '../../providers/modal-service';
 
 @Component({
   selector: 'page-payment',
@@ -17,8 +16,7 @@ export class PaymentPage {
               private navParams: NavParams,
               private viewCtrl: ViewController,
               private paymentS: PaymentService,
-              private discoverS: DiscoverService,
-              private modalS: ModalService) {
+              private discoverS: DiscoverService) {
     this.user = this.navParams.get('user');
     this.discovering = this.navParams.get('discovering');
     this.loadProducts();

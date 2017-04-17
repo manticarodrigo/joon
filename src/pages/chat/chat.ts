@@ -8,7 +8,6 @@ import { DiscoverService } from '../../providers/discover-service';
 import { StorageService } from '../../providers/storage-service';
 import { PushService } from '../../providers/push-service';
 import { SettingsService } from '../../providers/settings-service';
-import { ModalService } from '../../providers/modal-service';
 
 import { ProfilePage } from '../profile/profile';
 
@@ -35,8 +34,7 @@ export class ChatPage {
                 private discoverS: DiscoverService,
                 private storageS: StorageService,
                 private pushS: PushService,
-                private settingsS: SettingsService,
-                private modalS: ModalService) {
+                private settingsS: SettingsService) {
         this.user = navParams.get('user');
         this.chat = navParams.get('chat');
     }

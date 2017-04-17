@@ -4,7 +4,8 @@ import { InAppPurchase } from 'ionic-native';
 @Injectable()
 export class PaymentService {
   restored = false;
-  
+  extraLikes = 0;
+  extraDoubleLikes = 0;
   constructor() {
     this.restorePurchases();
   }
@@ -12,7 +13,7 @@ export class PaymentService {
   fetchProducts(): Promise<any> {
     return new Promise((resolve, reject) => {
       InAppPurchase
-      .getProducts(['unlimitedLikes'])
+      .getProducts(['2xlikes'])
       .then(products => {
         console.log(products);
         resolve(products);
@@ -34,8 +35,12 @@ export class PaymentService {
       console.log(purchases);
       if (purchases) {
         this.restored = true;
+        this.extraLikes = 15;
+        this.extraDoubleLikes = 3;
       } else {
         this.restored = false;
+        this.extraLikes = 0;
+        this.extraDoubleLikes = 0;
       }
     })
     .catch(error => {

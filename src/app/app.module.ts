@@ -28,7 +28,6 @@ import { FacebookService } from 'ng2-facebook-sdk';
 import { AuthService } from '../providers/auth-service';
 import { FbService } from'../providers/fb-service';
 import { UserService } from '../providers/user-service';
-import { ModalService } from '../providers/modal-service';
 import { PopoverService } from '../providers/popover-service';
 import { DiscoverService } from '../providers/discover-service';
 import { ChatService } from '../providers/chat-service';
@@ -96,7 +95,6 @@ import { PaymentService } from '../providers/payment-service';
     AuthService,
     FbService,
     UserService,
-    ModalService,
     PopoverService,
     DiscoverService,
     ChatService,

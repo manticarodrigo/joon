@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
-import { NavController, ActionSheetController, AlertController, LoadingController } from 'ionic-angular';
+import { NavController, ActionSheetController, AlertController, LoadingController, ModalController } from 'ionic-angular';
 import { Camera } from 'ionic-native';
 
 import { UserService } from '../../providers/user-service';
 import { FbService } from '../../providers/fb-service';
 import { StorageService } from '../../providers/storage-service';
 import { PopoverService } from '../../providers/popover-service';
-import { ModalService } from '../../providers/modal-service';
 
 import { PopoverPage } from '../popover/popover';
 import { PhotoSelectPage } from '../photo-select/photo-select';
@@ -23,11 +22,11 @@ export class EditProfilePage {
                 private actionSheetCtrl: ActionSheetController,
                 private alertCtrl: AlertController,
                 private loadingCtrl: LoadingController,
+                private modalCtrl: ModalController,
                 private userS: UserService,
                 private fbS: FbService,
                 private storageS: StorageService,
-                private popoverS: PopoverService,
-                private modalS: ModalService) {
+                private popoverS: PopoverService) {
         this.user = this.userS.user;
     }
     
@@ -204,9 +203,10 @@ export class EditProfilePage {
                 loading.dismiss();
                 console.log(albums);
                 if (albums) {
-                    this.modalS.albums = albums;
-                    this.modalS.create(PhotoSelectPage);
-                    this.modalS.modal.onDidDismiss(url => {
+                    let modal = this.modalCtrl.create(PhotoSelectPage, {
+                        albums: albums
+                    });
+                    modal.onDidDismiss(url => {
                         if (url) {
                             let loading = this.loadingCtrl.create({
                                 content: 'Fetching image...'
@@ -217,11 +217,11 @@ export class EditProfilePage {
                             img.setAttribute('crossOrigin', 'anonymous');
                             img.onload = function () {
                                 var canvas = document.createElement("canvas");
-                                canvas.width = this.width;
-                                canvas.height = this.height;
+                                canvas.width = img.width;
+                                canvas.height = img.height;
 
                                 var ctx = canvas.getContext("2d");
-                                ctx.drawImage(this, 0, 0);
+                                ctx.drawImage(img, 0, 0);
                                 
                                 let data = canvas.toDataURL("image/png");
                                 console.log(data);
@@ -235,7 +235,7 @@ export class EditProfilePage {
                             resolve(null);
                         }
                     });
-                    this.modalS.present();
+                    modal.present();
                 } else {
                     let alert = this.alertCtrl.create({
                         title: 'No albums found!',

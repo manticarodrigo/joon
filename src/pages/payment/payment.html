@@ -20,7 +20,8 @@
   <p *ngIf="user">Don't miss out on connecting with {{ user.firstName }}, subscribe now!</p>
   <div class="center">
     <h6><b>Subscription includes:</b></h6>
-    <p><b>Unlimited Likes / Day</b><p>
+    <p><b>30 Likes / Day</b><p>
+    <p><b>5 Double Likes / Day</b><p>
   </div>
   <div class="footer">
     <div class="buttons">
@@ -34,7 +35,7 @@
         <button ion-button *ngIf="this.paymentS.restored" (click)="subscribe(product.productId)">
           Manage Subscription
         </button>
-        <p>{{ product.description }}</p>
+        <!-- <p>{{ product.description }}</p> -->
       </div>
       <button *ngIf="discovering" class="dismiss" (click)="dismiss()">
         No thanks

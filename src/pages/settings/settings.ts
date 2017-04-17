@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { NavController, MenuController, AlertController } from 'ionic-angular';
+import { NavController, MenuController, AlertController, ModalController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { SettingsService } from '../../providers/settings-service';
 import { ChatService } from '../../providers/chat-service';
 import { AuthService } from '../../providers/auth-service';
-import { ModalService } from '../../providers/modal-service';
 
 import { LoginPage } from '../login/login';
 import { LegalPage } from '../legal/legal';
@@ -25,11 +24,11 @@ export class SettingsPage {
     constructor(private navCtrl: NavController,
                 private menuCtrl: MenuController,
                 private alertCtrl: AlertController,
+                private modalCtrl: ModalController,
                 private userS: UserService,
                 private chatS: ChatService,
                 private settingsS: SettingsService,
-                private authS: AuthService,
-                private modalS: ModalService) {
+                private authS: AuthService) {
         this.user = null;
         this.settingsS.fetchUserSettings(this.userS.user).then(settings => {
             this.settings = settings;
@@ -77,8 +76,8 @@ export class SettingsPage {
     }
 
     showPolicy() {
-        this.modalS.create(LegalPage);
-        this.modalS.present();
+        let modal = this.modalCtrl.create(LegalPage);
+        modal.present();
     }
 
 }
