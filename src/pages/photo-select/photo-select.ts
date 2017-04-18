@@ -10,7 +10,7 @@ export class PhotoSelectPage {
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
               private viewCtrl: ViewController) {
-
+    this.albums = this.navParams.get('albums');
   }
 
   dismiss() {

@@ -120,6 +120,7 @@ export class Joon {
                   env.userS.updateCurrentUser(user);
                   env.chatS.observeChats();
                   env.nav.setRoot(DiscoverPage);
+                  modal.dismiss();
                 }).catch(error => {
                   console.log(error);
                   env.logoutApp();
