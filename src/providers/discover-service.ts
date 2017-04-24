@@ -500,14 +500,8 @@ export class DiscoverService {
       let ref = firebase.database().ref('/user_discoverables/' + this.userS.user.id);
       ref.set({})
       .then(data => {
-        console.log("Discoverable data reset DB!");
-        return ref.once('value');
-      })
-      .then(snapshot => {
-        console.log("Discoverable data returned from DB!");
-        let val = snapshot.val();
-        // console.log("Snapshot val: " + JSON.stringify(val));
-        resolve(val);
+        console.log("Discoverable data reset in DB!");
+        resolve(null);
       })
       .catch(error => {
         console.log(error);

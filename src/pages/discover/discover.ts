@@ -85,7 +85,7 @@ export class DiscoverPage {
     Promise.all([this.discoverS.fetchDailyLikes(), this.discoverS.fetchDailyDoubleLikes()])
     .then(data => {
       this.dailyLikes = data[0];
-      this.dailyLikes = data[1];
+      this.dailyDoubleLikes = data[1];
     })
     .catch(error => {
       console.log(error);
@@ -299,15 +299,15 @@ export class DiscoverPage {
   swipeRight() {
     let env = this;
     if (this.loadedUsers.length > 0) {
-      let currentCard = this.loadedUsers.pop();
-      this.dailyLikes++;
-      this.undoHistory.push(currentCard);
-      this.checkForEmptyStack();
+      let currentCard = env.loadedUsers.pop();
+      env.undoHistory.push(currentCard);
+      env.checkForEmptyStack();
       console.log("Swiping right on...");
       console.log(currentCard);
       if (this.dailyLikes < 15 + env.paymentS.extraLikes) {
         env.discoverS.liked(currentCard)
           .then(matched => {
+            env.dailyLikes++;
             if (!env.toastSeen[1]) {
               env.toastSeen[1] = true;
               env.presentToast('You liked ' + currentCard.firstName);
@@ -333,26 +333,26 @@ export class DiscoverPage {
         modal.present();
       }
     } else {
-      this.checkForEmptyStack();
+      env.checkForEmptyStack();
     }
   }
 
   doubleLike() {
     let env = this;
     if (this.loadedUsers.length > 0) {
-      this.throwingRightId = this.loadedUsers[this.loadedUsers.length - 1].id;
+      env.throwingRightId = env.loadedUsers[env.loadedUsers.length - 1].id;
       setTimeout(() => {
         console.log("Finshed swipe right");
-        this.throwingRightId = '';
-        let currentCard = this.loadedUsers.pop();
-        this.dailyDoubleLikes++;
-        this.undoHistory.push(currentCard);
-        this.checkForEmptyStack();
+        env.throwingRightId = '';
+        let currentCard = env.loadedUsers.pop();
+        env.undoHistory.push(currentCard);
+        env.checkForEmptyStack();
         console.log("Double liking...");
         console.log(currentCard);
-        if (this.dailyDoubleLikes < 2 + this.paymentS.extraDoubleLikes) {
+        if (env.dailyDoubleLikes < 2 + env.paymentS.extraDoubleLikes) {
           env.discoverS.doubleLiked(currentCard)
           .then(matched => {
+            env.dailyDoubleLikes++;
             if (!env.toastSeen[2]) {
               env.toastSeen[2] = true;
               env.presentToast('You double liked ' + currentCard.firstName);
@@ -378,6 +378,8 @@ export class DiscoverPage {
           modal.present();
         }
       }, 500);
+    } else {
+      env.checkForEmptyStack();
     }
   }
 
