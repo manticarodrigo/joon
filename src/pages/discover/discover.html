@@ -20,7 +20,7 @@
             <h3>No more users to show...</h3>
             <h5>Please update your <a (click)="showPreferences()">Preferences!</a></h5>
         </div>
-        <ion-card #cardsContainer swing-card *ngFor="let user of loadedUsers">
+        <ion-card #cardsContainer swing-card *ngFor="let user of loadedUsers" [class.throw-right]="user.id == throwingRightId" [class.throw-left]="user.id == throwingLeftId">
             <ion-card-content class="crop" *ngIf="user" (click)="userTapped(user)">
                 <img *ngIf="user.photoURL"[src]="user.photoURL">
                 <ion-item id="cardsDock" *ngIf="user.firstName">
@@ -36,10 +36,11 @@
             </ion-card-content>
         </ion-card>
     </div>
-    <div class="discover-footer" [class.inactive]="noUsers">
+    
+    <div class="discover-footer" [class.inactive]="loadedUsers.length < 1">
         <img src="assets/redo.png" (click)="undo()"/>
-        <img class="lower" src="assets/ignore.png" (click)="swipeLeft()"/>
-        <img class="lower" src="assets/like.png" (click)="swipeRight()"/>
+        <img class="lower" src="assets/ignore.png" (click)="throwLeft()"/>
+        <img class="lower" src="assets/like.png" (click)="throwRight()"/>
         <img src="assets/super-like.png" (click)="doubleLike()"/>
     </div>
 </ion-content>

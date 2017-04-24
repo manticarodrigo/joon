@@ -15,31 +15,31 @@ export class DiscoverService {
               private settingsS: SettingsService) {
   }
 
-  isDiscoverableTo(user1, user2, seenUIDs): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      Promise.all([this.userS.fetchUserPreferences(user1), this.userS.fetchUserPreferences(user2)])
-      .then(data => {
-        let pref1 = data[0];
-        // let pref2 = data[1];
-        if (!user2.id)
-          resolve(false);
-        if (user1.id == user2.id)
-          resolve(false);
-        if (seenUIDs && user2.id in seenUIDs)
-          resolve(false);
-        /*if (user1.gender == 'male' && !pref2.lfm)
-          resolve(false);
-        if (user1.gender == 'female' && !pref2.lff)
-          resolve(false);*/
-        if (user2.gender == 'male' && !pref1.lfm)
-          resolve(false);
-        if (user2.gender == 'female' && !pref1.lff)
-          resolve(false);
-        if (pref1.distance == 'national' && user1.country != user2.country)
-          resolve(false);
-        resolve(true);
-      });
-    });
+  isDiscoverableTo(user1, user2, seenUIDs, pref1) {
+    if (!user2.id) {
+        console.log("Undefined error");
+        return false;
+    } else if (user1.id == user2.id) {
+        console.log("Same id error");
+        return false;
+    } else if (seenUIDs && user2.id in seenUIDs) {
+        console.log("Already saw error");
+        return false;
+    /*if (user1.gender == 'male' && !pref2.lfm)
+        return false;
+    if (user1.gender == 'female' && !pref2.lff)
+        return false;*/
+    } else if (user2.gender == 'male' && !pref1.lfm) {
+        console.log("Not looking for males");
+        return false;
+    } else if (user2.gender == 'female' && !pref1.lff) {
+        console.log("Not looking for females");
+        return false;
+    } else if (pref1.distance == 'national' && user1.country != user2.country) {
+        console.log("Different country error");
+        return false;
+    }
+    return true;
   }
 
   fetchSeenUIDs(): Promise<any> {
@@ -70,96 +70,37 @@ export class DiscoverService {
     });
   }
 
-  fetchGlobalUsers(): Promise<any> {
+  fetchDiscoverableUsers(prefs): Promise<any> {
+    console.log("Fetching discoverable users...");
     let currentUser = this.userS.user;
     let env = this;
     return new Promise((resolve, reject) => {
-      Promise.all([this.userS.fetchAllUsers(), this.fetchSeenUIDs()])
-      .then(data => {
-        let allUsers = data[0];
-        let seenUIDs = data[1];
-        let visibleUsers = [];
-
-        // this method for parsing out seenUIDs is not totally optimal
-        // - better to remove keys when both are dictionaries
-        var userCount = 0;
-        allUsers.forEach(user => {
-          env.isDiscoverableTo(currentUser, user, seenUIDs)
-          .then(discoverable => {
-            console.log("User is discoverable:", discoverable);
-
-            if (discoverable) {
-              visibleUsers.push(user);
-            }
-            userCount++;
-            if (userCount == allUsers.length) {
-              resolve(visibleUsers);
-            }
+      let ref = firebase.database().ref('user_discoverables/' + currentUser.id).limitToFirst(15);
+      ref.once('value')
+      .then(snapshot => {
+        if (snapshot.exists() && snapshot.val()) {
+          let keys = Object.keys(snapshot.val());
+          console.log(keys);
+          env.userS.fetchUsers(keys)
+          .then(users => {
+            console.log("Fetch returned visible users:");
+            console.log(users);
+            resolve(users);
           })
           .catch(error => {
             console.log(error);
             reject(error);
           });
-        });
-      })
-      .catch(error => {
-        reject(error);
-      });
-    });
-  }
-
-  fetchLocalUsers(users): Promise<any> {
-    let currentUser = this.userS.user;
-    let env = this;
-    return new Promise((resolve, reject) => {
-      this.fetchSeenUIDs()
-      .then(seenUIDs => {
-        var visibleUsers = [];
-        var userCount = 0;
-        users.forEach(user => {
-          if (user) {
-            env.isDiscoverableTo(currentUser, user, seenUIDs).then(discoverable => {
-              if (discoverable) {
-                visibleUsers.push(user);
-              }
-              userCount++;
-              if (userCount == users.length) {
-                resolve(visibleUsers);
-              }
-            }).catch(error => {
-              console.log(error);
-              reject(error);
-            });
-          } else {
-            userCount++
-            if (userCount == users.length) {
-              resolve(visibleUsers);
-            }
-          }
-        });
-      })
-      .catch(error => {
-        reject(error);
-      });
-    });
-  }
-
-  saw(user): Promise<any> {
-    console.log("Seeing user...");
-    return new Promise((resolve, reject) => {
-      var data = {};
-      data[user.id] = new Date().getTime();
-      let ref = firebase.database().ref('/user_saw/' + this.userS.user.id);
-      ref.update(data)
-      .then( data => {
-        console.log("User saw saved to DB!");
-        return ref.once('value');
-      })
-      .then( snapshot => {
-        console.log("User saw returned from DB!");
-        let val = snapshot.val();
-        // console.log("Snapshot val: " + JSON.stringify(val));
-        resolve(val);
+        } else {
+          console.log('No discoverables table.')
+          env.generateDiscoverables(prefs)
+          .then(users => {
+            resolve(users);
+          }).catch(error => {
+            console.log(error);
+            reject(error);
+          });
+        }
       })
       .catch(error => {
         console.log(error);
@@ -168,19 +109,162 @@ export class DiscoverService {
     });
   }
 
+  generateDiscoverables(prefs): Promise<any> {
+    let env = this;
+    let currentUser = this.userS.user;
+    return new Promise((resolve, reject) => {
+      Promise.all([
+          env.userS.fetchAllUsers(),
+          env.fetchSeenUIDs()
+      ])
+      .then(snapshots => {
+          console.log("Sorting discoverable users for " + currentUser.name);
+          const allUsers = snapshots[0];
+          const seenUIDS = snapshots[1];
+          let visibleUsers = [];
+          let visibleIds = {};
+          // this method for parsing out seenUIDs is not totally optimal
+          // - better to remove keys when both are dictionaries
+          var userCount = 0;
+          allUsers.forEach(user => {
+              if (user) {
+                  console.log(user);
+                  if (env.isDiscoverableTo(currentUser, user, seenUIDS, prefs)) {
+                      console.log("User is discoverable:", user);
+                      visibleUsers.push(user);
+                      visibleIds[user.id] = new Date().getTime();
+                  }
+                  userCount++;
+                  if (userCount == allUsers.length) {
+                      firebase.database().ref('/user_discoverables/' + currentUser.id)
+                      .set(visibleIds)
+                      console.log("Found visible users:");
+                      console.log(visibleUsers);
+                      resolve(visibleUsers);
+                  }
+              } else {
+                  userCount++;
+                  if (userCount == allUsers.length) {
+                      firebase.database().ref('/user_discoverables/' + currentUser.id)
+                      .set(visibleIds)
+                      console.log("Found visible users:");
+                      console.log(visibleUsers);
+                      resolve(visibleUsers);
+                  }
+              }
+          });
+      })
+      .catch(error => {
+          console.log(error);
+          reject(error);
+      });
+    });
+  }
+
+  fetchLocalUsers(nearbyKeys, prefs): Promise<any> {
+    let currentUser = this.userS.user;
+    let env = this;
+    return new Promise((resolve, reject) => {
+      let ref = firebase.database().ref('user_discoverables/' + currentUser.id).limitToFirst(15);
+      ref.once('value')
+      .then(snapshot => {
+        if (snapshot.exists() && snapshot.val()) {
+          let discoverableKeys = Object.keys(snapshot.val());
+          var matches = [];
+          for (var key in nearbyKeys) {
+            if (discoverableKeys.find(nearbyKeys[key])) {
+              matches.push(nearbyKeys[key]);
+            }
+          }
+          env.userS.fetchUsers(matches)
+          .then(users => {
+            resolve(users);
+          })
+          .catch(error => {
+            console.log(error);
+            reject(error);
+          });
+        } else {
+          env.userS.fetchUsers(nearbyKeys)
+          .then(users => {
+            env.fetchSeenUIDs()
+            .then(seenUIDs => {
+              var visibleUsers = [];
+              var userCount = 0;
+              users.forEach(user => {
+                if (user) {
+                  if (env.isDiscoverableTo(currentUser, user, seenUIDs, prefs)) {
+                      console.log("User is discoverable:", user);
+                      visibleUsers.push(user);
+                  }
+                  userCount++;
+                  if (userCount == users.length) {
+                      resolve(visibleUsers);
+                  }
+                } else {
+                  userCount++;
+                  if (userCount == users.length) {
+                      resolve(visibleUsers);
+                  }
+                }
+              });
+            })
+            .catch(error => {
+              console.log(error);
+              reject(error);
+            });
+          })
+          .catch(error => {
+            console.log(error);
+            reject(error);
+          });
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+  saw(user): Promise<any> {
+    console.log("Seeing user...");
+    return new Promise((resolve, reject) => {
+      let fanout = {};
+      fanout['/user_saw/' + this.userS.user.id + '/' + user.id] = new Date().getTime();
+      fanout['/user_discoverables/' + this.userS.user.id + '/' + user.id] = null;
+      let ref = firebase.database().ref().update(fanout)
+      .then( data => {
+        console.log("User saw saved to DB!");
+        resolve(data);
+      }).catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+  updateRankFor(uid, num) {
+    const rankRef = firebase.database().ref('/user_rank/' + uid);
+    rankRef.transaction(rank => {
+      return (rank || 0) + num;
+    });
+  }
+
   liked(user): Promise<boolean> {
     console.log("Liking user...");
+    let env = this;
     return new Promise((resolve, reject) => {
-      var data = {};
-      data[user.id] = new Date().getTime();
-      let ref = firebase.database().ref('/user_liked/' + this.userS.user.id);
-      ref.update(data).then(data => {
+      let fanout = {};
+      fanout['/user_saw/' + this.userS.user.id + '/' + user.id] = new Date().getTime();
+      fanout['/user_liked/' + this.userS.user.id + '/' + user.id] = new Date().getTime();
+      fanout['/user_discoverables/' + this.userS.user.id + '/' + user.id] = null;
+      let ref = firebase.database().ref().update(fanout)
+      .then(data => {
+        env.updateRankFor(user.id, 1);
         console.log("User liked saved to DB!");
-        return ref.once('value');
-      })
-      .then(snapshot => {
-        console.log("User liked returned from DB!");
-        this.checkForMatchWith(user).then(matched => {
+        env.checkForMatchWith(user)
+        .then(matched => {
           resolve(matched);
         })
         .catch(error => {
@@ -197,34 +281,38 @@ export class DiscoverService {
 
   doubleLiked(user): Promise<boolean> {
     console.log("Double liking user...");
-
-    // The Liked table is always our reference for who likes who and so
-    // we first create a normal like, then a double like seperately.
-
+    let env = this;
     return new Promise((resolve, reject) => {
-      this.liked(user.id)
-      .then(matched => {
-        var data = {};
-        data[user.id] = new Date().getTime();
-        let ref = firebase.database().ref('/user_double_liked/' + this.userS.user.id);
-        ref.update(data)
-        .then(() => {
-          if (user.pushId) {
-            this.settingsS.fetchUserSettings(user).then(settings => {
-              if (settings.doubleLikes) {
-                this.pushS.push("I double liked you!", user);
-              }
-            }).catch(error => {
-              console.log(error);
-            });
-          }
-          resolve(matched);
-        })
-        .catch(error => {
-          reject(error);
-        });
+      let fanout = {};
+      fanout['/user_saw/' + this.userS.user.id + '/' + user.id] = new Date().getTime();
+      fanout['/user_liked/' + this.userS.user.id + '/' + user.id] = new Date().getTime();
+      fanout['/user_double_liked/' + this.userS.user.id + '/' + user.id] = new Date().getTime();
+      fanout['/user_discoverables/' + this.userS.user.id + '/' + user.id] = null;
+      let ref = firebase.database().ref().update(fanout)
+      .then(data => {
+          console.log("User liked saved to DB!");
+          env.updateRankFor(user.id, 2);
+          env.checkForMatchWith(user)
+          .then(matched => {
+            if (user.pushId) {
+              this.settingsS.fetchUserSettings(user).then(settings => {
+                if (settings.doubleLikes) {
+                  this.pushS.push("I double liked you!", user);
+                }
+              }).catch(error => {
+                console.log(error);
+                reject(error);
+              });
+            }
+            resolve(matched);
+          })
+          .catch(error => {
+            console.log(error);
+            reject(error);
+          });
       })
       .catch(error => {
+        console.log(error);
         reject(error);
       });
     });
@@ -406,17 +494,38 @@ export class DiscoverService {
     });
   }
 
-  resetSeen(): Promise<any> {
-    console.log("Resetting seen data...");
+  resetDiscoverables(): Promise<any> {
+    console.log("Resetting discoverable data...");
     return new Promise((resolve, reject) => {
-      let ref = firebase.database().ref('/user_saw/' + this.userS.user.id);
+      let ref = firebase.database().ref('/user_discoverables/' + this.userS.user.id);
       ref.set({})
       .then(data => {
-        console.log("Seen data reset DB!");
+        console.log("Discoverable data reset DB!");
         return ref.once('value');
       })
       .then(snapshot => {
-        console.log("Seen data returned from DB!");
+        console.log("Discoverable data returned from DB!");
+        let val = snapshot.val();
+        // console.log("Snapshot val: " + JSON.stringify(val));
+        resolve(val);
+      })
+      .catch(error => {
+        console.log(error);
+        reject(error);
+      });
+    });
+  }
+
+  resetSeen(): Promise<any> {
+    console.log("Resetting seen data...");
+    return new Promise((resolve, reject) => {
+      var fanout = {}
+      fanout['/user_saw/' + this.userS.user.id] = null;
+      fanout['/user_discoverables/' + this.userS.user.id] = null;
+      let ref = firebase.database().ref();
+      ref.update(fanout)
+      .then(snapshot => {
+        console.log("Discoverable and seen data deleted from DB!");
         let val = snapshot.val();
         // console.log("Snapshot val: " + JSON.stringify(val));
         resolve(val);
@@ -472,67 +581,29 @@ export class DiscoverService {
     });
   }
 
-  // this is a reliable but computationally expensive method, in the future
-  // it would be reasonable to store this number and update as-needed
   getRankedUsersIDs(): Promise<any> {
-    console.log("Finding top users...");
+    console.log("Fetching top users...");
     return new Promise((resolve, reject) => {
-      let ref = firebase.database().ref('/user_liked/');
+      let ref = firebase.database().ref('/user_rank/')
       ref.once('value')
-      .then(snapshots => {
-        let likedCounts = {};
-        snapshots.forEach(snapshot => {
-          if (snapshot.exists()) {
-            snapshot.forEach(liked => {
-              if (liked) {
-                if (!(liked.key in likedCounts)) {
-                  likedCounts[liked.key] = 0;
-                }
-                // console.log("adding 1 for " + liked.key);
-                likedCounts[liked.key] += 1;
-              }
-            });
+      .then(snapshot => {
+        let rankings = snapshot.val()
+        console.log("Found user rankings: ");
+        console.log(rankings);
+        let userIdArr = Object.keys(rankings);
+        userIdArr.sort((a: any, b: any) => {
+          let likesA = rankings[a];
+          let likesB = rankings[b];
+          // this is a descending sort
+          if (likesA < likesB) {
+            return 1;
+          } else if (likesA > likesB) {
+            return -1;
+          } else {
+            return 0;
           }
-        })
-
-        let ref2 = firebase.database().ref('/user_double_liked/');
-        ref2.once('value')
-        .then(snapshots => {
-          snapshots.forEach(snapshot => {
-            if (snapshot.exists()) {
-              if (snapshot) {
-                if (!(snapshot.key in likedCounts)) {
-                  likedCounts[snapshot.key] = 0;
-                }
-                let count = snapshot.numChildren();
-                // console.log("adding extra " + count + " for " + snapshot.key);
-                likedCounts[snapshot.key] += count;
-              }
-            }
-          });
-
-          console.log("liked Counts: ");
-          console.log(likedCounts)
-
-          let userIdArr = Object.keys(likedCounts);
-          
-          userIdArr.sort((a: any, b: any) => {
-            let likesA = likedCounts[a];
-            let likesB = likedCounts[b];
-            // this is a descending sort
-            if (likesA < likesB) {
-              return 1;
-            } else if (likesA > likesB) {
-              return -1;
-            } else {
-              return 0;
-            }
-          });
-          resolve(userIdArr);
-        })
-        .catch(error => {
-          reject(error);
-        })
+        });
+        resolve(userIdArr);
       })
       .catch(error => {
         reject(error);

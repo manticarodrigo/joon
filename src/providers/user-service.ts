@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Storage } from '@ionic/storage';
 import firebase from 'firebase';
+import { Http } from '@angular/http';
 
 @Injectable()
 export class UserService {
 
     public user: any;
 
-    constructor(private storage: Storage) {
+    constructor(private http: Http,
+                private storage: Storage) {
         
     }
 

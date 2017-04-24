@@ -38,6 +38,7 @@ export class PreferencesPage {
     console.log(this.preferences);
     if (this.user) {
       this.userS.updateUserPreferences(this.preferences);
+      this.discoverS.resetDiscoverables();
     }
   }
 

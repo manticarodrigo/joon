@@ -64,30 +64,35 @@ export class TopUsersPage {
     console.log("Fetching local top users with ids:");
     console.log(topIds);
     let env = this;
-    env.locationS.getLocation().then(() => {
-      env.locationS.fetchNearbyKeys().then(nearbyKeys => {
+    env.locationS.getLocation()
+    .then(location => {
+      env.locationS.fetchNearbyKeys()
+      .then(nearbyKeys => {
         var localTopIds = [];
-          var count = 0;
-          for (var key in nearbyKeys){
-            console.log(nearbyKeys[key]);
-            if (topIds.includes(nearbyKeys[key])) {
-              if (count < this.topUsersLimit) {
-                console.log("Key exists nearby:");
-                console.log(nearbyKeys[key]);
-                count++;
-                localTopIds.push(nearbyKeys[key]);
-              }
+        var count = 0;
+        for (var key in nearbyKeys){
+          console.log(nearbyKeys[key]);
+          if (topIds.includes(nearbyKeys[key])) {
+            if (count < this.topUsersLimit) {
+              console.log("Key exists nearby:");
+              console.log(nearbyKeys[key]);
+              count++;
+              localTopIds.push(nearbyKeys[key]);
             }
           }
-          return this.userS.fetchUsers(localTopIds);
-        }).then(users => {
-          env.localUsers = this.removeEmptyValues(users);
-          modal.dismiss();
-        }).catch(error => {
-          console.log(error);
-          modal.dismiss();
-        });
-    }).catch(error => {
+        }
+        return this.userS.fetchUsers(localTopIds);
+      })
+      .then(users => {
+        env.localUsers = this.removeEmptyValues(users);
+        modal.dismiss();
+      })
+      .catch(error => {
+        console.log(error);
+        modal.dismiss();
+      });
+    })
+    .catch(error => {
       console.log(error);
       modal.dismiss();
     });

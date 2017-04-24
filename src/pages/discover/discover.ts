@@ -33,12 +33,18 @@ export class DiscoverPage {
   @ViewChild('swingContainer') swingStack: SwingStackComponent;
   @ViewChildren('cardsContainer') swingCards: QueryList<SwingCardComponent>;
 
+  prefs: any;
   users: Array<any>;
+  local = false;
+  buffering = false;
   loadedUsers: Array<any>;
-  noUsers: boolean = true;
   undoHistory: Array<any>;
   stackConfig: StackConfig;
+  throwingRightId = '';
+  throwingLeftId = '';
   toastSeen: Array<boolean>;
+  dailyLikes = 0;
+  dailyDoubleLikes = 0;
 
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
@@ -53,7 +59,7 @@ export class DiscoverPage {
               private paymentS: PaymentService) {
     this.stackConfig = {
       throwOutConfidence: (offset, element) => {
-        return Math.min(Math.abs(offset) / (element.offsetWidth/2), 1);
+        return Math.min(Math.abs(offset) / (element/2), 1);
       },
       transform: (element, x, y, r) => {
         this.onItemMove(element, x, y, r);
@@ -72,6 +78,17 @@ export class DiscoverPage {
     // Either subscribe in controller or set in HTML
     this.swingStack.throwin.subscribe((event: DragEvent) => {
       event.target.style.background = '#fff';
+    });
+  }
+
+  ionViewWillEnter() {
+    Promise.all([this.discoverS.fetchDailyLikes(), this.discoverS.fetchDailyDoubleLikes()])
+    .then(data => {
+      this.dailyLikes = data[0];
+      this.dailyLikes = data[1];
+    })
+    .catch(error => {
+      console.log(error);
     });
   }
 
@@ -112,48 +129,26 @@ export class DiscoverPage {
     });
     modal.present();
     this.userS.fetchUserPreferences(this.userS.user)
-    .then(preferences => {
-      if (preferences.distance == 'local') {
+    .then(prefs => {
+      env.prefs = prefs;
+      if (prefs.distance == 'local') {
+        env.local = true;
         env.locationS.getLocation()
-        .then(() => {
+        .then(location => {
             env.locationS.fetchNearbyKeys()
             .then(keys => {
-              if (keys.includes(this.userS.user.id)) {
-                var i = keys.indexOf(this.userS.user.id);
+              if (keys.includes(env.userS.user.id)) {
+                var i = keys.indexOf(env.userS.user.id);
                 if (i > -1) {
                     keys.splice(i, 1);
                 }
               }
               if (keys.length > 0) {
-                env.userS.fetchUsers(keys)
-                .then(users => {
-                  env.discoverS.fetchLocalUsers(users)
-                  .then(localUsers => {
-                    var existingUsers = [];
-                    for (var i in localUsers) {
-                      var user = localUsers[i];
-                      if (user) {
-                        existingUsers.push(user);
-                        env.noUsers = false;
-                        var mutual = [];
-                        for (var key in user.friends) {
-                          if (env.userS.user.friends.includes(user.friends[key])) {
-                            mutual.push(user.friends[key]);
-                          }
-                        }
-                        if (mutual.length > 0) {
-                          user['mutual'] = mutual.length;
-                        }
-                      }
-                    }
-                    env.users = existingUsers;
-                    env.checkForEmptyStack();
-                    modal.dismiss();
-                  })
-                  .catch(error => {
-                    console.log(error);
-                    modal.dismiss();
-                  });
+                env.discoverS.fetchLocalUsers(keys, prefs)
+                .then(localUsers => {
+                  env.users = env.addMutualFor(localUsers);
+                  env.checkForEmptyStack();
+                  modal.dismiss();
                 })
                 .catch(error => {
                   console.log(error);
@@ -174,31 +169,12 @@ export class DiscoverPage {
             modal.dismiss();
           });
       } else {
-        env.discoverS.fetchGlobalUsers()
+        env.local = false;
+        env.discoverS.fetchDiscoverableUsers(prefs)
         .then(users => {
-          console.log("fetch returned visible users");
-          console.log(users);
-          var existingUsers = [];
-          for (var i in users) {
-            var user = users[i];
-            if (user) {
-              existingUsers.push(user);
-              env.noUsers = false;
-              var mutual = [];
-              for (var key in user.friends) {
-                if (env.userS.user.friends.includes(user.friends[key])) {
-                  mutual.push(user.friends[key]);
-                }
-              }
-              if (mutual.length > 0) {
-                user.mutual = mutual.length;
-              }
-            }
-            
-          }
-          env.users = existingUsers;
+          env.users = env.addMutualFor(users);
           env.checkForEmptyStack();
-          modal.dismiss()
+          modal.dismiss();
         })
         .catch(error => {
           console.log(error);
@@ -212,29 +188,97 @@ export class DiscoverPage {
     });
   }
 
-  checkForEmptyStack() {
-    if (this.loadedUsers.length == 0 && this.users.length > 0) {
-      console.log("Refilling users!");
-      var nextUsers = [];
-      for (var i = 0; i < 10; i++) {
-        if (this.users[i]) {
-          nextUsers.push(this.users[i]);
+  addMutualFor(users) {
+    let env = this;
+    var existingUsers = [];
+    for (var i in users) {
+      var user = users[i];
+      if (user) {
+        existingUsers.push(user);
+        var mutual = [];
+        for (var key in user.friends) {
+          if (env.userS.user.friends.includes(user.friends[key])) {
+            mutual.push(user.friends[key]);
+          }
+        }
+        if (mutual.length > 0) {
+          user.mutual = mutual.length;
         }
       }
-      this.users.splice(0, nextUsers.length, null);
-      this.loadedUsers = nextUsers;
+      
+    }
+    return existingUsers;
+  }
+
+  checkForEmptyStack() {
+    let env = this;
+    if (this.local) {
+      if (env.loadedUsers.length == 0 && env.users.length > 0) {
+        console.log("Refilling users!");
+        var nextUsers = [];
+        for (var i = 0; i < 15; i++) {
+          if (env.users[i]) {
+            env.loadedUsers.push(env.users[i]);
+            nextUsers.push(env.users[i]);
+          }
+        }
+        env.users.splice(0, nextUsers.length, null);
+        env.loadedUsers = nextUsers;
+      }
+    } else {
+      if (env.loadedUsers.length < 5 && env.users.length < 15) {
+        if (!env.buffering) {
+          env.discoverS.fetchDiscoverableUsers(env.prefs)
+          .then(users => {
+            env.buffering = false;
+            env.users = users;
+          }).catch(error => {
+            env.buffering = false;
+            console.log(error);
+          });
+        }
+        env.buffering = true;
+      }
+      if (env.loadedUsers.length == 0 && env.users.length > 0) {
+        console.log("Refilling users!");
+        var nextUsers = [];
+        for (var i = 0; i < 15; i++) {
+          if (env.users[i]) {
+            env.loadedUsers.push(env.users[i]);
+            nextUsers.push(env.users[i]);
+          }
+        }
+        env.users.splice(0, nextUsers.length, null);
+        env.loadedUsers = nextUsers;
+      }
     }
   }
 
+  throwLeft() {
+    this.throwingLeftId = this.loadedUsers[this.loadedUsers.length - 1].id;
+    setTimeout(() => {
+      console.log("Finshed swipe left");
+      this.throwingLeftId = '';
+      this.swipeLeft();
+    }, 500);
+  }
+
+  throwRight() {
+    this.throwingRightId = this.loadedUsers[this.loadedUsers.length - 1].id;
+    setTimeout(() => {
+      console.log("Finshed swipe right");
+      this.throwingRightId = '';
+      this.swipeRight();
+    }, 500);
+  }
+
   swipeLeft() {
-    let currentCard = this.loadedUsers.pop();
-    this.undoHistory.push(currentCard);
-    this.checkForEmptyStack();
-    console.log("Swiping left on...");
-    console.log(currentCard);
-    console.log("Number of non-loaded users left...");
-    console.log(this.users.length);
-    if (this.users.length > 0 || this.loadedUsers.length > 0) {
+    if (this.loadedUsers.length > 0) {
+      let currentCard = this.loadedUsers.pop();
+      this.undoHistory.push(currentCard);
+      this.checkForEmptyStack();
+      console.log("Swiping left on...");
+      console.log(currentCard);
       this.discoverS.saw(currentCard)
       .then(success => {
         if (!this.toastSeen[0]) {
@@ -245,105 +289,82 @@ export class DiscoverPage {
       .catch(error => {
         console.log(error);
         this.presentToast('Error saving swipe');
-        this.undo();
+        this.undo('left');
       });
     } else {
-      this.noUsers = true;
+      this.checkForEmptyStack();
     }
   }
 
   swipeRight() {
     let env = this;
-    let currentCard = this.loadedUsers.pop();
-    this.undoHistory.push(currentCard);
-    this.checkForEmptyStack();
-    console.log("Swiping right on...");
-    console.log(currentCard);
-    console.log("Number of non-loaded users left...");
-    console.log(this.users.length);
-    if (this.users.length > 0 || this.loadedUsers.length > 0) {
-      env.discoverS.fetchDailyLikes()
-      .then(num => {
-        if (num < 15 + env.paymentS.extraLikes) {
-          env.discoverS.saw(currentCard)
-          .then(success => {
-            env.discoverS.liked(currentCard)
-            .then(matched => {
-              if (!env.toastSeen[1]) {
-                env.toastSeen[1] = true;
-                env.presentToast('You liked ' + currentCard.firstName);
-              }
-              if (matched) {
-                env.presentMatchWith(currentCard);
-              }
-            })
-            .catch(error => {
-              console.log(error);
-              env.presentToast('Error saving swipe');
-              env.undo();
-            });
+    if (this.loadedUsers.length > 0) {
+      let currentCard = this.loadedUsers.pop();
+      this.dailyLikes++;
+      this.undoHistory.push(currentCard);
+      this.checkForEmptyStack();
+      console.log("Swiping right on...");
+      console.log(currentCard);
+      if (this.dailyLikes < 15 + env.paymentS.extraLikes) {
+        env.discoverS.liked(currentCard)
+          .then(matched => {
+            if (!env.toastSeen[1]) {
+              env.toastSeen[1] = true;
+              env.presentToast('You liked ' + currentCard.firstName);
+            }
+            if (matched) {
+              env.presentMatchWith(currentCard);
+            }
           })
           .catch(error => {
             console.log(error);
             env.presentToast('Error saving swipe');
-            env.undo();
+            env.undo('right');
           });
-        } else {
-          let modal = env.modalCtrl.create(PaymentPage, {
-              user: currentCard,
-              discovering: true
-          });
-          modal.present();
-          modal.onDidDismiss(() => {
-            env.undo();
-          })
-          modal.present();
-        }
-      })
-      .catch(error => {
-        console.log(error);
-        env.presentToast('Error saving swipe');
-        env.undo();
-      });
+      } else {
+        let modal = env.modalCtrl.create(PaymentPage, {
+            user: currentCard,
+            discovering: true
+        });
+        modal.present();
+        modal.onDidDismiss(() => {
+          env.undo('right');
+        })
+        modal.present();
+      }
     } else {
-      env.noUsers = true;
+      this.checkForEmptyStack();
     }
   }
 
   doubleLike() {
     let env = this;
-    let currentCard = this.loadedUsers.pop();
-    this.undoHistory.push(currentCard);
-    this.checkForEmptyStack();
-    console.log("Double liking...");
-    console.log(currentCard);
-    console.log("Number of non-loaded users left...");
-    console.log(this.users.length);
-    if (this.users.length > 0 || this.loadedUsers.length > 0) {
-      this.discoverS.fetchDailyDoubleLikes()
-      .then(num => {
-        if (num < 2 + this.paymentS.extraDoubleLikes) {
-          env.discoverS.saw(currentCard)
-          .then(success => {
-            env.discoverS.doubleLiked(currentCard)
-            .then(matched => {
-              if (!env.toastSeen[2]) {
-                env.toastSeen[2] = true;
-                env.presentToast('You double liked ' + currentCard.firstName);
-              }
-              if (matched) {
-                env.presentMatchWith(currentCard);
-              }
-            })
-            .catch(error => {
-              console.log(error);
-              env.presentToast('Error saving swipe');
-              env.undo();
-            });
-          }).catch(error => {
+    if (this.loadedUsers.length > 0) {
+      this.throwingRightId = this.loadedUsers[this.loadedUsers.length - 1].id;
+      setTimeout(() => {
+        console.log("Finshed swipe right");
+        this.throwingRightId = '';
+        let currentCard = this.loadedUsers.pop();
+        this.dailyDoubleLikes++;
+        this.undoHistory.push(currentCard);
+        this.checkForEmptyStack();
+        console.log("Double liking...");
+        console.log(currentCard);
+        if (this.dailyDoubleLikes < 2 + this.paymentS.extraDoubleLikes) {
+          env.discoverS.doubleLiked(currentCard)
+          .then(matched => {
+            if (!env.toastSeen[2]) {
+              env.toastSeen[2] = true;
+              env.presentToast('You double liked ' + currentCard.firstName);
+            }
+            if (matched) {
+              env.presentMatchWith(currentCard);
+            }
+          })
+          .catch(error => {
             console.log(error);
             env.presentToast('Error saving swipe');
-            env.undo();
+            env.undo('double');
           });
         } else {
           console.log(currentCard);
@@ -352,18 +373,11 @@ export class DiscoverPage {
               discovering: true
           });
           modal.onDidDismiss(() => {
-            env.undo();
+            env.undo('double');
           })
           modal.present();
         }
-      })
-      .catch(error => {
-        console.log(error);
-        env.presentToast('Error saving swipe');
-        env.undo();
-      });
-    } else {
-      env.noUsers = true;
+      }, 500);
     }
   }
 
@@ -384,11 +398,17 @@ export class DiscoverPage {
     modal.present();
   }
 
-  undo() {
+  undo(type) {
     console.log("Undo pressed!");
     if (this.undoHistory.length > 0) {
       let undoCard = this.undoHistory.pop();
       this.loadedUsers.push(undoCard);
+      if (type == 'double') {
+        this.dailyLikes--;
+        this.dailyDoubleLikes--;
+      } else if (type == 'right') {
+        this.dailyLikes--;
+      }
     }
   }
 

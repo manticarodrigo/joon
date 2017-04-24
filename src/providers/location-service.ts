@@ -18,20 +18,36 @@ export class LocationService {
               private userS: UserService) {
     let ref = firebase.database().ref('user_located');
     this.geoRef = new GeoFire(ref);
+    this.getLocation();
   }
 
   getLocation(): Promise<any> {
     return new Promise((resolve, reject) => {
       var env = this;
       if (this.currentLocation) {
-        resolve('success');
+        resolve(env.currentLocation);
       } else {
-        // Check If Cordova/Mobile
-        if (env.platform.is('cordova')) {
+        if (env.platform.is('android')) {
+          console.log("Asking user to get their location (android)...");
+          if (navigator.geolocation) {
+            var options = {
+              enableHighAccuracy: true
+            };
+            navigator.geolocation.getCurrentPosition(location => {
+              env.currentLocation = location;
+              env.setLocation.bind(env)(location);
+              resolve(location);
+            }, error => {
+              console.log(error);
+              reject(error);
+            }, options);
+          }
+        } else if (env.platform.is('cordova')) {
           console.log("Asking user to get their location (cordova)...");
           Geolocation.getCurrentPosition().then(location => {
-            env.setLocation.bind(env)(location);
-            resolve('success');
+            env.currentLocation = location;
+            env.setLocation.bind(env)(location)
+            resolve(location);
           }).catch(error => {
             env.errorHandler(error);
             reject(error);
@@ -41,8 +57,9 @@ export class LocationService {
           if (typeof navigator !== "undefined" && typeof navigator.geolocation !== "undefined") {
             console.log("Asking user to get their location (html5)...");
             navigator.geolocation.getCurrentPosition(function(location) {
+                env.currentLocation = location;
                 env.setLocation(location);
-                resolve('success');
+                resolve(location);
             }, function(error) {
                 console.log(error);
                 reject(error);
@@ -57,7 +74,6 @@ export class LocationService {
   }
 
   setLocation(location) {
-    this.currentLocation = location;
     var latitude = location.coords.latitude;
     var longitude = location.coords.longitude;
     console.log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
@@ -82,13 +98,16 @@ export class LocationService {
   };
 
   fetchNearbyKeys(): Promise<any> {
+    let env = this;
     console.log("Fetching nearby keys...");
     return new Promise((resolve, reject) => {
-    var latitude = this.currentLocation.coords.latitude;
-    var longitude = this.currentLocation.coords.longitude;
-    var env = this;
-    var nearbyKeys = [];
-      var geoQuery = this.geoRef.query({
+      let latitude = env.currentLocation.coords.latitude;
+      let longitude = env.currentLocation.coords.longitude;
+      console.log("Found current position:");
+      console.log(latitude);
+      console.log(longitude);
+      var nearbyKeys = [];
+      var geoQuery = env.geoRef.query({
         center: [latitude, longitude],
         radius: 160.934 // kilometers
       });

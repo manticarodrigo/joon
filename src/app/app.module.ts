@@ -22,6 +22,7 @@ import { PaymentPage } from '../pages/payment/payment';
 
 import { IonicStorageModule } from '@ionic/storage';
 import { SwingModule } from 'angular2-swing';
+import { HttpModule } from '@angular/http';
 
 import { Facebook, NativeStorage, OneSignal } from 'ionic-native';
 import { FacebookService } from 'ng2-facebook-sdk';
@@ -67,7 +68,8 @@ import { PaymentService } from '../providers/payment-service';
         activator: 'none' 
     }),
     IonicStorageModule.forRoot(),
-    SwingModule
+    SwingModule,
+    HttpModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
