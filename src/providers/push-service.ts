@@ -6,11 +6,13 @@ import { UserService } from './user-service';
 @Injectable()
 export class PushService {
 
-  constructor(public userS: UserService) {
-    
+  notificationUID: any;
+
+  constructor(private userS: UserService) {
   }
 
   init() {
+    let env = this;
     console.log("Initializing OneSignal...");
     // OneSignal initialization
     OneSignal.startInit("ed946620-864f-40c3-9edb-bd3495a7e2b4", "516717911226");
@@ -23,33 +25,49 @@ export class PushService {
       console.log("Notification received!");
     });
 
-    OneSignal.handleNotificationOpened().subscribe(() => {
+    OneSignal.handleNotificationOpened().subscribe((result) => {
       // do something when a notification is opened
-      console.log("Notification opened!");
+      console.log("Notification opened with data:");
+      console.log(JSON.stringify(result));
+      let payload = result.notification.payload;
+      if (payload) {
+        if (payload.additionalData) {
+          let uid = payload.additionalData["uid"];
+          let type = payload.additionalData["type"];
+          if (type == 'doubleLike') {
+            console.log("Adding notification uid to discover page:");
+            console.log(uid);
+            env.notificationUID = uid;
+          }
+        }
+      }
     });
-
     OneSignal.endInit();
   }
 
   setSubscription(enable) {
     OneSignal.setSubscription(enable);
+    
   }
 
-  push(message, user) {
+  push(message, user, type) {
+    console.log("Sending message to user:");
+    console.log(message);
+    console.log(user.firstName);
     var notificationObj = { 
                           app_id: "5eb5a37e-b458-11e3-ac11-000c2940e62c",
                           headings: { en: this.userS.user.firstName },
                           contents: { en: message },
-                          data: { uid: this.userS.user.id },
+                          data: { uid: this.userS.user.id, type: type },
                           include_player_ids: [user.pushId],
                           isAppInFocus: null,
                           shown: null,
                           payload: null,
-                          displayType: null
+                          displayType: null,
                         };
-    if (this.userS.user.pushId) {
+    // if (this.userS.user.pushId) {
       OneSignal.postNotification(notificationObj);
-    }
+    // }
   }
 
   getPushId(): Promise<any> {

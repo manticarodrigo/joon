@@ -241,7 +241,7 @@ export class ChatPage {
                 if (this.user.pushId) {
                     this.settingsS.fetchUserSettings(this.user).then(settings => {
                         if (settings.messages) {
-                            this.pushS.push(this.userS.user.firstName + " sent an image.", this.user);
+                            this.pushS.push(this.userS.user.firstName + " sent an image.", this.user, 'attachment');
                         }
                     }).catch(error => {
                         console.log(error);
@@ -269,7 +269,7 @@ export class ChatPage {
                 if (this.user.pushId) {
                     this.settingsS.fetchUserSettings(this.user).then(settings => {
                         if (settings.messages) {
-                            this.pushS.push(input, this.user);
+                            this.pushS.push(input, this.user, 'message');
                         }
                     }).catch(error => {
                         console.log(error);

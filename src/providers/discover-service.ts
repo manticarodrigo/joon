@@ -297,7 +297,7 @@ export class DiscoverService {
             if (user.pushId) {
               this.settingsS.fetchUserSettings(user).then(settings => {
                 if (settings.doubleLikes) {
-                  this.pushS.push("I double liked you!", user);
+                  this.pushS.push("I double liked you!", user, 'doubleLike');
                 }
               }).catch(error => {
                 console.log(error);
@@ -432,7 +432,7 @@ export class DiscoverService {
               this.settingsS.fetchUserSettings(user)
               .then(settings => {
                 if (settings.matches) {
-                  this.pushS.push("You matched with me!", user);
+                  this.pushS.push("You matched with me!", user, 'match');
                 }
               })
               .catch(error => {

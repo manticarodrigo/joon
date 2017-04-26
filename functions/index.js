@@ -1,8 +1,7 @@
 var functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
-/*
-exports.sanitizeDiscoverables = functions.https.onRequest((req, res) => {
+exports.fetchDiscoverables = functions.https.onRequest((req, res) => {
     // Grab the uid parameter.
     const uid = req.query.uid;
     console.log("Got uid paramter: " + uid);
@@ -38,8 +37,7 @@ exports.sanitizeDiscoverables = functions.https.onRequest((req, res) => {
                         for (var i=0;i<keys.length;i++) {
                             val[keys[i]] = new Date().getTime();
                         }
-                        resolve(admin.database().ref('/user_discoverables/' + currentUser.id)
-                        .set(val));
+                        resolve(res.json(visibleUsers));
                     }
                 } else {
                     userCount++;
@@ -49,8 +47,7 @@ exports.sanitizeDiscoverables = functions.https.onRequest((req, res) => {
                         for (var i=0;i<keys.length;i++) {
                             val[keys[i]] = new Date().getTime();
                         }
-                        resolve(admin.database().ref('/user_discoverables/' + currentUser.id)
-                        .set(val));
+                        resolve(res.json(visibleUsers));
                     }
                 }
             });
@@ -61,7 +58,6 @@ exports.sanitizeDiscoverables = functions.https.onRequest((req, res) => {
         });
     });
 });
-*/
 
 function isDiscoverableTo(user1, user2, seenUIDs, pref1) {
     if (!user2.id) {
