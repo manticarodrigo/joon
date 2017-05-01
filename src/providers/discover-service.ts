@@ -75,7 +75,7 @@ export class DiscoverService {
     let currentUser = this.userS.user;
     let env = this;
     return new Promise((resolve, reject) => {
-      let ref = firebase.database().ref('user_discoverables/' + currentUser.id).limitToFirst(15);
+      let ref = firebase.database().ref('user_discoverables/' + currentUser.id);
       ref.once('value')
       .then(snapshot => {
         if (snapshot.exists() && snapshot.val()) {
@@ -96,7 +96,8 @@ export class DiscoverService {
           env.generateDiscoverables(prefs)
           .then(users => {
             resolve(users);
-          }).catch(error => {
+          })
+          .catch(error => {
             console.log(error);
             reject(error);
           });

@@ -1,5 +1,5 @@
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
-import { NavController, NavParams, ToastController, AlertController, MenuController, ModalController } from 'ionic-angular';
+import { NavController, NavParams, ToastController, AlertController, MenuController, ModalController, LoadingController } from 'ionic-angular';
 
 import { DiscoverService } from '../../providers/discover-service';
 import { UserService } from '../../providers/user-service';
@@ -37,8 +37,6 @@ export class DiscoverPage {
 
   prefs: any;
   users: Array<any>;
-  local = false;
-  buffering = false;
   loadedUsers: Array<any>;
   undoHistory: Array<any>;
   stackConfig: StackConfig;
@@ -54,6 +52,7 @@ export class DiscoverPage {
               private toastCtrl: ToastController,
               private alertCtrl: AlertController,
               private modalCtrl: ModalController,
+              private loadingCtrl: LoadingController,
               private menu: MenuController,
               private discoverS: DiscoverService,
               private userS: UserService,
@@ -147,7 +146,6 @@ export class DiscoverPage {
     .then(prefs => {
       env.prefs = prefs;
       if (prefs.distance == 'local') {
-        env.local = true;
         env.locationS.getLocation()
         .then(location => {
             env.locationS.fetchNearbyKeys()
@@ -184,7 +182,6 @@ export class DiscoverPage {
             modal.dismiss();
           });
       } else {
-        env.local = false;
         env.discoverS.fetchDiscoverableUsers(prefs)
         .then(users => {
           env.users = env.finishProcessing(users, notificationUser);
@@ -203,13 +200,13 @@ export class DiscoverPage {
     });
   }
 
-  finishProcessing(users, notificationUser) {
+  finishProcessing(users, notificationUser) {    
     let env = this;
     var existingUsers = [];
+    var map = {};
     for (var i in users) {
       var user = users[i];
-      if (user) {
-        existingUsers.push(user);
+      if (user && !map[user.id]) {
         var mutual = [];
         for (var key in user.friends) {
           if (env.userS.user.friends.includes(user.friends[key])) {
@@ -219,6 +216,8 @@ export class DiscoverPage {
         if (mutual.length > 0) {
           user.mutual = mutual.length;
         }
+        existingUsers.push(user);
+        map[user.id] = true;
       }
     }
     if (notificationUser) {
@@ -238,45 +237,17 @@ export class DiscoverPage {
 
   checkForEmptyStack() {
     let env = this;
-    if (this.local) {
-      if (env.loadedUsers.length == 0 && env.users.length > 0) {
-        console.log("Refilling users!");
-        var nextUsers = [];
-        for (var i = 0; i < 15; i++) {
-          if (env.users[i]) {
-            env.loadedUsers.push(env.users[i]);
-            nextUsers.push(env.users[i]);
-          }
+    if (env.loadedUsers.length == 0 && env.users.length > 0) {
+      console.log("Refilling users...");
+      var nextUsers = [];
+      for (var i = 0; i < 15; i++) {
+        if (env.users[i]) {
+          env.loadedUsers.push(env.users[i]);
+          nextUsers.push(env.users[i]);
         }
-        env.users.splice(0, nextUsers.length, null);
-        env.loadedUsers = nextUsers;
       }
-    } else {
-      if (env.loadedUsers.length < 5 && env.users.length < 15) {
-        if (!env.buffering) {
-          env.discoverS.fetchDiscoverableUsers(env.prefs)
-          .then(users => {
-            env.buffering = false;
-            env.users = users;
-          }).catch(error => {
-            env.buffering = false;
-            console.log(error);
-          });
-        }
-        env.buffering = true;
-      }
-      if (env.loadedUsers.length == 0 && env.users.length > 0) {
-        console.log("Refilling users!");
-        var nextUsers = [];
-        for (var i = 0; i < 15; i++) {
-          if (env.users[i]) {
-            env.loadedUsers.push(env.users[i]);
-            nextUsers.push(env.users[i]);
-          }
-        }
-        env.users.splice(0, nextUsers.length, null);
-        env.loadedUsers = nextUsers;
-      }
+      env.users.splice(0, nextUsers.length, null);
+      env.loadedUsers = nextUsers;
     }
   }
 
