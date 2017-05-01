@@ -38,15 +38,28 @@ export class TopUsersPage {
   }
 
   fetchTopUsers() {
-    console.log("Fetching global top users");
+    console.log("Fetching global top users...");
     let user = this.userS.user;
     let modal = this.modalCtrl.create(LoadingPage, {
         user: user
     });
     modal.present();
-    this.discoverS.getRankedUsersIDs().then(sortedIds => {
+    this.discoverS.getRankedUsersMap().then(rankings => {
+      let sortedIds = Object.keys(rankings);
+      sortedIds.sort((a: any, b: any) => {
+        let likesA = rankings[a];
+        let likesB = rankings[b];
+        // this is a descending sort
+        if (likesA < likesB) {
+          return 1;
+        } else if (likesA > likesB) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
       let topIds = sortedIds.slice(0, this.topUsersLimit + 3);
-      this.fetchLocalTopUsers(sortedIds, modal);
+      this.fetchLocalTopUsers(rankings, modal);
       return this.userS.fetchUsers(topIds);
     }).then(users => {
       // since each query is passed seperately to Promise.all,
@@ -60,31 +73,41 @@ export class TopUsersPage {
     });
   }
 
-  fetchLocalTopUsers(topIds, modal) {
-    console.log("Fetching local top users with ids:");
-    console.log(topIds);
+  fetchLocalTopUsers(rankings, modal) {
+    console.log("Fetching local top users with ids...");
     let env = this;
     env.locationS.getLocation()
     .then(location => {
       env.locationS.fetchNearbyKeys()
       .then(nearbyKeys => {
-        var localTopIds = [];
+        var localTopMap = {};
         var count = 0;
-        for (var key in nearbyKeys){
-          console.log(nearbyKeys[key]);
-          if (topIds.includes(nearbyKeys[key])) {
-            if (count < this.topUsersLimit) {
-              console.log("Key exists nearby:");
-              console.log(nearbyKeys[key]);
-              count++;
-              localTopIds.push(nearbyKeys[key]);
-            }
+        for (var key in nearbyKeys) {
+          if (rankings[nearbyKeys[key]]) {
+            localTopMap[nearbyKeys[key]] = rankings[nearbyKeys[key]];
+            console.log(nearbyKeys[key] + " is nearby and is ranked.");
+          } else {
+            console.log(nearbyKeys[key] + " is not ranked yet.");
           }
         }
-        return this.userS.fetchUsers(localTopIds);
+        let sortedIds = Object.keys(localTopMap);
+        sortedIds.sort((a: any, b: any) => {
+          let likesA = rankings[a];
+          let likesB = rankings[b];
+          // this is a descending sort
+          if (likesA < likesB) {
+            return 1;
+          } else if (likesA > likesB) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+        let topIds = sortedIds.slice(0, this.topUsersLimit + 3);
+        return this.userS.fetchUsers(topIds);
       })
       .then(users => {
-        env.localUsers = this.removeEmptyValues(users);
+        env.localUsers = this.removeEmptyValues(users).slice(0, this.topUsersLimit);
         modal.dismiss();
       })
       .catch(error => {

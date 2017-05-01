@@ -575,7 +575,7 @@ export class DiscoverService {
     });
   }
 
-  getRankedUsersIDs(): Promise<any> {
+  getRankedUsersMap(): Promise<any> {
     console.log("Fetching top users...");
     return new Promise((resolve, reject) => {
       let ref = firebase.database().ref('/user_rank/')
@@ -584,20 +584,7 @@ export class DiscoverService {
         let rankings = snapshot.val()
         console.log("Found user rankings: ");
         console.log(rankings);
-        let userIdArr = Object.keys(rankings);
-        userIdArr.sort((a: any, b: any) => {
-          let likesA = rankings[a];
-          let likesB = rankings[b];
-          // this is a descending sort
-          if (likesA < likesB) {
-            return 1;
-          } else if (likesA > likesB) {
-            return -1;
-          } else {
-            return 0;
-          }
-        });
-        resolve(userIdArr);
+        resolve(rankings);
       })
       .catch(error => {
         reject(error);

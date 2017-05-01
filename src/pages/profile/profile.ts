@@ -35,25 +35,21 @@ export class ProfilePage {
 
     ionViewWillLoad() {
         let env = this;
-        if (this.user.id != this.userS.user.id) {
-            for (var i in env.user.friends) {
-                let uid = env.user.friends[i];
-                if (env.userS.user.friends.includes(uid)) {
-                    if (env.mutual) {
-                        this.userS.fetchUser(uid).then(user => {
-                            env.mutual.push(user);
-                        }).catch(error => {
-                            console.log(error);
-                        });
-                    } else {
-                        this.userS.fetchUser(uid).then(user => {
-                            env.mutual = [user];
-                        }).catch(error => {
-                            console.log(error);
-                        });
-                    }
-                }
+        var mutual = [];
+        for (var key in env.user.friends) {
+            if (env.userS.user.friends.includes(env.user.friends[key])) {
+                console.log("Found mutual friend with id: " + key);
+                mutual.push(env.user.friends[key]);
             }
+        }
+        if (mutual.length > 0) {
+            this.userS.fetchUsers(mutual)
+            .then(mutual => {
+                env.mutual = mutual;
+            })
+            .catch(error => {
+                console.log(error);
+            });
         }
     }
     
