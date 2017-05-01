@@ -226,6 +226,12 @@ export class DiscoverPage {
       console.log(notificationUser);
       existingUsers.push(notificationUser);
       env.pushS.notificationUID = null;
+      let alert = this.alertCtrl.create({
+        title: notificationUser.firstName + 'double liked you!',
+        message: 'Swipe right on them to start a conversation.',
+        buttons: ['Dismiss']
+      });
+      alert.present();
     }
     return existingUsers;
   }

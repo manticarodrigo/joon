@@ -11,6 +11,6 @@
             <h1>Welcome!</h1>
         </ion-slide>
     </ion-slides>
-  <button ion-button (click)="login()">Login with Facebook</button>
+  <button ion-button (click)="login()" (touchstart)="highlight()" (touchend)="unhighlight()" [class.highlight]="pressed">Login with Facebook</button>
   <p>By logging in, you agree<br> to our <a (click)="showPolicy()">Privacy Policy</a></p>
 </ion-content>

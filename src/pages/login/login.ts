@@ -16,6 +16,8 @@ import { LegalPage } from '../legal/legal';
 })
 export class LoginPage {
 
+    pressed = false;
+
     constructor(private navCtrl: NavController,
                 private alertCtrl: AlertController,
                 private modalCtrl: ModalController,
@@ -34,20 +36,23 @@ export class LoginPage {
             user: user
         });
         modal.present();
-        this.authS.beginAuth().then(user => {
+        this.authS.beginAuth()
+        .then(user => {
             if (user) {
                 console.log("Auth succeeded!");
                 env.navCtrl.setRoot(DiscoverPage);
                 env.chatS.observeChats();
                 modal.dismiss();
-                env.pushS.getPushId().then(pushId => {
+                env.pushS.getPushId()
+                .then(pushId => {
                     console.log("Appending pushId:");
                     console.log(pushId);
                     var updatedUser = env.userS.user;
                     updatedUser["pushId"] = pushId;
                     console.log("Appended pushId to user:", updatedUser);
                     env.userS.updateUser(updatedUser);
-                }).catch(error => {
+                })
+                .catch(error => {
                     console.log(error);
                 });
             } else {
@@ -55,7 +60,8 @@ export class LoginPage {
                 modal.dismiss();
                 env.presentError('Authentication error! Please try again.');
             }
-        }).catch(error => {
+        })
+        .catch(error => {
             console.log(error);
             modal.dismiss();
             env.presentError(error);
@@ -74,5 +80,15 @@ export class LoginPage {
     showPolicy() {
         let modal = this.modalCtrl.create(LegalPage);
         modal.present();
+    }
+
+    highlight() {
+        console.log("Highlighting login button.");
+        this.pressed = true;
+    }
+
+    unhighlight() {
+        console.log("Unhighlighting login button.");
+        this.pressed = false;
     }
 }

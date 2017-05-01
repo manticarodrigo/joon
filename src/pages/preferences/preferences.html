@@ -41,22 +41,21 @@
     </ion-item>
     
     <ion-item class="borderless">
-        <button ion-button block outline (click)="resetDiscoverableUsers()">
+        <button ion-button block outline (click)="resetDiscoverableUsers()" (touchstart)="highlight(1)" (touchend)="unhighlight()" [class.highlight]="pressed == 1">
             Reset Discoverable Users
         </button>
     </ion-item>
-    
-    
+    <!--
     <ion-item class="borderless">
-        <button ion-button block outline (click)="resetLikes()">
+        <button ion-button block outline (click)="resetLikes()" (touchstart)="highlight(2)" (touchend)="unhighlight()" [class.highlight]="pressed == 2">
             Reset Likes
         </button>
     </ion-item>
 
     <ion-item class="borderless">
-        <button ion-button block outline (click)="resetDoubleLikes()">
+        <button ion-button block outline (click)="resetDoubleLikes()" (touchstart)="highlight(3)" (touchend)="unhighlight()" [class.highlight]="pressed == 3">
             Reset Double Likes
         </button>
     </ion-item>
-    
+    -->
 </ion-content>

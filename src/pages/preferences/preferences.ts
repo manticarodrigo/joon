@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, AlertController } from 'ionic-angular';
 
 import { UserService } from '../../providers/user-service';
 import { DiscoverService } from '../../providers/discover-service';
@@ -19,8 +19,10 @@ export class PreferencesPage {
       distance: 'national'
   };
   user: any;
+  pressed = 0;
   
   constructor(private navCtrl: NavController,
+              private alertCtrl: AlertController,
               private userS: UserService,
               private discoverS: DiscoverService,
               private popoverS: PopoverService) {
@@ -62,16 +64,44 @@ export class PreferencesPage {
   resetDiscoverableUsers() {
     console.log("Users reset pressed!");
     this.discoverS.resetSeen();
+    let alert = this.alertCtrl.create({
+      title: 'Discoverable users reset.',
+      message: 'Navigate to the Discover page to find people.',
+      buttons: ['Dismiss']
+    });
+    alert.present();
   }
 
   resetLikes() {
     console.log("Like reset pressed!");
     this.discoverS.resetLikes();
+    let alert = this.alertCtrl.create({
+      title: 'Likes reset.',
+      message: 'Navigate to the Discover page to find people.',
+      buttons: ['Dismiss']
+    });
+    alert.present();
   }
 
   resetDoubleLikes() {
     console.log("Double like reset pressed!");
     this.discoverS.resetDoubleLikes();
+    let alert = this.alertCtrl.create({
+      title: 'Double likes reset.',
+      message: 'Navigate to the Discover page to find people.',
+      buttons: ['Dismiss']
+    });
+    alert.present();
+  }
+
+  highlight(num) {
+    console.log("Highlighting button num " + num);
+    this.pressed = num;
+  }
+
+  unhighlight() {
+    console.log("Unhighlighting buttons");
+    this.pressed = 0;
   }
   
 }
