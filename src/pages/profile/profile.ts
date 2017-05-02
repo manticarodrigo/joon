@@ -30,6 +30,7 @@ export class ProfilePage {
         } else {
             console.log("Set current user for profile page!", this.userS.user)
             this.user = this.userS.user;
+            this.mutual = null;
         }
     }
 
@@ -38,18 +39,27 @@ export class ProfilePage {
         var mutual = [];
         for (var key in env.user.friends) {
             if (env.userS.user.friends.includes(env.user.friends[key])) {
-                console.log("Found mutual friend with id: " + key);
+                console.log("Found mutual friend with id: " + env.user.friends[key]);
                 mutual.push(env.user.friends[key]);
             }
         }
         if (mutual.length > 0) {
             this.userS.fetchUsers(mutual)
             .then(mutual => {
-                env.mutual = mutual;
+                var existingUsers = [];
+                for (var key in mutual) {
+                    if (mutual[key]) {
+                        existingUsers.push(mutual[key]);
+                    }
+                }
+                env.mutual = existingUsers;
             })
             .catch(error => {
                 console.log(error);
+                env.mutual = null;
             });
+        } else {
+            env.mutual = null;
         }
     }
     

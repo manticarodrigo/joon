@@ -39,6 +39,7 @@ export class DiscoverPage {
   users: Array<any>;
   loadedUsers: Array<any>;
   undoHistory: Array<any>;
+  seenMap: any;
   stackConfig: StackConfig;
   // These are used to identify the topmost card in the DOM
   // throwingRightId = '';
@@ -75,6 +76,7 @@ export class DiscoverPage {
     this.users = [];
     this.loadedUsers = [];
     this.undoHistory = [];
+    this.seenMap = {};
     this.toastSeen = [false, false, false];
   }
 
@@ -203,10 +205,9 @@ export class DiscoverPage {
   finishProcessing(users, notificationUser) {    
     let env = this;
     var existingUsers = [];
-    var map = {};
     for (var i in users) {
       var user = users[i];
-      if (user && !map[user.id]) {
+      if (user && !env.seenMap[user.id]) {
         var mutual = [];
         for (var key in user.friends) {
           if (env.userS.user.friends.includes(user.friends[key])) {
@@ -217,7 +218,6 @@ export class DiscoverPage {
           user.mutual = mutual.length;
         }
         existingUsers.push(user);
-        map[user.id] = true;
       }
     }
     if (notificationUser) {
@@ -241,9 +241,11 @@ export class DiscoverPage {
       console.log("Refilling users...");
       var nextUsers = [];
       for (var i = 0; i < 15; i++) {
-        if (env.users[i]) {
-          env.loadedUsers.push(env.users[i]);
-          nextUsers.push(env.users[i]);
+        let user = env.users[i];
+        if (user) {
+          if (!env.seenMap[user.id]) {
+            nextUsers.push(env.users[i]);
+          }
         }
       }
       env.users.splice(0, nextUsers.length, null);
@@ -276,9 +278,10 @@ export class DiscoverPage {
   }
 
   swipeLeft() {
-    if (this.loadedUsers.length > 0) {
+    if (this.loadedUsers.length > 0 && this.loadedUsers[0]) {
       let currentCard = this.loadedUsers.pop();
       this.undoHistory.push(currentCard);
+      this.seenMap[currentCard.id] = true;
       this.checkForEmptyStack();
       console.log("Swiping left on...");
       console.log(currentCard);
@@ -295,15 +298,17 @@ export class DiscoverPage {
         this.undo('left');
       });
     } else {
+      this.loadedUsers = [];
       this.checkForEmptyStack();
     }
   }
 
   swipeRight() {
     let env = this;
-    if (this.loadedUsers.length > 0) {
+    if (this.loadedUsers.length > 0 && this.loadedUsers[0]) {
       let currentCard = env.loadedUsers.pop();
       env.undoHistory.push(currentCard);
+      env.seenMap[currentCard.id] = true;
       env.checkForEmptyStack();
       console.log("Swiping right on...");
       console.log(currentCard);
@@ -336,16 +341,18 @@ export class DiscoverPage {
         modal.present();
       }
     } else {
+      this.loadedUsers = [];
       env.checkForEmptyStack();
     }
   }
 
   doubleLike() {
     let env = this;
-    if (this.loadedUsers.length > 0) {
+    if (this.loadedUsers.length > 0 && this.loadedUsers[0]) {
       console.log("Finshed swipe right");
       let currentCard = env.loadedUsers.pop();
       env.undoHistory.push(currentCard);
+      env.seenMap[currentCard.id] = true;
       env.checkForEmptyStack();
       console.log("Double liking...");
       console.log(currentCard);
@@ -384,6 +391,7 @@ export class DiscoverPage {
       }, 500);
       */
     } else {
+      this.loadedUsers = [];
       env.checkForEmptyStack();
     }
   }
