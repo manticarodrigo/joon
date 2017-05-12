@@ -25,7 +25,7 @@ import { SwingModule } from 'angular2-swing';
 import { HttpModule } from '@angular/http';
 
 import { Facebook, NativeStorage, OneSignal } from 'ionic-native';
-import { FacebookService } from 'ng2-facebook-sdk';
+import { FacebookService } from 'ngx-facebook';
 import { AuthService } from '../providers/auth-service';
 import { FbService } from'../providers/fb-service';
 import { UserService } from '../providers/user-service';

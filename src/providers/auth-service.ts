@@ -12,17 +12,19 @@ export class AuthService {
     }
 
     authenticateWith(credential): Promise<any> {
-        return new Promise((resolve, reject) => {
-            firebase.auth().signInWithCredential(credential).then(() => {
-                // User re-authenticated.
-                console.log("Current user authenticated!");
-                resolve('success');
-            }).catch(error => {
-                // An error happened.
-                console.log(error);
-                reject(error);
-            });
+      return new Promise((resolve, reject) => {
+        firebase.auth().signInWithCredential(credential)
+        .then(() => {
+          // User re-authenticated.
+          console.log("Current user authenticated!");
+          resolve('success');
+        })
+        .catch(error => {
+          // An error happened.
+          console.log(error);
+          reject(error);
         });
+      });
     }
 
     beginAuth(): Promise<any> {
@@ -121,17 +123,17 @@ export class AuthService {
     }
     
     isUserEqual (facebookAuthResponse, firebaseUser) {
-        if (firebaseUser) {
-            var providerData = firebaseUser.providerData;
-            for (var i = 0; i < providerData.length; i++) {
-                if (providerData[i].providerId === firebase.auth.FacebookAuthProvider.PROVIDER_ID &&
-            providerData[i].uid === facebookAuthResponse.userID) {
-                    // We don't need to re-auth the Firebase connection.
-                    return true;
-                }
-            }
+      if (firebaseUser) {
+        var providerData = firebaseUser.providerData;
+        for (var i = 0; i < providerData.length; i++) {
+          if (providerData[i].providerId === firebase.auth.FacebookAuthProvider.PROVIDER_ID &&
+        providerData[i].uid === facebookAuthResponse.userID) {
+            // We don't need to re-auth the Firebase connection.
+            return true;
+          }
         }
-        return false;
+      }
+      return false;
     }
 
 
@@ -149,12 +151,13 @@ export class AuthService {
 
     createSearch(): firebase.Promise<any> {
       let user = this.userS.user;
-      return firebase.database().ref('/user_preferences/' + user.id).update({
+      return firebase.database().ref('/user_preferences/' + user.id)
+      .update({
         distance: 'national',
         lff: (user.gender == 'male'),
         lfm: (user.gender == 'female'),
         showAge: true
-      });
+      })
     }
 
     ensureSearch(): Promise<boolean> {
@@ -216,18 +219,21 @@ export class AuthService {
     updateUserInDB(user): Promise<any> {
       console.log("Updating user in DB");
       return new Promise((resolve, reject) => {
-          let ref = firebase.database().ref('/users/' + user.id);
-          ref.update(user).then(data => {
-              console.log("DB saved user data");
-              return ref.once('value');
-          }).then(snapshot => {
-              console.log("DB returned user snapshot");
-              let val = snapshot.val();
-              resolve(val);
-          }).catch(error => {
-              console.log(error);
-              reject(error);
-          });
+        let ref = firebase.database().ref('/users/' + user.id);
+        ref.update(user)
+        .then(data => {
+          console.log("DB saved user data");
+          return ref.once('value');
+        })
+        .then(snapshot => {
+          console.log("DB returned user snapshot");
+          let val = snapshot.val();
+          resolve(val);
+        })
+        .catch(error => {
+          console.log(error);
+          reject(error);
+        });
       });
     }
     

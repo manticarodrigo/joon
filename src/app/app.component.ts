@@ -108,7 +108,8 @@ export class Joon {
             modal.present();
             console.log('Stored user found: ', storedUser);
             let facebookCredential = firebase.auth.FacebookAuthProvider.credential(storedUser.accessToken);
-            env.authS.authenticateWith(facebookCredential).then(success => {
+            env.authS.authenticateWith(facebookCredential)
+            .then(success => {
               if (storedUser.firebaseId == firebase.auth().currentUser.uid) {
                 // Current user signed into firebase
                 console.log("Current user: " + storedUser);
@@ -133,7 +134,8 @@ export class Joon {
                 modal.dismiss();
                 env.presentError("Stored user does not match authenticated user.");
               }
-            }).catch(error => {
+            })
+            .catch(error => {
               console.log(error);
               env.logoutApp();
               modal.dismiss();
@@ -150,7 +152,7 @@ export class Joon {
     presentError(message) {
         let alert = this.alertCtrl.create({
             title: 'Login Failed!',
-            message: message,
+            message: JSON.stringify(message),
             buttons: ['Dismiss']
             });
         alert.present();

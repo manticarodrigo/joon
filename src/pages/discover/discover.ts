@@ -202,7 +202,7 @@ export class DiscoverPage {
     });
   }
 
-  finishProcessing(users, notificationUser) {    
+    finishProcessing(users, notificationUser) {    
     let env = this;
     var existingUsers = [];
     for (var i in users) {
@@ -295,7 +295,7 @@ export class DiscoverPage {
       .catch(error => {
         console.log(error);
         this.presentToast('Error saving swipe');
-        this.undo('left');
+        this.undo();
       });
     } else {
       this.loadedUsers = [];
@@ -327,7 +327,7 @@ export class DiscoverPage {
           .catch(error => {
             console.log(error);
             env.presentToast('Error saving swipe');
-            env.undo('right');
+            env.undo();
           });
       } else {
         let modal = env.modalCtrl.create(PaymentPage, {
@@ -336,7 +336,7 @@ export class DiscoverPage {
         });
         modal.present();
         modal.onDidDismiss(() => {
-          env.undo('right');
+          env.undo();
         })
         modal.present();
       }
@@ -371,7 +371,7 @@ export class DiscoverPage {
         .catch(error => {
           console.log(error);
           env.presentToast('Error saving swipe');
-          env.undo('double');
+          env.undo();
         });
       } else {
         console.log(currentCard);
@@ -380,7 +380,7 @@ export class DiscoverPage {
             discovering: true
         });
         modal.onDidDismiss(() => {
-          env.undo('double');
+          env.undo();
         })
         modal.present();
       }
@@ -413,17 +413,11 @@ export class DiscoverPage {
     modal.present();
   }
 
-  undo(type) {
+  undo() {
     console.log("Undo pressed!");
     if (this.undoHistory.length > 0) {
       let undoCard = this.undoHistory.pop();
       this.loadedUsers.push(undoCard);
-      if (type == 'double') {
-        this.dailyLikes--;
-        this.dailyDoubleLikes--;
-      } else if (type == 'right') {
-        this.dailyLikes--;
-      }
     }
   }
 

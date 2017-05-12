@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, ViewController } from 'ionic-angular';
+import { NavController, NavParams, ViewController, Platform } from 'ionic-angular';
 
 import { PaymentService } from '../../providers/payment-service';
 import { DiscoverService } from '../../providers/discover-service';
@@ -12,14 +12,19 @@ export class PaymentPage {
   products: Array<any>;
   user: any;
   discovering = false;
+  android = false;
   constructor(private navCtrl: NavController,
               private navParams: NavParams,
               private viewCtrl: ViewController,
+              private platform: Platform,
               private paymentS: PaymentService,
               private discoverS: DiscoverService) {
     this.user = this.navParams.get('user');
     this.discovering = this.navParams.get('discovering');
     this.loadProducts();
+    if (this.platform.is('android')) {
+      this.android = true;
+    }
   }
 
   dismiss() {

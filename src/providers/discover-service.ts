@@ -29,13 +29,13 @@ export class DiscoverService {
         return false;
     if (user1.gender == 'female' && !pref2.lff)
         return false;*/
-    } else if (user2.gender == 'male' && !pref1.lfm) {
+    } else if (user2.gender && user2.gender == 'male' && !pref1.lfm) {
         console.log("Not looking for males");
         return false;
-    } else if (user2.gender == 'female' && !pref1.lff) {
+    } else if (user2.gender && user2.gender == 'female' && !pref1.lff) {
         console.log("Not looking for females");
         return false;
-    } else if (pref1.distance == 'national' && user1.country != user2.country) {
+    } else if (pref1.distance == 'national' && user1.country && user1.country != user2.country) {
         console.log("Different country error");
         return false;
     }
@@ -521,9 +521,8 @@ export class DiscoverService {
       ref.update(fanout)
       .then(snapshot => {
         console.log("Discoverable and seen data deleted from DB!");
-        let val = snapshot.val();
         // console.log("Snapshot val: " + JSON.stringify(val));
-        resolve(val);
+        resolve('success');
       })
       .catch(error => {
         console.log(error);

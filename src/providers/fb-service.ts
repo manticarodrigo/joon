@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { Facebook } from 'ionic-native';
-import { FacebookService } from 'ng2-facebook-sdk';
+import { FacebookService } from 'ngx-facebook';
 
 @Injectable()
 export class FbService {
@@ -116,7 +116,7 @@ export class FbService {
           delete rv.first_name;
           console.log(rv.firstName);
       }
-      if (rv.location) {
+      if (rv.location && rv.location.location) {
           console.log("rv has location");
           if (rv.location.location.city && rv.location.location.country) {
               rv.city = rv.location.location.city;
