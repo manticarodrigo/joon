@@ -1,7 +1,8 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, NavParams, Platform, MenuController, AlertController, ModalController } from 'ionic-angular';
+import { Nav, NavParams, Platform, MenuController, AlertController, ModalController, LoadingController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { Storage } from '@ionic/storage';
+import { Deploy } from '@ionic/cloud-angular';
 
 import firebase from 'firebase';
 
@@ -14,6 +15,7 @@ import { PreferencesPage } from '../pages/preferences/preferences';
 import { SettingsPage } from '../pages/settings/settings';
 import { FeedbackPage } from '../pages/feedback/feedback';
 import { PaymentPage } from '../pages/payment/payment';
+import { UpdatingPage } from '../pages/updating/updating';
 
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
@@ -38,7 +40,9 @@ export class Joon {
                 private chatS: ChatService,
                 private discoverS: DiscoverService,
                 private pushS: PushService,
-                private storage: Storage) {
+                private storage: Storage,
+                private deploy: Deploy,
+                private loadingCtrl: LoadingController) {
 
         this.initializeApp();
 
@@ -70,16 +74,14 @@ export class Joon {
                 storageBucket: "joon-702c0.appspot.com",
                 messagingSenderId: '516717911226'
             });
-            // Check current user auth state
-            this.storage.ready().then(() => {
-                console.log("Local storage ready. Fetching stored user...");
-                this.fetchCurrentUser();
-            });
+            
             // Check If Cordova/Mobile
             if (this.platform.is('cordova')) {
               // OneSignal init
               this.pushS.init();
             }
+
+            this.checkNewDeploy();
         });
     }
     
@@ -164,6 +166,33 @@ export class Joon {
         this.chatS.stopObservingChats();
         this.userS.updateCurrentUser(null);
         this.authS.signOut();
+    }
+
+    checkNewDeploy() {
+      console.log('Checking for new deployment');
+      this.deploy.channel = 'dev';
+      this.deploy.check().then((snapshotAvailable: boolean) => {
+        console.log('Snapshot Available ' + snapshotAvailable);
+        if (snapshotAvailable) {
+          let user = { photoURL : 'assets/user-placeholder.png' }
+          let modal = this.modalCtrl.create(UpdatingPage, {
+              user: user
+          });
+          modal.present();
+          this.deploy.download().then(() => {
+            return this.deploy.extract();
+          }).then(() => {
+            modal.dismiss();
+            this.deploy.load();
+          }).catch(err => modal.dismiss());
+        } else {
+          // Check current user auth state
+            this.storage.ready().then(() => {
+                console.log("Local storage ready. Fetching stored user...");
+                this.fetchCurrentUser();
+            });
+        }
+      });
     }
 
 }

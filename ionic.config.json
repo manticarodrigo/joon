@@ -1,6 +1,5 @@
 {
   "name": "joon",
-  "app_id": "100646ff",
-  "v2": true,
-  "typescript": true
+  "app_id": "b4e762a0",
+  "type": "ionic-angular"
 }

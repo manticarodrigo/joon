@@ -19,10 +19,12 @@ import { InvitePage } from '../pages/invite/invite';
 import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
 import { PaymentPage } from '../pages/payment/payment';
+import { UpdatingPage } from '../pages/updating/updating';
 
 import { IonicStorageModule } from '@ionic/storage';
 import { SwingModule } from 'angular2-swing';
 import { HttpModule } from '@angular/http';
+import { CloudSettings, CloudModule } from '@ionic/cloud-angular';
 
 import { Facebook, NativeStorage, OneSignal } from 'ionic-native';
 import { FacebookService } from 'ngx-facebook';
@@ -37,6 +39,12 @@ import { PushService } from '../providers/push-service';
 import { LocationService } from '../providers/location-service';
 import { SettingsService } from '../providers/settings-service';
 import { PaymentService } from '../providers/payment-service';
+
+const cloudSettings: CloudSettings = {
+  'core': {
+    'app_id': 'b4e762a0'
+  }
+};
 
 @NgModule({
   declarations: [
@@ -58,6 +66,7 @@ import { PaymentService } from '../providers/payment-service';
     ChatsPage,
     ChatPage,
     PaymentPage,
+    UpdatingPage
   ],
   imports: [
     IonicModule.forRoot(Joon, {
@@ -69,7 +78,8 @@ import { PaymentService } from '../providers/payment-service';
     }),
     IonicStorageModule.forRoot(),
     SwingModule,
-    HttpModule
+    HttpModule,
+    CloudModule.forRoot(cloudSettings)
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -90,7 +100,8 @@ import { PaymentService } from '../providers/payment-service';
     InvitePage,
     ChatsPage,
     ChatPage,
-    PaymentPage
+    PaymentPage,
+    UpdatingPage
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
