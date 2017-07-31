@@ -20,6 +20,7 @@ import { ChatsPage } from '../pages/chats/chats';
 import { ChatPage } from '../pages/chat/chat';
 import { PaymentPage } from '../pages/payment/payment';
 import { UpdatingPage } from '../pages/updating/updating';
+import { MaintenancePage } from '../pages/maintenance/maintenance';
 
 import { IonicStorageModule } from '@ionic/storage';
 import { SwingModule } from 'angular2-swing';
@@ -66,7 +67,8 @@ const cloudSettings: CloudSettings = {
     ChatsPage,
     ChatPage,
     PaymentPage,
-    UpdatingPage
+    UpdatingPage,
+    MaintenancePage
   ],
   imports: [
     IonicModule.forRoot(Joon, {
@@ -101,7 +103,8 @@ const cloudSettings: CloudSettings = {
     ChatsPage,
     ChatPage,
     PaymentPage,
-    UpdatingPage
+    UpdatingPage,
+    MaintenancePage
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},

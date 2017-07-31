@@ -1,0 +1,11 @@
+page-maintenance {
+  .vertical-align-content>* {
+    display: flex!important;
+    flex-direction: column;
+    align-items: center!important;
+    justify-content: center;
+  }
+  p {
+      font-size: 14px;
+  }
+}

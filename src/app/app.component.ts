@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Nav, NavParams, Platform, MenuController, AlertController, ModalController, LoadingController } from 'ionic-angular';
+import { Nav, Platform, MenuController, AlertController, ModalController, LoadingController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 import { Storage } from '@ionic/storage';
 import { Deploy } from '@ionic/cloud-angular';
@@ -16,6 +16,7 @@ import { SettingsPage } from '../pages/settings/settings';
 import { FeedbackPage } from '../pages/feedback/feedback';
 import { PaymentPage } from '../pages/payment/payment';
 import { UpdatingPage } from '../pages/updating/updating';
+import { MaintenancePage } from '../pages/maintenance/maintenance';
 
 import { AuthService } from '../providers/auth-service';
 import { UserService } from '../providers/user-service';
@@ -28,7 +29,7 @@ import { PushService } from '../providers/push-service';
 })
 export class Joon {
     @ViewChild(Nav) nav: Nav;
-    rootPage: any = LoginPage;
+    rootPage: any = MaintenancePage;
     pages: Array<{title: string, component: any}>;
     
     constructor(private platform: Platform,
@@ -189,7 +190,7 @@ export class Joon {
           // Check current user auth state
             this.storage.ready().then(() => {
                 console.log("Local storage ready. Fetching stored user...");
-                this.fetchCurrentUser();
+                //this.fetchCurrentUser();
             });
         }
       });
