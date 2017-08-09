@@ -2,7 +2,18 @@
 </ion-header>
 
 <ion-content text-center padding class="vertical-align-content">
-  <img src="assets/caution.jpg" />
-  <p>App is currently under Maintenance</p>
-  <p>We will be back soon</p>
+  <img height="50" src="assets/joon.png" />
+  <p>Hi! We are back in business</p>
+  <div *ngIf="android">
+    <p>
+      Please download our latest app from
+      <a href="https://play.google.com/store/apps/details?id=com.joon.joonapp&hl=en">Playstore</a>
+    </p>
+  </div>
+  <div *ngIf="!android">
+    <p>
+      Please download our latest app from
+      <a href="https://itunes.apple.com/us/app/joon-dating-for-persian-singles/id1218438743?mt=8">iTunes store</a>
+    </p>
+  </div>
 </ion-content>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Platform } from 'ionic-angular';
 
 @Component({
   selector: 'page-maintenance',
@@ -6,7 +7,11 @@ import { Component } from '@angular/core';
 })
 export class MaintenancePage {
 
-    constructor() {
+  android = false;
 
+  constructor(private platform: Platform) {
+    if (this.platform.is('android')) {
+      this.android = true;
     }
+  }
 }
